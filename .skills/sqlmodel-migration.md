@@ -3,115 +3,113 @@ name: sqlmodel-migration
 description: |
   Padroes de SQLModel + Alembic para o Revenue SDR OS. Carregue esta skill
   sempre que for criar/alterar models, criar migrations, ou mexer no schema.
-version: 1.0.0
+version: 2.0.0
 platforms: [claude-code, codex, opencode, hermes-agent, github-copilot]
 ---
 
-# SQLModel + Alembic — Padroes do Revenue SDR OS
+# SQLModel + Alembic — Padroes do Revenue SDR OS (v2.0)
 
 ## Principio basico
 
 ```
-Todo model de dominio TEM organization_id (FK NOT NULL).
-Todo ID e' prefixed: org_, user_, lead_, conv_, msg_, evt_, mem_, ...
+Todo model de dominio herda TenantMixin: organization_id (FK NOT NULL).
+Todo ID e' prefixed via prefixed_id(): org_, user_, lead_, conv_, msg_, evt_, mem_...
 Toda migration e' reversivel (upgrade + downgrade testados).
+Timestamps UTC-aware (utc_now); updated_at com onupdate automatico.
+JSON e' coluna nativa (sa.JSON), NAO string serializada.
 ```
 
 ---
 
 ## Estrutura de model
 
-### Tenant model (multi-tenant)
+### Tenant model (multi-tenant) — app/<feature>/models.py
 
 ```python
-# app/models/<feature>.py
-from datetime import datetime
-from typing import List, Optional, TYPE_CHECKING
-from uuid import uuid4
+"""Tabelas de <feature>."""
+from typing import TYPE_CHECKING
 
-from sqlmodel import Field, Relationship, SQLModel
+from sqlmodel import Field, Relationship
+
+from app.db.base import TenantMixin, prefixed_id
 
 if TYPE_CHECKING:
-    from app.models.organization import Organization
-    from app.models.user import User
+    from app.users.models import User
 
 
-def _new_<feature>_id() -> str:
-    """Factory: sempre prefixar (lead_, conv_, etc)."""
-    return f"<feature>_{uuid4().hex[:12]}"
-
-
-class <Feature>(SQLModel, table=True):
+class <Feature>(TenantMixin, table=True):
     __tablename__ = "<features>"  # SEMPRE plural snake_case
 
-    # ID prefixed
-    id: str = Field(default_factory=_new_<feature>_id, primary_key=True, index=True)
-
-    # Tenant FK (CRITICO)
-    organization_id: str = Field(
-        foreign_key="organizations.id",
-        index=True,
-        nullable=False,
+    # ID prefixed (organization_id + timestamps vem do TenantMixin)
+    id: str = Field(
+        default_factory=lambda: prefixed_id("<feat>"),
+        primary_key=True,
     )
 
     # Campos de dominio
-    name: str = Field(min_length=1, max_length=200)
-    # ... outros campos
-
-    # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = Field(default=None)
+    name: str = Field(max_length=200)
+    # ...
 
     # Relationships (opcional)
-    # user: Optional["User"] = Relationship(...)
+    # user: "User" = Relationship(back_populates="<features>")
 ```
 
-### Enum-like fields (string constants)
+**TenantMixin ja entrega**: `organization_id` (FK index NOT NULL) +
+`created_at`/`updated_at` (UTC-aware, `onupdate` automatico).
+**TimestampMixin** (sem tenant) para tabelas globais (ex: `Organization`).
+
+### IMPORTANTE: table models NAO validam entrada
+
+SQLModel `table=True` nao executa validacao pydantic — `regex=`,
+`min_length=` em table model sao decorativos (ADR-012). Portanto:
+
+- **Validacao de formato** (slug, cor, email, enums) -> nos **schemas**
+  pydantic da API (`schemas.py`)
+- **Integridade** (unique, FK, NOT NULL) -> constraints no **banco**
+- No table model, `max_length` permanece: define o VARCHAR no DDL
+
+### Enum-like fields
 
 ```python
-# Quando tem valores finitos, use constants
-LEAD_SOURCES = [
-    "instagram", "facebook", "whatsapp", "site",
-    "indicacao", "telefone", "email", "outros"
-]
+# Coluna string + StrEnum para uso no codigo (melhor dos dois mundos):
+from enum import StrEnum
 
-LEAD_STATUSES = [
-    "novo", "qualificado", "reuniao_agendada",
-    "proposta_enviada", "venda", "perdido",
-    "inativo", "deletado"  # soft delete
-]
+class LeadStatus(StrEnum):
+    NOVO = "novo"
+    QUALIFICADO = "qualificado"
+    # ...
 
-class Lead(SQLModel, table=True):
-    source: str = Field(max_length=50)  # validar contra LEAD_SOURCES
-    status: str = Field(default="novo", max_length=20)
+class Lead(TenantMixin, table=True):
+    status: str = Field(default=LeadStatus.NOVO, max_length=20, index=True)
+
+# StrEnum compara com str: lead.status == LeadStatus.NOVO funciona.
+# Validacao do valor permitido: no schema pydantic (Literal ou validator).
 ```
 
-**Por que string em vez de Enum**: simplicidade, flexibilidade pra migrations, sem dependência Python.
+**Por que nao `sa.Enum`**: CHECK constraints dificultam adicionar valores
+depois (exige migration de constraint). Coluna VARCHAR + validacao no
+schema e' mais simples de evoluir.
 
 ---
 
-## JSON fields (extensibilidade)
+## JSON fields (extensibilidade) — coluna NATIVA
 
 ```python
+from sqlalchemy import JSON, Column
 from sqlmodel import Field
 
-class Lead(SQLModel, table=True):
-    # JSON serializado como string (SQLite nao tem JSON nativo, mas funciona)
-    tags: str = Field(default="[]", max_length=10000)
-    custom_fields: str = Field(default="{}", max_length=10000)
+class Lead(TenantMixin, table=True):
+    tags: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    custom_fields: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
 
-# No codigo:
-import json
-
-lead.tags = json.dumps(["VIP", "retorno"])
-db.add(lead)
-db.commit()
-
-# Ao ler:
-tags_list = json.loads(lead.tags)  # ["VIP", "retorno"]
+# No codigo: uso direto, sem json.dumps/loads
+lead.tags = ["VIP", "retorno"]
+lead.custom_fields["orcamento_max"] = 5000
 ```
 
-**Convencao**: sempre `"[]"` ou `"{}"` como default (JSON valido, nao `None`).
+**Convencao**: default `list`/`dict` via `default_factory` (nunca `None`).
+No SQLite o JSON vira TEXT gerenciado pelo SQLAlchemy; em Postgres vira
+JSON/JSONB na migracao — transparente.
 
 ---
 
@@ -146,88 +144,29 @@ async def delete_lead(lead_id: str, ...):
 
 ---
 
-## Alembic setup
+## Alembic setup (JA CONFIGURADO na v0.2.0 — nao recriar)
 
-### 1. Inicializar (uma vez)
+O repo tem `alembic.ini` + `alembic/env.py` funcionando:
 
-```bash
-cd ~/AGENCIA/SDR
-alembic init alembic
-```
-
-### 2. Configurar `alembic/env.py`
+- A URL vem de `DATABASE_URL` (ambiente) com fallback para o `.env` —
+  **sem exigir SECRET_KEY** (migrations rodam em CI/deploy limpos)
+- `target_metadata = SQLModel.metadata`; todo model novo precisa ser
+  **importado no `alembic/env.py`** para o autogenerate enxerga-lo:
 
 ```python
-# alembic/env.py
-import sys
-from pathlib import Path
-from logging.config import fileConfig
-
-from sqlalchemy import engine_from_config, pool
-from alembic import context
-
-# Adiciona raiz ao path
-sys.path.insert(0, str(Path(__file__).parent.parent))
-
-from sqlmodel import SQLModel
-from app.config import get_settings
-
-# Importa TODOS os models (para autogenerate detectar)
-from app.models import (
-    Organization,
-    User,
-    Lead,           # Sprint 2
-    LeadMemory,
-    LeadTimelineEvent,
-    # ... adicionar TODOS aqui
-)
-
-config = context.config
-config.set_main_option("sqlalchemy.url", get_settings().database_url)
-
-if config.config_file_name is not None:
-    fileConfig(config.config_file_name)
-
-target_metadata = SQLModel.metadata
-
-
-def run_migrations_offline() -> None:
-    url = config.get_main_option("sqlalchemy.url")
-    context.configure(
-        url=url,
-        target_metadata=target_metadata,
-        literal_binds=True,
-        dialect_opts={"paramstyle": "named"},
-    )
-    with context.begin_transaction():
-        context.run_migrations()
-
-
-def run_migrations_online() -> None:
-    connectable = engine_from_config(
-        config.get_section(config.config_ini_section, {}),
-        prefix="sqlalchemy.",
-        poolclass=pool.NullPool,
-    )
-    with connectable.connect() as connection:
-        context.configure(connection=connection, target_metadata=target_metadata)
-        with context.begin_transaction():
-            context.run_migrations()
-
-
-if context.is_offline_mode():
-    run_migrations_offline()
-else:
-    run_migrations_online()
+# alembic/env.py (trecho)
+import app.organizations.models
+import app.users.models
+import app.leads.models        # <- adicionar novos dominios aqui
 ```
 
-### 3. Criar migration
+### Criar migration
 
 ```bash
-# Autogenerate baseado nos models
+# Autogenerate baseado nos models (SEMPRE revisar o arquivo gerado)
 alembic revision --autogenerate -m "add <feature> table"
 
-# OU manual:
+# OU manual (indices, dados, ajustes finos):
 alembic revision -m "add custom index on <table>"
 ```
 
@@ -389,17 +328,16 @@ def _new_lead_id() -> str:
 
 ### Timestamps
 
+Entregues pelos mixins — **nao redeclarar no model**:
+
 ```python
-created_at: datetime = Field(default_factory=datetime.utcnow)
-updated_at: Optional[datetime] = Field(default=None)  # NAO auto-update
+# app/db/base.py (ja implementado):
+#   created_at: default_factory=utc_now  (datetime.now(UTC), timezone-aware)
+#   updated_at: default_factory=utc_now + sa_column_kwargs={"onupdate": utc_now}
 ```
 
-Para auto-update, faca manualmente:
-```python
-lead.updated_at = datetime.utcnow()
-db.add(lead)
-db.commit()
-```
+`datetime.utcnow()` esta DEPRECADO no Python 3.12 — sempre `utc_now` de
+`app.db.base`.
 
 ### Boolean
 
@@ -440,27 +378,30 @@ class Lead(SQLModel, table=True):
     name: str  # esqueceu organization_id! NUNCA!
 
 
-# ERRADO: cascade nao definido
-class LeadMemory(SQLModel, table=True):
-    lead_id: str = Field(foreign_key="leads.id")  # sem cascade!
-
-# CERTO
-class LeadMemory(SQLModel, table=True):
+# ERRADO: cascade no lugar errado (sa_relationship_kwargs e' de Relationship, NAO de Field)
+class LeadMemory(TenantMixin, table=True):
     lead_id: str = Field(
         foreign_key="leads.id",
+        sa_relationship_kwargs={"cascade": "all, delete-orphan"},  # NUNCA!
+    )
+
+# CERTO: cascade vai no Relationship; FK no Field
+class Lead(TenantMixin, table=True):
+    memories: list["LeadMemory"] = Relationship(
+        back_populates="lead",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
 
+class LeadMemory(TenantMixin, table=True):
+    lead_id: str = Field(foreign_key="leads.id", index=True, nullable=False)
+    lead: Lead = Relationship(back_populates="memories")
 
-# ERRADO: usar Enum do Python
-from enum import Enum
 
-class LeadStatus(str, Enum):
-    NOVO = "novo"
-    QUALIFICADO = "qualificado"
+# ERRADO: usar sa.Enum (CHECK constraint dificulta adicionar valores)
+role: str = Field(sa_column=Column(sa.Enum(Role)))
 
-# Isso complica migrations. Use string constants:
-LEAD_STATUSES = ["novo", "qualificado", ...]
+# CERTO: coluna VARCHAR + StrEnum no codigo + validacao no schema
+role: str = Field(default=Role.MEMBER, max_length=20)
 
 
 # ERRADO: migration nao reversivel
@@ -478,20 +419,19 @@ alembic upgrade head
 ## Checklist de review de model/migration
 
 ```
-[ ] Model tem __tablename__ em plural snake_case
-[ ] Model tem id prefixed (factory _new_X_id)
-[ ] Model tem organization_id (FK NOT NULL) se for de dominio
-[ ] FKs tem cascade quando apropriado
-[ ] Campos tem max_length definido
-[ ] Timestamps: created_at (default factory) + updated_at (optional)
-[ ] Enums como string constants (NAO Enum class)
-[ ] JSON fields: default "[]" ou "{}", serializados no codigo
+[ ] Model no pacote do dominio (app/<feature>/models.py), __tablename__ plural snake_case
+[ ] Herda TenantMixin (dominio) ou TimestampMixin (global)
+[ ] ID via prefixed_id("<prefix>") (default_factory)
+[ ] Validacao de formato nos SCHEMAS (table model nao valida!)
+[ ] FKs com cascade no Relationship quando apropriado
+[ ] Campos tem max_length (DDL) — sem regex/min_length decorativos
+[ ] JSON como coluna nativa (sa.JSON), default_factory=list/dict
+[ ] StrEnum no codigo + coluna VARCHAR (nunca sa.Enum)
 [ ] Soft delete: status='deletado' ao inves de db.delete()
-[ ] Migration: upgrade() cria tudo
-[ ] Migration: downgrade() desfaz TUDO na ordem reversa
+[ ] Model importado no alembic/env.py (autogenerate enxergar)
+[ ] Migration: upgrade() cria tudo; downgrade() desfaz TUDO na ordem reversa
 [ ] alembic upgrade + downgrade + upgrade testado
-[ ] Indices em colunas filtradas frequentemente
-[ ] app/models/__init__.py exporta o novo model
+[ ] Indices em colunas filtradas frequentemente (org, status, phone, email)
 ```
 
 ---

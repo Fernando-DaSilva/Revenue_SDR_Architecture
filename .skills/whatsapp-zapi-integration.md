@@ -214,7 +214,7 @@ Fluxo:
 8. Emite SSE event
 9. Retorna 200 (Z-API exige < 5s)
 """
-from datetime import datetime
+from datetime import UTC, datetime
 from fastapi import APIRouter, BackgroundTasks, HTTPException, status
 
 from app.integrations.whatsapp.zapi import ZAPIProvider
@@ -274,7 +274,7 @@ async def incoming_message(
                 phone=phone,
                 source="whatsapp",
                 status="novo",
-                last_interaction_at=datetime.utcnow(),
+                last_interaction_at=datetime.now(UTC),
             )
             db.add(lead)
             db.commit()
@@ -297,7 +297,7 @@ async def incoming_message(
                 current_stage="novo",
                 score=0,
                 emotional_state="neutro",
-                last_interaction_at=datetime.utcnow(),
+                last_interaction_at=datetime.now(UTC),
             )
             db.add(conv)
             db.commit()
@@ -317,7 +317,7 @@ async def incoming_message(
             external_id=msg.message_id,  # ID do Z-API
         )
         db.add(message)
-        conv.last_interaction_at = datetime.utcnow()
+        conv.last_interaction_at = datetime.now(UTC)
         db.add(conv)
         db.commit()
         db.refresh(message)

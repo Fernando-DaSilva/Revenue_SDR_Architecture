@@ -5,133 +5,155 @@ task: 01-create-models
 
 # Prompt 02.01 — Criar Models (Lead, Memory, Timeline Event)
 
-> **Copy-paste este prompt inteiro pra um agente de IA.**
-> Ele sabe exatamente o que fazer.
+> Spec da task T1 da Sprint 02. Convencoes v0.2.0 (ver ARCHITECTURE.md).
 
 ---
 
 ## Skills a carregar ANTES
 
 ```
-1. /Volumes/Workspace_iOS/AGENCIA/00_SDR_architecture/.skills/revenue-sdr-os-architect.md
-2. /Volumes/Workspace_iOS/AGENCIA/00_SDR_architecture/.skills/sqlmodel-migration.md
-3. /Volumes/Workspace_iOS/AGENCIA/00_SDR_architecture/.skills/fastapi-multi-tenant.md
+1. .skills/revenue-sdr-os-architect.md
+2. .skills/sqlmodel-migration.md
+3. .skills/fastapi-multi-tenant.md
 ```
 
 ---
 
 ## Contexto
 
-Voce esta implementando a Sprint 02 do Revenue SDR OS — Lead Brain + Memory Brain.
-O repo de codigo e' `~/AGENCIA/SDR/`. Ja existe:
-- Organization, User (Sprint 01)
-- Middleware de tenant resolution
-- Auth (JWT + bcrypt)
+Repo: `~/AGENCIA/SDR/` (baseline v0.2.0). Ja existem:
 
-Voce precisa criar **3 models novos** com FK para `organizations.id`:
+- `Organization`, `User` (pacotes `app/organizations/`, `app/users/`)
+- Mixins em `app/db/base.py`: `TenantMixin` (organization_id + timestamps
+  UTC-aware), `TimestampMixin`, `utc_now`, `prefixed_id`
+- Tenancy por middleware + ContextVar; auth Argon2id/PyJWT
+
+Criar **3 models novos** no pacote `app/leads/`.
+
+Lembretes duros:
+- Table models NAO validam entrada (ADR-012) — formatos vao nos schemas (T4)
+- `datetime.utcnow()` DEPRECADO — timestamps vem do TenantMixin
+- JSON e' coluna nativa (`sa.JSON`) com `default_factory`
 
 ---
 
-## Tasks
+## Task
 
-### T1: Criar `app/models/lead.py` com 3 SQLModels
+### Criar `app/leads/models.py`
 
 ```python
 """
-Lead + Memory + Timeline Event models.
+Lead Brain + Memory Brain — models de dominio.
 
-Implementa o Lead Brain (unificacao cross-channel) e Memory Brain
-(notas estruturadas + deteccao automatica).
+Lead: entidade unica da pessoa, unificada entre canais.
+LeadMemory: atributos estruturados de longo prazo.
+LeadTimelineEvent: log append-only de tudo que acontece com o lead.
 """
-from datetime import datetime
-from typing import List, Optional, TYPE_CHECKING
-from uuid import uuid4
 
-from sqlmodel import Field, Relationship, SQLModel
+from datetime import datetime
+from enum import StrEnum
+from typing import TYPE_CHECKING
+
+from sqlalchemy import JSON, Column
+from sqlmodel import Field, Relationship
+
+from app.db.base import TenantMixin, prefixed_id
 
 if TYPE_CHECKING:
-    from app.models.organization import Organization
-    from app.models.user import User
+    from app.users.models import User
 
 
-# --- ID factories ---
+# --- Enums (coluna VARCHAR + StrEnum no codigo; validacao nos schemas) ---
 
-def _new_lead_id() -> str:
-    return f"lead_{uuid4().hex[:12]}"
+class LeadSource(StrEnum):
+    INSTAGRAM = "instagram"
+    FACEBOOK = "facebook"
+    WHATSAPP = "whatsapp"
+    SITE = "site"
+    LANDING_PAGE = "landing_page"
+    LINKEDIN = "linkedin"
+    GOOGLE = "google"
+    INDICACAO = "indicacao"
+    TELEFONE = "telefone"
+    EMAIL = "email"
+    IMPORT_CSV = "import_csv"
+    OUTROS = "outros"
 
-def _new_memory_id() -> str:
-    return f"mem_{uuid4().hex[:12]}"
 
-def _new_event_id() -> str:
-    return f"evt_{uuid4().hex[:12]}"
+class LeadStatus(StrEnum):
+    NOVO = "novo"
+    QUALIFICADO = "qualificado"
+    REUNIAO_AGENDADA = "reuniao_agendada"
+    REUNIAO_FEITA = "reuniao_feita"
+    PROPOSTA_ENVIADA = "proposta_enviada"
+    EM_NEGOCIACAO = "em_negociacao"
+    VENDA = "venda"
+    PERDIDO = "perdido"
+    INATIVO = "inativo"
+    DELETADO = "deletado"  # soft delete (LGPD)
 
 
-# --- Enums (use string constants para simplicidade) ---
+class MemoryCategory(StrEnum):
+    PERSONAL = "personal"        # nome conjuge, idade, cidade
+    PREFERENCE = "preference"    # estilo, hobbies
+    OBJECTION = "objection"      # "muito caro", "vou pensar"
+    FINANCIAL = "financial"      # orcamento, renda, dia pagamento
+    CONTEXT = "context"          # contexto da compra, urgencia
+    FAMILY = "family"
+    TEMPORAL = "temporal"        # datas importantes
+    OTHER = "other"
 
-LEAD_SOURCES = [
-    "instagram", "facebook", "whatsapp", "site", "landing_page",
-    "linkedin", "google", "indicacao", "telefone", "email", "import_csv", "outros"
-]
 
-LEAD_STATUSES = [
-    "novo", "qualificado", "reuniao_agendada", "reuniao_feita",
-    "proposta_enviada", "em_negociacao", "venda", "perdido",
-    "inativo", "deletado"  # soft delete (LGPD)
-]
+class MemorySource(StrEnum):
+    MANUAL = "manual"
+    CONVERSATION_DETECTED = "conversation_detected"
+    IMPORT = "import"
 
-MEMORY_CATEGORIES = [
-    "personal",      # nome conjuge, idade, cidade
-    "preference",    # estilo preferido, time futebol, hobbies
-    "objection",     # objecoes recurrentes ("muito caro", "vou pensar")
-    "financial",     # orcamento, renda, dia pagamento
-    "context",       # contexto da compra, urgencia
-    "family",        # info sobre familia
-    "temporal",      # datas importantes (aniversario, viagem)
-    "other"
-]
+
+class LeadEventType(StrEnum):
+    CREATED = "created"
+    UPDATED = "updated"
+    MERGED = "merged"
+    STATUS_CHANGED = "status_changed"
+    ASSIGNED = "assigned"
+    TAG_ADDED = "tag_added"
+    MEMORY_ADDED = "memory_added"
 
 
 # --- Lead ---
 
-class Lead(SQLModel, table=True):
+class Lead(TenantMixin, table=True):
     __tablename__ = "leads"
 
-    id: str = Field(default_factory=_new_lead_id, primary_key=True, index=True)
-
-    # Tenant (CRITICO)
-    organization_id: str = Field(foreign_key="organizations.id", index=True, nullable=False)
+    id: str = Field(default_factory=lambda: prefixed_id("lead"), primary_key=True)
 
     # Identidade
-    name: str = Field(min_length=1, max_length=200)
-    phone: Optional[str] = Field(default=None, max_length=50, index=True)
-    email: Optional[str] = Field(default=None, max_length=200, index=True)
-    document: Optional[str] = Field(default=None, max_length=50)  # CPF/CNPJ
+    name: str = Field(max_length=200)
+    phone: str | None = Field(default=None, max_length=50)
+    email: str | None = Field(default=None, max_length=320)
+    document: str | None = Field(default=None, max_length=50)  # CPF/CNPJ
 
     # Origem
-    source: str = Field(max_length=50)  # ver LEAD_SOURCES
-    source_detail: str = Field(default="{}", max_length=10000)  # JSON
+    source: str = Field(max_length=50)  # LeadSource
+    source_detail: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
 
     # Segmentacao
-    tags: str = Field(default="[]", max_length=10000)  # JSON array
-    custom_fields: str = Field(default="{}", max_length=10000)  # JSON object
+    tags: list = Field(default_factory=list, sa_column=Column(JSON, nullable=False))
+    custom_fields: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
 
-    # Status
-    status: str = Field(default="novo", max_length=20, index=True)
-    assigned_user_id: Optional[str] = Field(
-        default=None, foreign_key="users.id", index=True
-    )
+    # Status / dono
+    status: str = Field(default=LeadStatus.NOVO, max_length=20, index=True)
+    assigned_user_id: str | None = Field(default=None, foreign_key="users.id")
 
-    # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = Field(default=None)
-    last_interaction_at: Optional[datetime] = Field(default=None)
+    # Atividade
+    last_interaction_at: datetime | None = Field(default=None)
 
     # Relationships
-    memories: List["LeadMemory"] = Relationship(
+    memories: list["LeadMemory"] = Relationship(
         back_populates="lead",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
-    timeline: List["LeadTimelineEvent"] = Relationship(
+    timeline: list["LeadTimelineEvent"] = Relationship(
         back_populates="lead",
         sa_relationship_kwargs={"cascade": "all, delete-orphan"},
     )
@@ -139,110 +161,83 @@ class Lead(SQLModel, table=True):
 
 # --- Lead Memory ---
 
-class LeadMemory(SQLModel, table=True):
+class LeadMemory(TenantMixin, table=True):
     __tablename__ = "lead_memories"
 
-    id: str = Field(default_factory=_new_memory_id, primary_key=True, index=True)
-
-    # Tenant
-    organization_id: str = Field(foreign_key="organizations.id", index=True, nullable=False)
+    id: str = Field(default_factory=lambda: prefixed_id("mem"), primary_key=True)
     lead_id: str = Field(foreign_key="leads.id", index=True, nullable=False)
 
     # Conteudo
-    category: str = Field(max_length=50, index=True)  # ver MEMORY_CATEGORIES
+    category: str = Field(max_length=50)  # MemoryCategory
     key: str = Field(max_length=100)
     value: str = Field(max_length=10000)
 
     # Metadata
-    confidence: float = Field(default=1.0, ge=0.0, le=1.0)
-    source: str = Field(default="manual", max_length=50)  # manual|conversation_detected|import
-
-    # Timestamps
-    created_at: datetime = Field(default_factory=datetime.utcnow)
-    updated_at: Optional[datetime] = Field(default=None)
+    confidence: float = Field(default=1.0)  # 0.0-1.0 (validado no schema)
+    source: str = Field(default=MemorySource.MANUAL, max_length=50)
 
     # Relationships
     lead: Lead = Relationship(back_populates="memories")
 
 
-# --- Lead Timeline Event ---
+# --- Lead Timeline Event (append-only) ---
 
-class LeadTimelineEvent(SQLModel, table=True):
+class LeadTimelineEvent(TenantMixin, table=True):
     __tablename__ = "lead_timeline_events"
 
-    id: str = Field(default_factory=_new_event_id, primary_key=True, index=True)
-
-    # Tenant
-    organization_id: str = Field(foreign_key="organizations.id", index=True, nullable=False)
+    id: str = Field(default_factory=lambda: prefixed_id("evt"), primary_key=True)
     lead_id: str = Field(foreign_key="leads.id", index=True, nullable=False)
 
-    # Evento
-    event_type: str = Field(max_length=50, index=True)
-    payload: str = Field(default="{}", max_length=10000)  # JSON
-
-    # Actor
-    actor_user_id: Optional[str] = Field(default=None, foreign_key="users.id")
-
-    # Timestamp
-    created_at: datetime = Field(default_factory=datetime.utcnow, index=True)
+    event_type: str = Field(max_length=50, index=True)  # LeadEventType
+    payload: dict = Field(default_factory=dict, sa_column=Column(JSON, nullable=False))
+    actor_user_id: str | None = Field(default=None, foreign_key="users.id")
 
     # Relationships
     lead: Lead = Relationship(back_populates="timeline")
 ```
 
-### T2: Atualizar `app/models/__init__.py`
-
-```python
-"""
-SQLModel models do Revenue SDR OS.
-"""
-from app.models.organization import Organization
-from app.models.user import User
-from app.models.lead import Lead, LeadMemory, LeadTimelineEvent
-
-__all__ = ["Organization", "User", "Lead", "LeadMemory", "LeadTimelineEvent"]
-```
+Notas de implementacao:
+- `TenantMixin` ja traz `organization_id`, `created_at`, `updated_at`
+  (UTC-aware + onupdate) — NAO redeclarar
+- Indices compostos `(organization_id, phone/email/status)` entram na
+  migration (autogenerate detecta os simples; composto revisar a mao)
+- `LeadTimelineEvent` e' append-only: sem update/delete em codigo de
+  dominio (so inserts)
 
 ---
 
 ## Validacao
 
 ```bash
-cd ~/AGENCIA/SDR
-source .venv/bin/activate
+cd ~/AGENCIA/SDR && source .venv/bin/activate
 
 # 1. Imports funcionam
-python -c "from app.models import Lead, LeadMemory, LeadTimelineEvent; print('OK')"
+python -c "from app.leads.models import Lead, LeadMemory, LeadTimelineEvent; print('OK')"
 
-# 2. Tabelas criam (vai ser usado pela migration depois)
+# 2. Instancia sem banco
 python -c "
-from app.database import create_db_and_tables
-create_db_and_tables()
-print('Tables created')
+from app.leads.models import Lead, LeadSource
+lead = Lead(organization_id='org_x', name='Joao', source=LeadSource.WHATSAPP)
+assert lead.id.startswith('lead_') and lead.status == 'novo'
+print('OK', lead.id)
 "
 
-# 3. Lead pode ser instanciado
-python -c "
-from app.models import Lead
-lead = Lead(organization_id='org_test', name='João', phone='+5511...', source='whatsapp')
-print(f'Lead: {lead.id} - {lead.name}')
-"
+# 3. Registrar no alembic/env.py (autogenerate da task T2 depende):
+#    import app.leads.models
 ```
-
----
 
 ## Checklist
 
 ```
-[ ] Arquivo app/models/lead.py criado com 3 classes
-[ ] Lead tem organization_id (FK NOT NULL)
-[ ] LeadMemory tem lead_id (FK NOT NULL, cascade delete)
-[ ] LeadTimelineEvent tem lead_id (FK NOT NULL, cascade delete)
-[ ] IDs sao prefixed (lead_, mem_, evt_)
-[ ] Constantes LEAD_SOURCES, LEAD_STATUSES, MEMORY_CATEGORIES definidas
-[ ] app/models/__init__.py exporta os novos models
-[ ] Python imports funcionam
-[ ] Tabelas criam no DB
+[ ] app/leads/models.py com 3 classes + StrEnums
+[ ] Herda TenantMixin (sem redeclarar org/timestamps)
+[ ] IDs prefixed_id('lead'/'mem'/'evt')
+[ ] JSON nativo (source_detail, tags, custom_fields, payload)
+[ ] cascade 'all, delete-orphan' nos Relationships do Lead
+[ ] FKs: memories.lead_id, events.lead_id, assigned_user_id, actor_user_id
+[ ] status indexado; default 'novo'; soft delete = 'deletado'
+[ ] import app.leads.models adicionado ao alembic/env.py
+[ ] ruff check limpo
 ```
 
 ---

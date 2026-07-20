@@ -5,232 +5,103 @@ task: 99-final-validation
 
 # Prompt 02.99 — Validacao Final da Sprint 02
 
-> **Rode este prompt quando TODAS as tasks (T1-T12) estiverem concluidas.**
+> Rodar DEPOIS de todas as tasks (T1-T12). Tudo precisa passar antes
+> do commit/push.
 
 ---
 
-## Validacao automatica completa
-
-### 1. Setup limpo
+## 1. Suite de testes
 
 ```bash
-cd ~/AGENCIA/SDR
-source .venv/bin/activate
+cd ~/AGENCIA/SDR && source .venv/bin/activate
+pytest                          # 100% verde (suite toda, nao so os novos)
+pytest --cov=app --cov-report=term-missing tests/
+```
 
-# Backup do banco atual
-cp revenue_sdr_os.db revenue_sdr_os.db.backup 2>/dev/null
+## 2. Lint + formatacao
 
-# Drop banco pra testar migration limpa
-rm revenue_sdr_os.db
+```bash
+ruff check app/ tests/ scripts/ alembic/
+ruff format --check app/ tests/ scripts/
+```
+
+## 3. Migration round-trip
+
+```bash
 alembic upgrade head
-python scripts/seed.py
+alembic downgrade -1
+alembic upgrade head
+sqlite3 revenue_sdr_os.db ".tables"   # organizations users leads lead_memories lead_timeline_events alembic_version
 ```
 
-### 2. Servidor sobe
+## 4. Servidor sobe + OpenAPI
 
 ```bash
-cd ~/AGENCIA/SDR
-source .venv/bin/activate
-uvicorn app.main:app --host 127.0.0.1 --port 8000 --log-level warning &
+./start &                       # ou: uvicorn app.main:app --port 8000 &
 sleep 3
-curl http://127.0.0.1:8000/api/v1/health/
-# Esperado: {"status":"ok","version":"0.1.0","service":"revenue-sdr-os"}
+curl -s localhost:8000/api/v1/health/ | python -m json.tool
+curl -s localhost:8000/openapi.json | python -c "import json,sys; paths=json.load(sys.stdin)['paths']; print([p for p in paths if 'leads' in p])"
 ```
 
-### 3. Todos os testes passam
+Esperado ver: `/api/v1/leads`, `/api/v1/leads/{lead_id}`,
+`/api/v1/leads/{lead_id}/memories`, `/api/v1/leads/{lead_id}/timeline`.
+
+## 5. Smoke test funcional (2 tenants)
 
 ```bash
-cd ~/AGENCIA/SDR
-source .venv/bin/activate
-
-pytest -v --tb=short
-# TODOS devem passar (Sprint 1 + Sprint 2)
-# Esperado: 30+ testes passando
-```
-
-### 4. Tenant isolation passa (CRITICO)
-
-```bash
-pytest tests/test_lead_isolation.py -v --tb=short
-# TODOS os 11 testes devem passar
-```
-
-### 5. End-to-end manual (curl)
-
-```bash
-# Login
-TOKEN_A=$(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -H "X-Tenant-Slug: clinica-bela" \
-  -d '{"email":"admin@clinica-bela.com","password":"senha123"}' \
-  | python -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
-
-TOKEN_B=$(curl -s -X POST http://127.0.0.1:8000/api/v1/auth/login \
-  -H "Content-Type: application/json" \
-  -H "X-Tenant-Slug: imob-center" \
-  -d '{"email":"admin@imob-center.com","password":"senha123"}' \
-  | python -c "import sys,json; print(json.load(sys.stdin)['access_token'])")
+# Login nos 2 tenants
+TOKEN_A=$(curl -s -X POST localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" -H "X-Tenant-Slug: clinica-bela" \
+  -d '{"email":"admin@clinica-bela.com","password":"senha123"}' | python -c "import json,sys;print(json.load(sys.stdin)['access_token'])")
+TOKEN_B=$(curl -s -X POST localhost:8000/api/v1/auth/login \
+  -H "Content-Type: application/json" -H "X-Tenant-Slug: imob-center" \
+  -d '{"email":"admin@imob-center.com","password":"senha123"}' | python -c "import json,sys;print(json.load(sys.stdin)['access_token'])")
 
 # Criar lead em A
-LEAD_A=$(curl -s -X POST http://127.0.0.1:8000/api/v1/leads \
+curl -s -X POST localhost:8000/api/v1/leads \
+  -H "Content-Type: application/json" -H "X-Tenant-Slug: clinica-bela" \
   -H "Authorization: Bearer $TOKEN_A" \
-  -H "Content-Type: application/json" \
-  -H "X-Tenant-Slug: clinica-bela" \
-  -d '{"name":"Joao A","phone":"+5511999991111","source":"whatsapp"}' \
-  | python -c "import sys,json; print(json.load(sys.stdin)['id'])")
+  -d '{"name":"Joao Teste","phone":"+5511999990001","source":"whatsapp"}'
 
-# Adicionar memory
-curl -s -X POST http://127.0.0.1:8000/api/v1/leads/$LEAD_A/memories \
-  -H "Authorization: Bearer $TOKEN_A" \
-  -H "Content-Type: application/json" \
-  -H "X-Tenant-Slug: clinica-bela" \
-  -d '{"category":"objection","key":"preco","value":"Acha caro"}'
-
-# Tentar acessar como B (deve dar 404)
-curl -s -w "\nHTTP %{http_code}\n" \
-  http://127.0.0.1:8000/api/v1/leads/$LEAD_A \
-  -H "Authorization: Bearer $TOKEN_B" \
-  -H "X-Tenant-Slug: imob-center"
-
-# Tentar merge cross-tenant (cria novo, NAO faz merge)
-curl -s -X POST http://127.0.0.1:8000/api/v1/leads \
-  -H "Authorization: Bearer $TOKEN_B" \
-  -H "Content-Type: application/json" \
-  -H "X-Tenant-Slug: imob-center" \
-  -d '{"name":"Joao B","phone":"+5511999991111","source":"site"}' \
-  | python -c "import sys,json; d=json.load(sys.stdin); print(f'B criou lead NOVO: {d[\"id\"]}')"
-
-# Timeline
-curl -s http://127.0.0.1:8000/api/v1/leads/$LEAD_A/timeline \
-  -H "Authorization: Bearer $TOKEN_A" \
-  -H "X-Tenant-Slug: clinica-bela" \
-  | python3 -m json.tool
+# Duplicata em A -> merge (merged=true, mesmo id)
+# Mesmo telefone em B -> cria NOVO em B (sem merge cross-tenant)
+# Listar em B -> NAO contem o lead de A
+# GET lead de A com TOKEN_B -> 404
+# Memory + timeline em A -> funcionam e aparecem na timeline
 ```
 
-### 6. UI no navegador (verificar visualmente)
+## 6. UI (browser)
 
-Adicione ao `/etc/hosts`:
 ```
-127.0.0.1   clinica-bela.localhost
-127.0.0.1   imob-center.localhost
+[ ] http://clinica-bela.localhost:8000/leads -> lista com tema rosa
+[ ] http://imob-center.localhost:8000/leads -> lista com tema verde
+[ ] Busca filtra; detalhe mostra memories + timeline
+[ ] Cada tenant ve SO seus leads
 ```
 
-Acesse:
-- http://clinica-bela.localhost:8000/login → login com admin@clinica-bela.com / senha123
-- Lista de leads deve aparecer (vazia se acabou de criar)
-- Criar novo lead via UI
-- Ver detalhe + memories + timeline
+## 7. Definition of Done (do spec da sprint)
 
-### 7. OpenAPI spec regenerada
+Rever `../README.md` secao "Criterios de aceitacao" — todos os itens
+funcionais e tecnicos marcados.
+
+## 8. Commit
 
 ```bash
-curl http://127.0.0.1:8000/openapi.json | python -m json.tool | grep -E "(/leads|/memories)" | head -10
-# Deve mostrar: /api/v1/leads, /api/v1/leads/{lead_id}/memories, etc
+git status                      # so arquivos da sprint
+git add -A
+git commit -m "feat: adiciona Lead Brain + Memory Brain (Sprint 2)"
+git push origin feature/sprint-02-lead-brain   # ou main, conforme fluxo
 ```
 
-### 8. Lint (se ruff configurado)
-
-```bash
-ruff check app/ tests/
-ruff format --check app/ tests/
-```
-
----
-
-## Checklist FINAL (Definition of Done)
+## Checklist final
 
 ```
-[ ] Setup limpo funciona (rm db + alembic upgrade + seed)
-[ ] Servidor sobe sem warnings
-[ ] Health check retorna 200
-[ ] pytest -v passa 100%
-[ ] pytest tests/test_lead_isolation.py -v passa 11/11
-[ ] End-to-end curl funciona:
-    [ ] Login em 2 tenants funciona
-    [ ] CRUD de lead funciona
-    [ ] Merge automatico funciona
-    [ ] Memories CRUD funciona
-    [ ] Timeline retorna eventos
-    [ ] Cross-tenant retorna 404
-[ ] UI no navegador funciona
-[ ] OpenAPI spec mostra novos endpoints
-[ ] Nenhum secret hardcoded
-[ ] Codigo segue patterns das skills
+[ ] pytest 100% verde + cobertura sem buracos nas novas linhas
+[ ] ruff check + format limpos
+[ ] Migration round-trip OK
+[ ] OpenAPI com os endpoints novos
+[ ] Smoke funcional com 2 tenants OK (merge + isolamento)
+[ ] UI dos 2 tenants OK
+[ ] DoD do spec da sprint completo
+[ ] Commit em Conventional Commits PT-BR
 ```
-
----
-
-## Se algo falhou
-
-1. Verifique logs do servidor: `tail -f revenue_sdr_os.log` (ou logs no terminal)
-2. Rode pytest especifico: `pytest tests/test_leads.py::test_xxx -v --tb=long`
-3. Verifique a migration: `sqlite3 revenue_sdr_os.db ".schema leads"`
-4. Rode ruff: `ruff check app/api/v1/leads.py`
-
----
-
-## Commit + push
-
-Quando TUDO passar:
-
-```bash
-cd ~/AGENCIA/SDR
-git add .
-git status
-
-# Deve mostrar:
-# - app/models/lead.py (novo)
-# - app/api/v1/leads.py (novo)
-# - app/api/v1/memories.py (novo)
-# - app/services/lead_merge.py (novo)
-# - alembic/versions/XXXX_add_leads.py (novo)
-# - tests/test_leads.py (novo)
-# - tests/test_lead_isolation.py (novo)
-# - tests/test_lead_merge.py (novo)
-# - tests/test_memories.py (novo)
-# - app/api/v1/__init__.py (modificado)
-# - app/models/__init__.py (modificado)
-# - alembic/env.py (modificado)
-
-git commit -m "feat: Sprint 02 — Lead Brain + Memory Brain
-
-- Models: Lead, LeadMemory, LeadTimelineEvent
-- API CRUD de leads com merge automatico (Lead Brain)
-- API CRUD de memories com bulk endpoint (Memory Brain)
-- Service lead_merge.py (find_existing_lead, merge_lead_data, log_merge_event)
-- Migration Alembic
-- 11 testes de tenant isolation (CRITICOS)
-- 15+ testes de CRUD
-
-Refs: Sprints/02_Sprint_02_Lead_Brain_Memory_Brain"
-
-git push origin main
-```
-
----
-
-## Reporte ao usuario
-
-```
-Sprint 02 completa!
-
-Entregues:
-  [OK] 3 models novos (Lead, LeadMemory, LeadTimelineEvent)
-  [OK] Migration Alembic (round-trip testado)
-  [OK] Service de merge automatico
-  [OK] API CRUD de leads (6 endpoints)
-  [OK] API CRUD de memories (5 endpoints)
-  [OK] 11 testes de tenant isolation (100% passing)
-  [OK] UI lista de leads (em HTMX)
-  [OK] UI detalhe do lead (em HTMX)
-
-Testes: 30+ passing (Sprint 1 + Sprint 2)
-Tenant isolation: 11/11 critical tests passing
-PR: <link do GitHub>
-
-Proxima sprint: Sprint 03 — Conversations + Opportunity Brain
-```
-
----
-
-*"Sprint 02 done. Lead Brain esta vivo."*

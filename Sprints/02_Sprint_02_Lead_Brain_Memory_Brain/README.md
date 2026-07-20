@@ -4,8 +4,8 @@
 +----------------------------------------------------------------------+
 |                                                                      |
 |   SPRINT 02 — LEAD BRAIN + MEMORY BRAIN                             |
-|   Status:  A EXECUTAR (codigo)                                       |
-|   Owner:   Agente externo (Claude Code / Codex / OpenCode)           |
+|   Status:  PRONTA PARA EXECUCAO (spec alinhada a v0.2.0)            |
+|   Owner:   Agente de codificacao                                     |
 |   Quando:  1-2 semanas                                               |
 |   Repo:    ~/AGENCIA/SDR/                                            |
 |   Branch:  feature/sprint-02-lead-brain                              |
@@ -17,127 +17,229 @@
 
 ## Visao geral
 
-Implementar as duas primeiras "cerebros" do Revenue SDR OS:
+Implementar os dois primeiros "cerebros" do Revenue SDR OS:
 
 ### Lead Brain
-Unifica identidade de uma pessoa atraves de todos os canais. Lead = entidade unica independente de onde veio (WhatsApp, Instagram, site, indicacao, etc). Merge automatico baseado em telefone/email/nome similar.
+Unifica identidade de uma pessoa atraves de todos os canais. Lead = entidade unica independente de onde veio (WhatsApp, Instagram, site, indicacao, etc). Deteccao de duplicatas por telefone/email + merge conservador.
 
 ### Memory Brain
-Lembra absolutamente tudo sobre o lead: preferencias, objecoes, datas importantes, contexto financeiro, relacionamento. Notas estruturadas + deteccao automatica em mensagens.
+Lembra absolutamente tudo sobre o lead: preferencias, objecoes, datas importantes, contexto financeiro, relacionamento. Notas estruturadas + deteccao automatica em mensagens (placeholder nesta sprint).
 
 ---
 
-## Schema (migrations Alembic)
+## Schema (migration Alembic via autogenerate)
+
+Convencoes v0.2.0 aplicadas: models herdam `TenantMixin` (organization_id +
+timestamps UTC-aware com onupdate), IDs via `prefixed_id()`, JSON nativo
+(`sa.JSON`), StrEnum no codigo + coluna VARCHAR.
 
 ### Tabela: leads
 
 ```sql
 CREATE TABLE leads (
-    id VARCHAR PRIMARY KEY,                  -- "lead_<12hex>"
-    organization_id VARCHAR NOT NULL,        -- FK organizations.id
+    id VARCHAR PRIMARY KEY,                    -- "lead_<12hex>"
+    organization_id VARCHAR NOT NULL,          -- FK organizations.id
     name VARCHAR(200) NOT NULL,
     phone VARCHAR(50),
-    email VARCHAR(200),
-    document VARCHAR(50),                     -- CPF/CNPJ
-    source VARCHAR(50) NOT NULL,              -- instagram|whatsapp|site|indicacao|telefone|email|outros
-    source_detail TEXT,                       -- JSON com metadata do source
-    tags JSON NOT NULL DEFAULT '[]',          -- ["VIP", "retorno", ...]
-    custom_fields JSON NOT NULL DEFAULT '{}', -- extensivel por tenant
-    status VARCHAR(20) NOT NULL DEFAULT 'novo', -- novo|qualificado|reuniao|proposta|venda|perdido|inativo
-    assigned_user_id VARCHAR,                -- FK users.id (nullable)
-    created_at DATETIME NOT NULL,
-    updated_at DATETIME,
+    email VARCHAR(320),
+    document VARCHAR(50),                      -- CPF/CNPJ
+    source VARCHAR(50) NOT NULL,               -- ver LeadSource
+    source_detail JSON NOT NULL,               -- metadata da origem
+    tags JSON NOT NULL,                        -- ["VIP", "retorno", ...]
+    custom_fields JSON NOT NULL,               -- extensivel por tenant
+    status VARCHAR(20) NOT NULL DEFAULT 'novo',-- ver LeadStatus
+    assigned_user_id VARCHAR,                  -- FK users.id (nullable)
     last_interaction_at DATETIME,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,              -- onupdate automatico
     FOREIGN KEY (organization_id) REFERENCES organizations(id),
     FOREIGN KEY (assigned_user_id) REFERENCES users(id)
 );
 
-CREATE INDEX idx_leads_org ON leads(organization_id);
-CREATE INDEX idx_leads_phone ON leads(organization_id, phone);
-CREATE INDEX idx_leads_email ON leads(organization_id, email);
-CREATE INDEX idx_leads_status ON leads(organization_id, status);
-CREATE INDEX idx_leads_assigned ON leads(organization_id, assigned_user_id);
+-- Indices: (organization_id), (organization_id, phone),
+--          (organization_id, email), (organization_id, status)
 ```
 
 ### Tabela: lead_memories
 
 ```sql
 CREATE TABLE lead_memories (
-    id VARCHAR PRIMARY KEY,                  -- "mem_<12hex>"
+    id VARCHAR PRIMARY KEY,                    -- "mem_<12hex>"
     organization_id VARCHAR NOT NULL,
-    lead_id VARCHAR NOT NULL,
-    category VARCHAR(50) NOT NULL,            -- personal|preference|objection|financial|context|family|temporal
-    key VARCHAR(100) NOT NULL,                -- "esposa", "orcamento_max", "data_salario"
+    lead_id VARCHAR NOT NULL,                  -- FK leads.id (cascade via ORM)
+    category VARCHAR(50) NOT NULL,             -- ver MemoryCategory
+    key VARCHAR(100) NOT NULL,                 -- "esposa", "orcamento_max", "data_salario"
     value TEXT NOT NULL,
-    confidence FLOAT NOT NULL DEFAULT 1.0,    -- 0.0-1.0 (1.0 = user explicit; <1.0 = IA detected)
-    source VARCHAR(50) NOT NULL,              -- manual|conversation_detected|import
-    source_message_id VARCHAR,                -- FK messages.id (nullable)
+    confidence FLOAT NOT NULL DEFAULT 1.0,     -- 1.0 = explicito; <1.0 = IA detectou
+    source VARCHAR(50) NOT NULL DEFAULT 'manual', -- manual|conversation_detected|import
     created_at DATETIME NOT NULL,
-    updated_at DATETIME,
+    updated_at DATETIME NOT NULL,
     FOREIGN KEY (organization_id) REFERENCES organizations(id),
-    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
+    FOREIGN KEY (lead_id) REFERENCES leads(id)
 );
 
-CREATE INDEX idx_memories_lead ON lead_memories(lead_id);
-CREATE INDEX idx_memories_org_category ON lead_memories(organization_id, category);
+-- Indices: (lead_id), (organization_id, category)
 ```
 
-### Tabela: lead_timeline_events (audit log)
+### Tabela: lead_timeline_events (append-only)
 
 ```sql
 CREATE TABLE lead_timeline_events (
-    id VARCHAR PRIMARY KEY,                  -- "evt_<12hex>"
+    id VARCHAR PRIMARY KEY,                    -- "evt_<12hex>"
     organization_id VARCHAR NOT NULL,
-    lead_id VARCHAR NOT NULL,
-    event_type VARCHAR(50) NOT NULL,          -- created|memory_added|merged|status_changed|assigned|tag_added
-    payload JSON NOT NULL DEFAULT '{}',
-    actor_user_id VARCHAR,                    -- quem fez (nullable = sistema)
-    created_at DATETIME NOT NULL,
+    lead_id VARCHAR NOT NULL,                  -- FK leads.id (cascade via ORM)
+    event_type VARCHAR(50) NOT NULL,           -- created|memory_added|merged|status_changed|assigned
+    payload JSON NOT NULL,
+    actor_user_id VARCHAR,                     -- quem fez (NULL = sistema)
+    created_at DATETIME NOT NULL,              -- imutavel (append-only)
     FOREIGN KEY (organization_id) REFERENCES organizations(id),
-    FOREIGN KEY (lead_id) REFERENCES leads(id) ON DELETE CASCADE
+    FOREIGN KEY (lead_id) REFERENCES leads(id)
 );
 
-CREATE INDEX idx_timeline_lead ON lead_timeline_events(lead_id, created_at DESC);
+-- Indices: (lead_id, created_at)
 ```
 
 ---
 
-## Estrutura de arquivos
+## Estrutura de arquivos (padrao v0.2.0 — pacotes de dominio)
 
 ```
 app/
-+-- models/
-|   +-- lead.py                    # SQLModel: Lead, LeadMemory, LeadTimelineEvent
-|   +-- __init__.py                # adicionar imports
-|
-+-- api/v1/
-|   +-- leads.py                   # CRUD de leads
-|   +-- memories.py                # CRUD de memories de um lead
-|   +-- __init__.py                # registrar routers
-|
-+-- services/                      # NOVO — logica de negocio
++-- leads/
 |   +-- __init__.py
-|   +-- lead_merge.py              # logica de merge automatico
-|   +-- memory_extractor.py        # deteccao de info em mensagens (placeholder)
+|   +-- models.py               # Lead, LeadMemory, LeadTimelineEvent + StrEnums
+|   +-- schemas.py              # LeadCreate/Update/Response, MemoryCreate/... (VALIDACAO)
+|   +-- service.py              # LeadService (CRUD + timeline), MemoryService
+|   +-- merge.py                # deteccao de duplicatas + merge conservador
+|   +-- api.py                  # /api/v1/leads (JSON)
 |
-+-- templates/
-|   +-- leads/
-|   |   +-- index.html            # lista de leads com busca
-|   |   +-- detail.html           # perfil do lead + memories + timeline
-|   |   +-- new.html              # form de cadastro
-|   +-- partials/
++-- web/
+|   +-- pages/leads.py          # paginas HTML (lista, detalhe, novo)
+|   +-- templates/leads/
+|       +-- index.html          # lista com busca (HTMX)
+|       +-- detail.html         # perfil + memories + timeline
+|       +-- new.html            # form de cadastro
+|   +-- templates/partials/
 |       +-- lead_card.html
 |       +-- memory_chip.html
-|
+
 alembic/versions/
-+-- XXXX_add_leads.py              # gerado por autogenerate
++-- XXXX_add_leads_domain.py    # autogenerate (revisar antes de aplicar)
 
 tests/
-+-- test_leads.py                  # CRUD basico
-+-- test_lead_isolation.py         # tenant isolation (CRITICO)
-+-- test_lead_merge.py             # logica de merge
-+-- test_memories.py               # CRUD de memories
++-- test_leads_api.py           # CRUD + paginacao
++-- test_leads_isolation.py     # cross-tenant (CRITICO)
++-- test_leads_merge.py         # cenarios de duplicata/merge
++-- test_lead_memories.py       # CRUD de memories + timeline
 ```
+
+---
+
+## Prompts (specs por tarefa, nesta pasta)
+
+| # | Prompt | Tarefa |
+|---|---|---|
+| 01 | `prompts/01-create-models.md` | T1: models Lead/Memory/TimelineEvent |
+| 02 | `prompts/02-create-migration.md` | T2: migration Alembic |
+| 03 | `prompts/03-create-merge-service.md` | T3: merge de duplicatas |
+| 04 | `prompts/04-create-leads-api.md` | T4-T7: API de leads + timeline |
+| 05 | `prompts/05-create-memories-api.md` | T8: API de memories |
+| 06 | `prompts/06-create-isolation-tests.md` | T11: testes de isolamento |
+| 99 | `prompts/99-final-validation.md` | Validacao final + commit |
+
+UI (T8-T10) segue a skill `htmx-alpine-component`. CSV import (T13)
+confirmado no escopo (D2) — segue os mesmos padroes de service/merge.
+
+---
+
+## Criterios de aceitacao (Definition of Done)
+
+### Funcionais
+
+```
+[ ] Criar lead via POST /api/v1/leads (campos validados pelo schema)
+[ ] Lead criado aparece em GET /api/v1/leads (paginado)
+[ ] Buscar por ID via GET /api/v1/leads/{id}
+[ ] Atualizar via PATCH /api/v1/leads/{id}
+[ ] DELETE e soft-delete (status="deletado") — nao remove do banco (LGPD)
+[ ] Listar memories via GET /api/v1/leads/{id}/memories
+[ ] Adicionar memory via POST /api/v1/leads/{id}/memories
+[ ] Timeline do lead em ordem cronologica (GET /api/v1/leads/{id}/timeline)
+[ ] Criar lead com telefone/email duplicado NAO duplica (ver "Decisao D1")
+[ ] Cross-tenant: lead de Org A NAO aparece em listagem de Org B
+[ ] Cross-tenant: GET /api/v1/leads/{id_de_B} com credencial de A = 404
+[ ] organization_id do payload e' IGNORADO (sempre do contexto)
+[ ] UI lista leads com busca (nome/email/telefone), tema do tenant
+[ ] UI detalhe mostra memories + timeline
+```
+
+### Tecnicos
+
+```
+[ ] pytest 100% verde (suite toda + novos)
+[ ] Testes de isolamento cross-tenant cobrem todos os endpoints novos
+[ ] ruff check + ruff format --check limpos
+[ ] alembic upgrade + downgrade + upgrade OK
+[ ] /openapi.json mostra os endpoints novos
+[ ] Models herdam TenantMixin; IDs prefixed (lead_, mem_, evt_)
+[ ] JSON nativo (tags, custom_fields, payload); StrEnum no codigo
+[ ] Envelope de erro padrao; validacao nos schemas
+[ ] Timestamps UTC-aware; updated_at automatico
+```
+
+---
+
+## Decisoes tomadas (2026-07-20, com Fernando)
+
+```
+D1. Duplicata na criacao: MERGE CONSERVADOR AUTOMATICO.
+    Match por telefone/email normalizado (mesmo tenant, ignorando
+    'deletado') -> preenche SOMENTE campos vazios do lead existente
+    (nunca sobrescreve), uniao de tags/custom_fields, evento 'merged'
+    auditavel na timeline, resposta da API com merged=true.
+
+D2. CSV import: FICA na Sprint 02 (T13, ~4h).
+    Upload -> parse -> validacao -> dry-run -> commit. Reusa o
+    LeadService.create (dedup/merge valem para o CSV tambem).
+
+D3. Status do lead: CONGELADO (LeadStatus no codigo).
+    Funis customizados por tenant ficam para os Playbooks (Sprint 10),
+    sem tabela de estagios por org nesta sprint.
+```
+
+---
+
+## Estimativa
+
+```
+T1: Models (Lead, Memory, Event)        — 4h
+T2: Migration Alembic                   — 1h
+T3: Merge service                       — 6h
+T4: Memory extractor (placeholder)      — 2h
+T5-T7: Leads API + timeline             — 10h
+T8: Memories API                        — 3h
+T9-T11: UI lista + detalhe + cadastro   — 15h
+T12: Testes (isolation + CRUD + merge)  — 8h
+T13: CSV Import (se D2 = sim)           — 4h
+
+TOTAL: ~49-53h (1.5-2 semanas para 1 dev)
+```
+
+---
+
+## Riscos
+
+| Risco | Mitigacao |
+|---|---|
+| Merge incorreto fundir pessoas diferentes | Regra conservadora (so campos vazios) + evento auditavel + D1 |
+| Memory extractor (IA) detectar errado | Confidence < 1.0 + editavel pelo user + placeholder nesta sprint |
+| Performance com 10k+ leads | Indices (org, phone), (org, email), (org, status) |
+| Soft delete vazar em queries | `status != 'deletado'` em TODA listagem (padrao do service) |
+| Multi-tenant leak | Testes de isolamento + 404 generico + org do contexto |
+
+---
+
+*"Lead sem memoria e' lead perdido."*
 
 ---
 

@@ -4,9 +4,9 @@
 +----------------------------------------------------------------------+
 |                                                                      |
 |   SPRINT 00 — ARQUITETURA E GESTAO                                  |
-|   Status:  Em andamento (este folder)                                |
-|   Owner:   Hermes (arquiteto/orquestrador)                           |
-|   Quando:  Continuo (nao tem fim — evolui com o projeto)             |
+|   Status:  BASE CONCLUIDA (continua evoluindo com o projeto)        |
+|   Owner:   Arquitetura (Fernando + agente de arquitetura)           |
+|   Quando:  Continuo (nao tem fim — evolui com o projeto)            |
 |                                                                      |
 +----------------------------------------------------------------------+
 ```
@@ -15,30 +15,26 @@
 
 ## Objetivo
 
-Construir a fundacao de GESTAO do projeto: skills, prompts, templates, ADRs, sprint docs.
-NÃO escreve codigo do produto — isso e' trabalho de outros agentes que consomem este material.
+Construir e manter a fundacao de GESTAO do projeto: docs centrais, skills,
+prompts (specs), templates e ADRs. Codigo do produto NAO vive aqui.
 
 ---
 
 ## Entregaveis
 
 ```
-[OK] Estrutura de pastas (Sprints/, .skills/, prompts/, templates/, decisions/, docs/)
+[OK] Estrutura de pastas (Sprints/, .skills/, prompts/, templates/)
 [OK] README.md (indice geral)
-[OK] AGENTS.md (manual para agentes externos)
-[OK] .skills/revenue-sdr-os-architect.md (skill principal)
-[OK] .skills/fastapi-multi-tenant.md (padroes de API)
-[OK] prompts/01-create-api-endpoint.md (prompt exemplo)
-[OK] templates/fastapi-route.py (template de codigo)
-[OK] Sprints/ (estrutura das 11 sprints futuras)
-[ ] FOUNDATION.md (migrar de ~/AGENCIA/SDR/)
-[ ] ARCHITECTURE.md
-[ ] ROADMAP.md
-[ ] Resto das skills (htmx, sqlmodel, pytest, whatsapp, sse, observability)
-[ ] Resto dos prompts (02-09)
-[ ] Resto dos templates
-[ ] ADRs (001-005+)
-[ ] Sprint docs (02-10 detalhadas)
+[OK] FOUNDATION.md v2.0 (visao do produto consolidada)
+[OK] ARCHITECTURE.md v2.0 (arquitetura vigente + 12 ADRs)
+[OK] ROADMAP.md v2.0 (sprints 01-10 com status real)
+[OK] AGENTS.md v2.0 (manual para agentes, alinhado a v0.2.0)
+[OK] .skills/ (9 skills; 5 principais atualizadas para v0.2.0)
+[OK] Sprints/01 (concluida — inclui nota da reescrita v0.2.0)
+[OK] Sprints/02 spec + 8 prompts alinhados a v0.2.0
+[OK] prompts/01-create-api-endpoint.md + templates/fastapi-route.py
+[--] ADRs formais em decisions/ (consolidados em ARCHITECTURE.md por ora)
+[--] Sprint docs 03-10 detalhadas (criar quando a sprint anterior fechar)
 ```
 
 ---
@@ -46,30 +42,23 @@ NÃO escreve codigo do produto — isso e' trabalho de outros agentes que consom
 ## Como este sprint se encaixa no projeto
 
 ```
-Projeto = Sprint 00 (este) + Sprint 01 (feito) + Sprint 02+ (a fazer)
-
-Sprint 00 → define COMO construir (skills, prompts, ADRs)
-Sprint 01 → probo que o stack funciona (auth + multi-tenant + white-label)
-Sprint 02+ → features do produto (lead, conversas, IA, WhatsApp, etc)
+Sprint 00 (este) -> define COMO construir (docs, skills, specs)
+Sprint 01 [OK]  -> fundacao profissional (v0.2.0: auth, tenancy, white-label)
+Sprint 02 [>>] -> Lead Brain + Memory Brain (spec pronta)
+Sprint 03+     -> features do produto (conversas, IA, WhatsApp, omnichannel)
 ```
 
 ---
 
-## Workflow
+## Workflow vigente
 
-1. **Eu (Hermes)** defino skills, prompts, templates, ADRs, sprint docs
-2. **Voce (Fernando)** orquestra: pega os artefatos, passa pros agentes externos
-3. **Agentes externos** (Claude Code, Codex, OpenCode) constroem no `~/AGENCIA/SDR/`
-4. **Voce** revisa PRs no GitHub
-5. **Eu** documento decisoes em ADRs baseado no feedback
-
----
-
-## Status detalhado
-
-Ver `STATUS.md` (a criar) ou `README.md` na raiz do folder.
+1. **Arquitetura** mantem FOUNDATION/ARCHITECTURE/ROADMAP + skills + specs
+2. **Fernando** aprova decisoes (ADRs novos ou revertidos)
+3. **Agente de codificacao** implementa no repo `~/AGENCIA/SDR/` seguindo
+   as specs e invariantes
+4. **Revisao** via pytest/ruff/CI + review humana
+5. **Decisoes novas** viram ADR em ARCHITECTURE.md
 
 ---
 
 *"Arquitetura e' a arte de tomar decisoes faceis de reverter."*
-— atribuido a various

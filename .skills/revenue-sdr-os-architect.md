@@ -65,10 +65,13 @@ NUNCA confiar em dados que vem do request sem validar tenant.
 ```
 
 **Defense in depth**:
-- Layer 1: FK constraint no banco
-- Layer 2: ORM mixin que filtra automaticamente
-- Layer 3: Tests de regressao (test_tenant_isolation.py)
-- Layer 4: Code review verifica manualmente
+- Layer 1: FK constraint + uniques compostas no banco
+- Layer 2: middleware ASGI resolve tenant + ContextVar `current_organization`
+- Layer 3: services filtram TODA query por organization_id (mixin de ORM
+  automatico: evolucao futura sobre a ContextVar)
+- Layer 4: claim `org` do JWT precisa bater com o tenant do request
+- Layer 5: testes de isolamento cross-tenant (obrigatorios por feature)
+- Layer 6: code review verifica manualmente
 
 ### 2. White-label via CSS variables
 
@@ -141,34 +144,34 @@ conversation_reports →  analise IA pos-conversa
 
 ---
 
-## Estrutura de pastas do codigo (no repo ~/AGENCIA/SDR/)
+## Estrutura de pastas do codigo (repo ~/AGENCIA/SDR/, v0.2.0)
 
 ```
 app/
-+-- main.py                 # entrypoint FastAPI
-+-- config.py               # Pydantic Settings (.env)
-+-- database.py             # SQLModel engine + session
-+-- models/                 # Tabelas (Organization, User, Conversation, ...)
-+-- auth/                   # JWT + bcrypt + login
-+-- middleware/             # Tenant resolution
-+-- themes/                 # CSS variables por tenant
-+-- templates_renderer.py   # Jinja2 env (nao usar Starlette Jinja2Templates direto)
-+-- api/v1/                 # REST versionada (auth, health, organization, users, ...)
-+-- routes/                 # Rotas HTML (dashboard, ...)
-+-- templates/              # Jinja2 (HTMX)
-+-- static/                 # CSS, JS, imagens
++-- main.py                 # create_app(settings, db_engine) — app factory
++-- core/                   # config, security (Argon2id/PyJWT), errors,
+|                           # pagination, middleware (security headers), logging
++-- db/                     # engine factory, session dep, base/mixins
+|                           #   (TenantMixin, TimestampMixin, utc_now, prefixed_id)
++-- tenancy/                # middleware ASGI puro + ContextVar de tenant
++-- organizations/          # models.py, schemas.py, service.py, api.py
++-- users/                  # models.py, schemas.py, service.py, api.py
++-- auth/                   # service.py, dependencies.py, schemas.py, api.py
++-- themes/                 # service.py (CSS variables + branding)
++-- health/                 # api.py (liveness/readiness)
++-- web/                    # templating.py (Jinja), pages/, templates/, static/
+                            #   static/js/vendor/ = HTMX + Alpine vendored
 
-tests/
-+-- conftest.py             # fixtures (client, seed_two_orgs, auth_headers_*)
-+-- test_tenant_isolation.py # CRITICO
-+-- test_auth.py
-+-- test_themes.py
-+-- test_api.py
-
-scripts/
-+-- seed.py                 # popula 2 tenants de teste
-+-- reset_db.py
+alembic/                    # env.py + versions/ (schema versionado)
+scripts/seed.py             # python -m scripts.seed (2 tenants demo)
+tests/                      # pytest isolado — app + SQLite em memoria por teste
+archive/sprint-1/           # codigo v0.1.0 (referencia historica, NAO usar)
 ```
+
+**Padrao por dominio**: cada area de negocio e um pacote com
+`models.py` (tabelas) + `schemas.py` (validacao de entrada) +
+`service.py` (regras + queries filtradas por tenant) + `api.py` (rotas
+JSON finas). Paginas HTML ficam em `app/web/pages/`.
 
 ---
 
@@ -256,17 +259,10 @@ scripts/
 cd ~/AGENCIA/SDR
 source .venv/bin/activate
 
-# Subir servidor local
-uvicorn app.main:app --reload --host 127.0.0.1 --port 8000
-
-# Rodar seed (2 tenants de teste)
-python scripts/seed.py
-
-# Rodar testes
-pytest -v
-
-# Ver health check
-curl http://127.0.0.1:8000/api/v1/health/
+./start          # setup completo: .env, migrations, seed se vazio, uvicorn --reload
+pytest           # testes (banco em memoria — NUNCA toca o banco de dev)
+ruff check app/ tests/ scripts/ alembic/
+alembic upgrade head
 ```
 
 **Credenciais seed**:
@@ -279,14 +275,15 @@ curl http://127.0.0.1:8000/api/v1/health/
 
 ```
 [ ] Codigo compila sem erro (python -c "import app.main")
-[ ] Testes passam (pytest -v)
-[ ] Tenant isolation test passa (pytest tests/test_tenant_isolation.py)
+[ ] Testes passam (pytest) — suite completa
+[ ] Testes de isolamento cross-tenant da feature passam
+[ ] ruff check + ruff format --check limpos
 [ ] Migration criada e testada (alembic upgrade head && alembic downgrade -1 && alembic upgrade head)
 [ ] OpenAPI spec regenerada e consistente (/openapi.json)
 [ ] Sem secrets hardcoded (use settings from .env)
-[ ] Docstrings em funcoes publicas
-[ ] Type hints em funcoes publicas
-[ ] Commit message segue Conventional Commits
+[ ] Erros via AppError (envelope), NAO HTTPException solta
+[ ] Docstrings PT-BR sem acentos + type hints em funcoes publicas
+[ ] Commit message segue Conventional Commits (PT-BR)
 ```
 
 ---

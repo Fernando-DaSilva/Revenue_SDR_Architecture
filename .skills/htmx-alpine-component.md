@@ -20,45 +20,48 @@ Componentes reusaveis em templates/partials/.
 
 ---
 
-## Estrutura de templates
+## Estrutura de templates (app/web/templates/)
 
 ```
-app/templates/
+app/web/templates/
 +-- base.html                    # layout base com CSS variables
 +-- auth/
 |   +-- login.html
-|   +-- logout.html
++-- errors/
+|   +-- error.html
+|   +-- tenant_not_found.html
 +-- leads/
 |   +-- index.html               # lista de leads
 |   +-- detail.html              # detalhe + memories + timeline
 |   +-- new.html                 # form de cadastro
 +-- dashboard/
 |   +-- index.html
-|   +-- partials/
-|       +-- header.html
-|       +-- sidebar.html
 +-- partials/                    # componentes reusaveis
     +-- lead_card.html
     +-- memory_chip.html
     +-- empty_state.html
 ```
 
+Paginas (rotas HTML) ficam em `app/web/pages/<feature>.py`.
+Assets estaticos em `app/web/static/` — HTMX/Alpine **vendored** em
+`static/js/vendor/` (sem CDN: app precisa ser self-contained, ADR-011).
+
 ---
 
-## Template base (app/templates/base.html)
+## Template base (app/web/templates/base.html)
 
 ```html
 <!DOCTYPE html>
 <html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
     {{ brand_meta | safe }}
     <link rel="stylesheet" href="/static/css/base.css">
     <link rel="stylesheet" href="/static/css/components.css">
     <style>{{ theme_css | safe }}</style>
-    <script src="/static/js/htmx.js" defer></script>
-    <script src="/static/js/alpine.js" defer></script>
+    <script src="/static/js/vendor/htmx.min.js" defer></script>
+    <script src="/static/js/vendor/alpine.min.js" defer></script>
 </head>
 <body>
     {% block content %}{% endblock %}
@@ -67,50 +70,50 @@ app/templates/
 </html>
 ```
 
-**Variaveis de contexto obrigatorias** (injetadas pelo `render_template()`):
-- `request` (obrigatorio pro Jinja)
-- `brand_meta` (string HTML com title, favicon, theme-color)
-- `theme_css` (string CSS com `:root { --color-primary: ...; }`)
-- `brand_name` (string)
-- `logo_url` (string)
-- Variaveis customizadas conforme a pagina
+**Contexto injetado automaticamente** pelo `render()` de
+`app/web/templating.py` (a rota NAO repete isso):
+- `request`, `organization`
+- `brand_meta` (title, favicon, theme-color)
+- `theme_css` (`:root { --color-primary: ...; }`)
+- `brand_name`, `logo_url`, `tenant_slug`
 
 ---
 
 ## Como renderizar template (Python)
 
 ```python
-# app/routes/<feature>.py ou app/api/v1/<feature>.py
-from fastapi import Request
+# app/web/pages/<feature>.py
+from fastapi import APIRouter, Request
 from fastapi.responses import HTMLResponse
-from app.templates_renderer import render_template
+
+from app.web.templating import render
+
+router = APIRouter(tags=["pages"])
 
 
 @router.get("/leads", response_class=HTMLResponse)
 async def list_leads_page(request: Request, ...):
-    return render_template(
+    return render(
         request,
         "leads/index.html",
         {
             "user_name": current_user.name,
             "user_role": current_user.role,
-            "leads": [...],  # lista de leads (ou paginacao)
-            "primary_color": organization.theme_primary_color,
-            # ... outros
+            "leads": [...],  # lista de leads (ou pagina)
         },
     )
 ```
 
-**REGRA**: passe apenas tipos hashable (string, int, list, dict, model).
-NAO passe objeto SQLModel direto (causa erro de hash no Jinja).
+**REGRA**: passe apenas tipos simples/hashable (string, int, list, dict).
+Evite passar o model SQLModel inteiro — extraia os campos que o template
+precisa (ou passe um schema/namespace leve).
 
 ```python
-# ERRADO
-return render_template(request, "leads/index.html", {"lead": lead})
-# TypeError: unhashable type: 'dict'
+# EVITE
+return render(request, "leads/index.html", {"lead": lead})
 
-# CERTO
-return render_template(request, "leads/index.html", {
+# PREFIRA
+return render(request, "leads/index.html", {
     "lead_id": lead.id,
     "lead_name": lead.name,
     "lead_phone": lead.phone,
@@ -124,10 +127,10 @@ return render_template(request, "leads/index.html", {
 ### Injetadas por tenant (backend)
 
 ```python
-# app/themes/resolver.py
-def generate_theme_css(organization: Organization) -> str:
-    primary = organization.theme_primary_color
-    primary_hover = _darken(primary, 10)
+# app/themes/service.py
+def generate_theme_css(organization: Organization | None) -> str:
+    primary = organization.theme_primary_color if organization else DEFAULT_PRIMARY
+    primary_hover = darken(primary, 10)
     return f""":root {{
   --color-primary: {primary};
   --color-primary-hover: {primary_hover};
@@ -409,7 +412,7 @@ body {
 
 ## Componentes reusaveis (partials)
 
-### Lead card (app/templates/partials/lead_card.html)
+### Lead card (app/web/templates/partials/lead_card.html)
 
 ```html
 {# Componente: card de lead #}

@@ -1,139 +1,94 @@
 # Revenue SDR OS — Arquitetura
 
-> **Este folder e' onde mora o "COMO" construir o produto.**
-> O codigo em si vive em `~/AGENCIA/SDR/` (repo GitHub).
+> **Este repo e onde mora o "COMO" construir o produto.**
+> O codigo vive em [Revenue_SDR_OS](https://github.com/Fernando-DaSilva/Revenue_SDR_OS) (`~/AGENCIA/SDR/`).
 
 ```
 +----------------------------------------------------------------------+
+|  Este repo: VISAO, DECISOES (ADRs), SKILLS, SPECS DE SPRINT         |
+|  Repo code: ~/AGENCIA/SDR/ -> github.com/Fernando-DaSilva/...       |
 |                                                                      |
-|   Este folder: ARQUITETURA, SKILLS, PROMPTS, ADRs                   |
-|   Repo code:   ~/AGENCIA/SDR/ → github.com/Fernando-DaSilva/...    |
-|                                                                      |
-|   Fluxo:                                                             |
-|     Eu defino specs/aqui → Voce passa pros agentes → Eles constroem |
-|                                                                      |
+|  Leitura essencial (nesta ordem):                                   |
+|    1. FOUNDATION.md     -> o QUE e POR QUE                          |
+|    2. ARCHITECTURE.md   -> o COMO (invariantes + ADRs)              |
+|    3. ROADMAP.md        -> sprints e status                         |
+|    4. Sprints/XX_*/     -> spec da sprint vigente                   |
 +----------------------------------------------------------------------+
 ```
 
 ---
+
+## Documentos centrais
+
+| Doc | Conteudo | Status |
+|---|---|---|
+| [FOUNDATION.md](FOUNDATION.md) | Visao do produto, 8 Brains, modelo de negocio/deploy, stack | v2.0 |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Arquitetura vigente + 12 ADRs | v2.0 |
+| [ROADMAP.md](ROADMAP.md) | Sprints 01-10 com status real | v2.0 |
+| [AGENTS.md](AGENTS.md) | Manual para agentes de codificacao | v2.0 |
 
 ## Estrutura
 
 ```
-00_SDR_architecture/
+Revenue_SDR_Architecture/
 |
-+-- README.md                         ← voce esta aqui
-+-- FOUNDATION.md                     ← doc principal do projeto (v1.4)
-+-- ARCHITECTURE.md                   ← ADRs e decisoes tecnicas
-+-- AGENTS.md                         ← manual pra outros agentes
-+-- ROADMAP.md                        ← visao geral dos sprints
++-- FOUNDATION.md / ARCHITECTURE.md / ROADMAP.md / AGENTS.md
 |
-+-- .skills/                          ← skills carregaveis por agentes
-|   +-- revenue-sdr-os-architect.md   ← skill principal (SEMPRE carregar)
-|   +-- fastapi-multi-tenant.md       ← padroes de API REST + tenant isolation
-|   +-- sqlmodel-migration.md         ← schema, migrations Alembic, ID prefixes
-|   +-- htmx-alpine-component.md      ← padroes de UI + CSS variables
-|   +-- pytest-tenant-isolation.md    ← testes (CRITICOS)
-|   +-- whatsapp-zapi-integration.md  ← integracao WhatsApp (Z-API)
-|   +-- sse-realtime-pattern.md       ← Server-Sent Events (real-time)
-|   +-- observability-stack.md        ← Prometheus + Grafana + logs
-|   +-- whatsapp-zapi-integration.md  ← integracao WhatsApp
-|   +-- sse-realtime-pattern.md       ← Server-Sent Events
-|   +-- observability-stack.md        ← Prometheus + Grafana
++-- .skills/                       <- contexto tecnico carregavel por tema
+|   +-- revenue-sdr-os-architect.md     (SEMPRE carregar primeiro)
+|   +-- fastapi-multi-tenant.md         (padroes de API + tenancy)
+|   +-- sqlmodel-migration.md           (models + Alembic)
+|   +-- htmx-alpine-component.md        (padroes de UI)
+|   +-- pytest-tenant-isolation.md      (testes — CRITICOS)
+|   +-- whatsapp-zapi-integration.md    (Sprint 4)
+|   +-- sse-realtime-pattern.md         (Sprint 6)
+|   +-- observability-stack.md          (Sprint 5+)
 |
-+-- prompts/                          ← prompts copy-paste pra tarefas
-|   +-- README.md                     ← indice dos prompts
++-- Sprints/                       <- spec por sprint
+|   +-- 00_Sprint_00_Arquitetura_e_Gestao/
+|   +-- 01_Sprint_01_Foundation_Auth_WhiteLabel/     [CONCLUIDA v0.2.0]
+|   +-- 02_Sprint_02_Lead_Brain_Memory_Brain/        [PROXIMA]
+|       +-- prompts/                <- specs por tarefa (T1-T12)
+|
++-- prompts/                       <- specs genericas reutilizaveis
 |   +-- 01-create-api-endpoint.md
-|   +-- 02-create-htmx-page.md
-|   +-- 03-create-model.md
-|   +-- 04-create-migration.md
-|   +-- 05-create-test.md
-|   +-- 06-create-cadence-job.md
-|   +-- 07-deploy-vps.md
-|   +-- 08-add-whatsapp-channel.md
-|   +-- 09-add-google-calendar.md
 |
-+-- templates/                        ← code templates
-|   +-- fastapi-route.py
-|   +-- sqlmodel-tenant-model.py
-|   +-- pytest-isolation-test.py
-|   +-- htmx-component.html
-|   +-- alembic-migration.py
-|
-+-- decisions/                        ← Architecture Decision Records
-|   +-- README.md
-|   +-- 001-why-htmx-alpine-not-react.md
-|   +-- 002-why-sqlite-first.md
-|   +-- 003-why-z-api-whatsapp.md
-|   +-- 004-why-vps-dedicated-not-shared.md
-|   +-- 005-why-sse-not-websocket.md
-|
-+-- docs/sprints/                     ← docs detalhados por sprint
-    +-- README.md
-    +-- sprint-01-foundation.md
-    +-- sprint-02-lead-brain.md
-    +-- sprint-03-conversations.md
-    +-- ...
++-- templates/                     <- codigo base
+    +-- fastapi-route.py
 ```
 
----
+## Como este repo e usado
 
-## Como usar
+### Pelo arquiteto/orquestrador (Fernando + agente de arquitetura)
 
-### Para mim (arquiteto — eu)
+1. Decide/revisa: FOUNDATION, ARCHITECTURE (ADRs), ROADMAP
+2. Detalha a sprint vigente em `Sprints/XX_*/README.md` + `prompts/`
+3. Mantem `.skills/` alinhadas com o codigo real
 
-Quando voce me pedir algo:
-1. Eu **atualizo** FOUNDATION.md, ADRs, sprint docs
-2. Eu **crio/edito skills** em `.skills/`
-3. Eu **crio/edito prompts** em `prompts/`
-4. Eu **crio/edito templates** em `templates/`
-5. NUNCA escrevo codigo do produto — defino como ele deve ser feito
+### Pelo agente de codificacao (constroi no repo de codigo)
 
-### Para outros agentes (construtores)
+1. Le `AGENTS.md` do repo de codigo (`~/AGENCIA/SDR/AGENTS.md`) — regras duras
+2. Carrega `.skills/revenue-sdr-os-architect.md` + skills da tarefa
+3. Le o spec da sprint em `Sprints/XX_*/` e os prompts por tarefa
+4. Implementa no `~/AGENCIA/SDR/` seguindo os templates
+5. Valida com o checklist do prompt; commit + push
 
-Quando voce passar uma tarefa:
-1. Eles **carregam a skill** `revenue-sdr-os-architect.md` (sempre)
-2. Eles **carregam skills especificas** conforme a tarefa
-3. Eles **leem o prompt** correspondente em `prompts/`
-4. Eles **seguem o template** em `templates/`
-5. Eles **codam em `~/AGENCIA/SDR/`** (repo separado)
-6. Eles **validam com checklist** do prompt
-7. Eles **commitam e dao push** no GitHub
+### Convencoes deste repo
 
-### Para voce (orquestrador)
+- Markdown PT-BR **sem acentos** (evitar mojibake), ASCII art otimizado
+- Skills: frontmatter YAML + principios + exemplos + anti-patterns + checklist
+- Prompts: contexto + tasks com codigo-guia + validacao + checklist
+- Decisoes: registradas como ADR em [ARCHITECTURE.md](ARCHITECTURE.md)
 
-1. Me pede specs/aqui → eu entrego docs + skills + prompts
-2. Voce pega os prompts, passa pros agentes (Claude Code, Codex, etc)
-3. Agentes constroem no `~/AGENCIA/SDR/`
-4. Voce revisa PRs no GitHub
-5. Volta pra mim com feedback ou proxima sprint
-
----
-
-## Convencoes deste folder
-
-- **Markdown**: ASCII art otimizado pra GitHub (caixas, diagramas, setas)
-- **Skills**: formato SKILL.md com frontmatter YAML + instrucoes em markdown
-- **Prompts**: copy-paste ready, com contexto, passos, criterios de aceitacao
-- **Templates**: codigo Python/HTML com TODOs claros pra customizar
-- **ADRs**: formato MADR (Markdown Any Decision Record)
-
----
-
-## Status atual
+## Estado do projeto (2026-07-20)
 
 | Item | Status |
 |---|---|
-| FOUNDATION.md | A migrar de ~/AGENCIA/SDR/FOUNDATION.md |
-| ARCHITECTURE.md | A criar |
-| AGENTS.md | A criar |
-| ROADMAP.md | A criar |
-| Skills | A criar |
-| Prompts | A criar |
-| Templates | A criar |
-| Decisions | A criar |
+| Fundacao (Sprint 01) | **v0.2.0 reescrita e validada** (57 testes, CI verde) |
+| Sprint 02 spec | Revisada e alinhada a v0.2.0 — pronta para execucao |
+| Proximo passo | Executar Sprint 02 (Lead Brain + Memory Brain) |
 
 ---
 
-*Esse folder e' vivo. Conforme o projeto evolui, eu atualizo tudo aqui.*
-*Codigo em si NAO vive aqui — vive no repo separado.*
+*Repo vivo: conforme o produto evolui, estes docs evoluem junto.
+Codigo NAO vive aqui.*

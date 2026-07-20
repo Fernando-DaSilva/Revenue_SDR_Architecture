@@ -1,12 +1,11 @@
-# Sprint 01 — Foundation + Auth + White-Label Basico
+# Sprint 01 — Foundation + Auth + White-Label
 
 ```
 +----------------------------------------------------------------------+
 |                                                                      |
 |   SPRINT 01 — FOUNDATION + AUTH + WHITE-LABEL                       |
-|   Status:  CONCLUIDO (commit b73d07b no GitHub)                     |
-|   Quando:  Sprint 1 (1-2 semanas)                                   |
-|   Branch:  main                                                       |
+|   Status:  CONCLUIDA — reescrita em qualidade profissional          |
+|   Versao:  v0.2.0 (baseline, commit 4513a29)                        |
 |   Repo:    https://github.com/Fernando-DaSilva/Revenue_SDR_OS        |
 |                                                                      |
 +----------------------------------------------------------------------+
@@ -14,89 +13,72 @@
 
 ---
 
+## Nota historica (2026-07-17)
+
+A v0.1.0 desta sprint validou o stack, mas acumulou problemas estruturais
+(auth Bearer inoperante, testes apontando para o banco de dev, deps
+abandonadas — python-jose/passlib, Alembic vazio, assets 404). Foi
+**arquivada em `archive/sprint-1/`** e reescrita do zero como **v0.2.0**.
+Todos os "issues conhecidos" abaixo foram resolvidos na reescrita.
+
 ## Objetivo (alcancado)
 
-Construir a fundacao tecnica validando:
-- [x] Stack funciona (FastAPI + SQLModel + HTMX + Alpine.js)
-- [x] Multi-tenancy funciona (2+ orgs isoladas)
-- [x] White-label funciona (tema diferente por tenant)
-- [x] Auth funciona (login, sessao, roles)
-- [x] API-first funciona (toda UI consome API documentada)
+- [x] Stack funciona (FastAPI + SQLModel + HTMX + Alpine.js vendored)
+- [x] Multi-tenancy funciona (isolamento + middleware ASGI + ContextVar)
+- [x] White-label funciona (CSS variables por tenant)
+- [x] Auth funciona (Argon2id + PyJWT; cookie HttpOnly + Bearer)
+- [x] API-first funciona (/docs + envelope de erro consistente)
 
----
-
-## Entregaveis (todos completos)
-
-### Codigo (em ~/AGENCIA/SDR/)
+## Entregaveis (v0.2.0)
 
 ```
-[OK] Estrutura do monorepo (app/, tests/, scripts/, docs/)
-[OK] Schema SQLModel: Organization + User (com TenantBase mixin)
-[OK] Middleware de tenant resolution (subdomain + header + query)
-[OK] Sistema de auth: JWT (HS256) + bcrypt + cookie HttpOnly
-[OK] Tema dinamico via CSS variables injetadas por tenant
-[OK] API REST v1: auth, health, organization, users
-[OK] Frontend basico: login + dashboard vazio (HTMX + Alpine + CSS)
-[OK] Seed script com 2 tenants (clinica-bela + imob-center)
-[OK] Testes pytest (parcial — 15 passam, 13 tem issues de cache)
-[OK] CI no GitHub Actions (.github/workflows/ci.yml)
-[OK] README com badges + ASCII art
-[OK] CONTRIBUTING.md + SECURITY.md
+[OK] App factory (create_app) + service layer + pacotes de dominio
+[OK] Multi-tenancy: custom_domain, subdominio, header, query (dev), default
+[OK] JWT com claim org validado contra o tenant do request
+[OK] Erros em envelope {"error": {code, message, details}}
+[OK] Alembic real (migration inicial + upgrade/downgrade testados)
+[OK] Email unico por tenant (uq_users_org_email)
+[OK] Security headers + CSP; assets vendored (HTMX/Alpine, sem CDN)
+[OK] 57 testes isolados (SQLite em memoria por teste, 94% cobertura)
+[OK] ruff (lint+format+bandit) limpo; CI verde no GitHub Actions
+[OK] ./start (setup + migrate + seed + serve em 1 comando)
+[OK] Seed: clinica-bela (rosa) + imob-center (verde) / senha123
+[OK] AGENTS.md no repo de codigo (regras duras)
 ```
 
-### Documentacao (neste folder)
+## Issues da v0.1.0 — TODOS RESOLVIDOS
 
-```
-[OK] FOUNDATION.md v1.4 (migrar de ~/AGENCIA/SDR/)
-[OK] ARCHITECTURE.md (decisoes tecnicas)
-[OK] ROADMAP.md (visao geral)
-```
+| Issue v0.1.0 | Resolucao v0.2.0 |
+|---|---|
+| Testes 15/28 (cache Jinja2 + fixtures) | 57/57 — novo padrao de fixtures (app factory + engine em memoria injetada) |
+| Bearer token inutil (so cookie auth) | Auth dupla real: cookie + Bearer, com org do JWT validada |
+| Testes apagavam o banco de dev | SQLite em memoria por teste (StaticPool) |
+| passlib + bcrypt<4.1 | pwdlib/Argon2id (sem pin) |
+| python-jose (CVEs) | PyJWT |
+| Alembic vazio | Migration inicial real; schema so via migration |
+| templates_renderer workaround | app/web/templating.py (env por app) |
+| Assets JS/logo 404 | Vendored em static/js/vendor/ + logo SVG |
+| requirements.txt duplicado | pyproject.toml como fonte unica |
 
----
-
-## Criterios de aceitacao (todos atingidos)
+## Criterios de aceitacao (todos atingidos e mantidos)
 
 | Criterio | Status |
 |---|---|
-| Acessa `http://localhost:8000` | [x] |
-| Ve tela de login customizada pelo tenant | [x] |
-| Loga como admin@empresa1.com ou admin@empresa2.com | [x] |
-| Cada um ve dashboard com cor/logo diferente | [x] |
-| Nao ve dados do outro tenant | [x] |
+| Login white-label por tenant (cor/logo/nome) | [x] |
+| 2 tenants isolados (dados + tema) | [x] |
+| Cross-tenant login bloqueado (401) | [x] |
+| Cross-tenant recurso = 404 generico | [x] |
+| Token de um tenant nao opera em outro (401) | [x] |
 | API documentada em /docs | [x] |
-| Health check retorna ok | [x] |
-| Cross-tenant login bloqueado com 401 | [x] |
-| 2 tenants seedados com cores diferentes | [x] |
+| Health + readiness OK | [x] |
 
----
-
-## Issues conhecidos (a resolver em sprints futuras)
-
-1. **Testes pytest**: 15 passam, 13 falham por cache de Jinja2 + detached instances (fixture pattern a refinar)
-2. **Login HTML**: bug intermitente do Jinja2 + Starlette com `{% extends %}` — resolvido com `templates_renderer.py` próprio
-3. **bcrypt 4.1 incompatibilidade com passlib**: pinado `bcrypt<4.1` no `requirements.txt`
-4. **IPv6 vs IPv4**: servidor precisa `--host 127.0.0.1` (não 0.0.0.0) por causa do macOS resolver IPv6 primeiro
-
----
-
-## Como usar o que foi construido
+## Como rodar
 
 ```bash
-cd ~/AGENCIA/SDR
-source .venv/bin/activate
-uvicorn app.main:app --host 127.0.0.1 --port 8000
+cd ~/AGENCIA/SDR && ./start
+# http://clinica-bela.localhost:8000  admin@clinica-bela.com / senha123
+# http://imob-center.localhost:8000   admin@imob-center.com / senha123
 ```
-
-Acesse:
-- http://127.0.0.1:8000/docs
-- http://clinica-bela.localhost:8000/login (rosa)
-- http://imob-center.localhost:8000/login (verde)
-
-Credenciais:
-- `admin@clinica-bela.com` / `senha123`
-- `admin@imob-center.com` / `senha123`
-
----
 
 ## Proxima sprint
 

@@ -3,9 +3,9 @@ sprint: 02
 task: 03-create-merge-service
 ---
 
-# Prompt 02.03 — Criar Lead Merge Service
+# Prompt 02.03 — Lead Merge (deteccao de duplicatas + merge conservador)
 
-> **Copy-paste este prompt inteiro pra um agente de IA.**
+> Spec da task T3 da Sprint 02. Logica central do Lead Brain.
 
 ---
 
@@ -21,224 +21,177 @@ task: 03-create-merge-service
 
 ## Contexto
 
-Ja existem os models Lead, LeadMemory, LeadTimelineEvent.
-Agora voce precisa implementar a **logica de Lead Brain**: detectar leads duplicados e fazer merge automatico.
+Models prontos (`app/leads/models.py`). Agora implementar a logica de
+**Lead Brain**: ao criar lead com telefone/email que ja existe no MESMO
+tenant, nao duplicar — fazer merge conservador no lead existente.
 
-Repo: `~/AGENCIA/SDR/`
-
----
-
-## Objetivo
-
-Quando alguem tenta criar um lead com telefone/email que ja existe no mesmo tenant, o sistema:
-1. Detecta a duplicata
-2. Faz merge automatico (preenche dados faltantes no lead existente)
-3. Loga evento de merge no timeline
-4. Retorna o lead existente (unificado)
+Arquivo: `app/leads/merge.py` (pacote do dominio, NAO `app/services/`).
 
 ---
 
-## Tasks
+## Regras de negocio (DECISAO D1 — confirmar com o usuario antes)
 
-### T1: Criar `app/services/__init__.py`
+Proposta vigente (default desta spec):
 
-```python
-"""Business logic services."""
-```
+1. **Match exato** por telefone normalizado OU email normalizado
+   (lowercase/trim), dentro do tenant, ignorando `status='deletado'`.
+2. **Merge conservador**: preenche SOMENTE campos vazios do lead
+   existente (nunca sobrescreve dado ja preenchido).
+3. **Auditavel**: registra `LeadTimelineEvent(event_type='merged')` com
+   payload `{source_lead_data, matched_by}` e atualiza
+   `last_interaction_at`.
+4. **Retorna o lead existente** unificado (a API sinaliza que houve
+   merge — ver T4: header `X-Merged: true` ou campo na resposta).
 
-### T2: Criar `app/services/lead_merge.py`
+Alternativa (se o usuario escolher): `409 Conflict` com o candidato e
+endpoint explicito `POST /leads/{id}/merge`. Nao implementar as duas.
+
+---
+
+## Implementacao de referencia
 
 ```python
 """
-Lead Merge Service — Lead Brain.
+Lead Merge — Lead Brain.
 
-Detecta leads duplicados (mesmo telefone/email no mesmo tenant)
-e faz merge automatico.
+Deteccao de duplicatas por telefone/email dentro do tenant e merge
+CONSERVADOR: so preenche campos vazios, nunca sobrescreve.
+Toda operacao e auditada na timeline do lead.
 """
-from datetime import datetime
-from typing import Optional
 
-from sqlmodel import Session, select, or_
+from sqlmodel import Session, or_, select
 
-from app.models.lead import Lead, LeadTimelineEvent, _new_event_id
+from app.db.base import utc_now
+from app.leads.models import Lead, LeadEventType, LeadStatus, LeadTimelineEvent
 
 
-def find_existing_lead(
-    db: Session,
-    organization_id: str,
-    phone: Optional[str] = None,
-    email: Optional[str] = None,
-    exclude_lead_id: Optional[str] = None,
-) -> Optional[Lead]:
-    """
-    Busca lead existente no mesmo tenant por telefone OU email.
-
-    Args:
-        db: Sessao do banco
-        organization_id: Tenant
-        phone: Telefone normalizado (com codigo pais)
-        email: Email normalizado (lowercase)
-        exclude_lead_id: Ignorar este lead (usado em updates)
-
-    Returns:
-        Lead encontrado ou None
-    """
-    if not phone and not email:
+def normalize_phone(phone: str | None) -> str | None:
+    """Mantem so digitos e '+'. None/vazio -> None."""
+    if not phone:
         return None
+    digits = "".join(c for c in phone if c.isdigit() or c == "+")
+    return digits or None
 
-    conditions = []
-    if phone:
-        conditions.append(Lead.phone == phone)
-    if email:
-        conditions.append(Lead.email == email.lower().strip() if email else None)
 
-    if not conditions:
+def normalize_email(email: str | None) -> str | None:
+    """Lowercase + strip. None/vazio -> None."""
+    if not email:
         return None
-
-    statement = select(Lead).where(
-        Lead.organization_id == organization_id,
-        Lead.status != "deletado",  # NAO merge com deletados
-        or_(*conditions),
-    )
-    if exclude_lead_id:
-        statement = statement.where(Lead.id != exclude_lead_id)
-
-    return db.exec(statement).first()
+    normalized = email.strip().lower()
+    return normalized or None
 
 
-def merge_lead_data(existing: Lead, new_data: dict) -> Lead:
-    """
-    Faz merge de dados novos no lead existente.
-    Preenche apenas campos vazios (NAO sobrescreve dados existentes).
+class LeadMerger:
+    def __init__(self, session: Session):
+        self.session = session
 
-    Returns:
-        Lead atualizado
-    """
-    updated = False
-    for field, new_value in new_data.items():
-        if not hasattr(existing, field):
-            continue
+    def find_duplicate(
+        self,
+        *,
+        organization_id: str,
+        phone: str | None = None,
+        email: str | None = None,
+        exclude_lead_id: str | None = None,
+    ) -> Lead | None:
+        """Busca duplicata ativa no tenant por telefone OU email normalizados."""
+        phone = normalize_phone(phone)
+        email = normalize_email(email)
+        conditions = []
+        if phone:
+            conditions.append(Lead.phone == phone)
+        if email:
+            conditions.append(Lead.email == email)
+        if not conditions:
+            return None
 
-        current_value = getattr(existing, field)
-        # Preenche apenas se current for None/vazio
-        if current_value is None or current_value == "":
-            setattr(existing, field, new_value)
-            updated = True
-        # Caso especial: source_detail (JSON) — merge keys
-        elif field == "source_detail" and new_value and current_value == "{}":
-            setattr(existing, field, new_value)
-            updated = True
+        statement = select(Lead).where(
+            Lead.organization_id == organization_id,
+            Lead.status != LeadStatus.DELETADO,
+            or_(*conditions),
+        )
+        if exclude_lead_id:
+            statement = statement.where(Lead.id != exclude_lead_id)
+        return self.session.exec(statement).first()
 
-    if updated:
-        existing.updated_at = datetime.utcnow()
-        existing.last_interaction_at = datetime.utcnow()
+    def merge_into(self, *, existing: Lead, incoming: Lead) -> Lead:
+        """
+        Merge conservador de `incoming` em `existing`.
+        Preenche so campos vazios; registra evento 'merged'.
+        """
+        mergeable = [
+            "name", "phone", "email", "document",
+            "source", "assigned_user_id",
+        ]
+        filled: dict[str, object] = {}
+        for field in mergeable:
+            current = getattr(existing, field)
+            new_value = getattr(incoming, field)
+            if (current is None or current == "") and new_value:
+                setattr(existing, field, new_value)
+                filled[field] = new_value
 
-    return existing
+        # tags: uniao sem duplicar
+        new_tags = [t for t in incoming.tags if t not in existing.tags]
+        if new_tags:
+            existing.tags = [*existing.tags, *new_tags]
+            filled["tags_added"] = new_tags
 
+        # custom_fields: so chaves ausentes
+        new_keys = {k: v for k, v in incoming.custom_fields.items()
+                    if k not in existing.custom_fields}
+        if new_keys:
+            existing.custom_fields = {**existing.custom_fields, **new_keys}
+            filled["custom_fields_added"] = list(new_keys)
 
-def log_merge_event(
-    db: Session,
-    organization_id: str,
-    existing_lead_id: str,
-    new_lead_id: str,
-    merged_fields: list[str],
-    actor_user_id: Optional[str] = None,
-) -> LeadTimelineEvent:
-    """Loga evento de merge no timeline do lead existente."""
-    import json
+        existing.last_interaction_at = utc_now()
+        self.session.add(existing)
 
-    event = LeadTimelineEvent(
-        id=_new_event_id(),
-        organization_id=organization_id,
-        lead_id=existing_lead_id,
-        event_type="merged",
-        payload=json.dumps({
-            "merged_with": new_lead_id,
-            "merged_fields": merged_fields,
-        }),
-        actor_user_id=actor_user_id,
-    )
-    db.add(event)
-    return event
-```
-
-### T3: Testar manualmente
-
-```bash
-cd ~/AGENCIA/SDR
-source .venv/bin/activate
-
-python << 'EOF'
-from sqlmodel import Session
-from app.database import engine
-from app.services.lead_merge import find_existing_lead, merge_lead_data
-from app.models import Organization, Lead
-
-# Setup
-with Session(engine) as db:
-    # Pega Org A
-    org = db.exec(select(Organization).where(Organization.slug == "clinica-bela")).first()
-    print(f"Org: {org.name}")
-
-    # Busca lead existente por telefone
-    existing = find_existing_lead(db, organization_id=org.id, phone="+5511999999999")
-    print(f"Found: {existing}")
-EOF
+        event = LeadTimelineEvent(
+            organization_id=existing.organization_id,
+            lead_id=existing.id,
+            event_type=LeadEventType.MERGED,
+            payload={
+                "matched_by": "phone_or_email",
+                "incoming_source": incoming.source,
+                "filled_fields": filled,
+            },
+            actor_user_id=None,  # sistema
+        )
+        self.session.add(event)
+        self.session.commit()
+        self.session.refresh(existing)
+        return existing
 ```
 
 ---
 
-## Criterios de aceitacao
+## Cenarios de teste (tests/test_leads_merge.py)
 
-```python
-# Em test_lead_merge.py
-
-def test_find_by_phone_returns_existing():
-    """Lead com mesmo telefone no mesmo tenant e' encontrado."""
-    # Criar org + lead + buscar por telefone → retorna o lead
-
-def test_find_by_email_returns_existing():
-    """Lead com mesmo email no mesmo tenant e' encontrado."""
-    # Criar org + lead + buscar por email → retorna o lead
-
-def test_find_returns_none_when_no_match():
-    """Lead com telefone/email diferente NAO e' encontrado."""
-
-def test_find_excludes_deleted_leads():
-    """Leads com status='deletado' NAO sao encontrados para merge."""
-
-def test_find_excludes_self_when_updating():
-    """Ao atualizar lead X, NAO retorna X mesmo como match."""
-
-def test_find_only_same_tenant():
-    """Lead com mesmo telefone em OUTRO tenant NAO e' encontrado."""
-
-def test_merge_fills_empty_fields():
-    """Merge preenche apenas campos vazios, NAO sobrescreve."""
-
-def test_merge_updates_timestamp():
-    """Merge atualiza updated_at e last_interaction_at."""
-
-def test_log_merge_creates_event():
-    """Log cria evento de timeline com merged_with e merged_fields."""
 ```
-
----
+[ ] Criar lead com telefone duplicado (mesmo tenant) -> merge, nao duplica
+[ ] Match por email duplicado -> merge
+[ ] Telefone com formatacao diferente ("+55 11 9..." vs "55119...") -> match
+[ ] Merge NAO sobrescreve campos preenchidos (conservador)
+[ ] Merge preenche campos vazios (email/document ausentes)
+[ ] Merge faz uniao de tags sem duplicar
+[ ] Evento 'merged' registrado na timeline com payload correto
+[ ] Mesmo telefone em tenant DIFERENTE -> cria lead novo (sem merge)
+[ ] Telefone duplicado em lead 'deletado' -> cria novo (nao revive)
+[ ] exclude_lead_id impede match consigo mesmo (para updates futuros)
+```
 
 ## Checklist
 
 ```
-[ ] app/services/__init__.py criado
-[ ] app/services/lead_merge.py criado com 3 funcoes
-[ ] find_existing_lead filtra por tenant e exclui deletados
-[ ] merge_lead_data NAO sobrescreve campos existentes
-[ ] log_merge_event cria evento de timeline com payload JSON
-[ ] Testes em tests/test_lead_merge.py cobrem todos cenarios
-[ ] pytest tests/test_lead_merge.py -v passa
-[ ] Multi-tenant test: lead de outro tenant NAO e' encontrado
-[ ] Codigo segue patterns das skills
+[ ] app/leads/merge.py com LeadMerger + normalizadores
+[ ] Match so dentro do tenant (organization_id na query)
+[ ] Ignora leads 'deletado'
+[ ] Merge conservador + uniao de tags/custom_fields
+[ ] Evento 'merged' na timeline (append-only)
+[ ] 10+ cenarios de teste passando
+[ ] ruff limpo
 ```
 
 ---
 
-*"Merge inteligente e' a alma do Lead Brain."*
+*"Um lead, uma pessoa — nao importa de onde ele venha."*
