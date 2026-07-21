@@ -20,7 +20,7 @@
 Foco em instrumentar o sistema para operação em produção e empoderar as ferramentas da IA e do vendedor:
 1. **Handoff Avançado**: Permitir que a IA solicite proativamente um vendedor humano quando detectar sentimentos negativos ou quando a complexidade da negociação exceder sua política de ação.
 2. **Integração Google Calendar**: Autenticação OAuth2 do tenant para que a IA possa agendar, reagendar ou cancelar reuniões de vendas usando Tools.
-3. **Observabilidade e Logs**: Implementação de logging estruturado (JSON), métricas (Prometheus) para monitoramento de latência da IA e taxas de entrega de mensagens.
+3. **Observabilidade e Logs (Conforme ADR-014)**: Implementação de logging estruturado (JSON), métricas (Prometheus) para monitoramento de latência da IA e taxas de entrega de mensagens, além do tracing com `request_id` cross-layer.
 
 ---
 
@@ -66,6 +66,7 @@ CREATE TABLE meetings (
 - **Calendar OAuth**: `GET /api/v1/integrations/google/authorize` e `GET /api/v1/integrations/google/callback`.
 - **Handoff API**: `POST /api/v1/conversations/{id}/handoff` (usado pela UI ou pela IA via Tool).
 - **Métricas**: `GET /metrics` (para scraping do Prometheus). Configurado via Middleware ou dependência no nível do App.
+- **Client Logs Ingestion**: `POST /api/v1/logs/client` (conforme especificado no ADR-014 para captação de métricas de frontend e erros client-side).
 
 ---
 

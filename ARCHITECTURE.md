@@ -213,6 +213,11 @@ tabela central de eventos do dominio. Regras:
 - **Decisão**: Criar a tabela `user_translations` para sobrescrever chaves de tradução por tela e por usuário. Definir 5 presets de cores iniciais (Sakura Bloom, Emerald Garden, Ocean Breeze, Obsidian Night e Amber Warmth) no banco de dados e injetar as variáveis CSS no template base de acordo com a escolha do tenant.
 - **Consequências**: Maior flexibilidade no White-label real. Uso de cache em memória para mitigar overhead de query no banco a cada carregamento de página.
 
+### ADR-014 — Logs Estruturados e Observabilidade (JSON, Tracing)
+- **Contexto**: A operação em VPS/SaaS e a complexidade de logs isolados tornavam inviável a detecção de problemas, análises de gargalos (ex: latência em queries e respostas do LLM) ou tracing de transações.
+- **Decisão**: Implementar logs unificados em JSON Lines (`structlog`), estabelecendo propagação do `request_id`, rastreamento cross-layer (Frontend -> Middleware -> DB/LLM) e um endpoint dedicado (`/api/v1/logs/client`) para ingestão de eventos/erros do Client-side.
+- **Consequências**: Tracing robusto das jornadas de requests com contexto enriquecido (tenant_id, user_id). Necessário configurar rate-limiting estrito no ingestor de client-side.
+
 ---
 
 *"Arquitetura e a arte de tomar decisoes faceis de reverter."*
