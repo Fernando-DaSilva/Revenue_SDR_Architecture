@@ -27,7 +27,7 @@ Todos os "issues conhecidos" abaixo foram resolvidos na reescrita.
 - [x] Multi-tenancy funciona (isolamento + middleware ASGI + ContextVar)
 - [x] White-label funciona (CSS variables por tenant)
 - [x] White-label Avançado (v2.1.0) (customização de idiomas pt-BR, es-ES, en-GB, de-DE, lt-LT por usuário/tela e 5 presets de cores)
-- [x] Auth funciona (Argon2id + PyJWT; cookie HttpOnly + Bearer)
+- [x] Auth funciona (Argon2id + PyJWT; cookie HttpOnly + Bearer) + Suporte Opcional a Google Sign-up/Login
 - [x] API-first funciona (/docs + envelope de erro consistente)
 
 ## Entregaveis (v0.2.0 & v2.1.0)
@@ -46,6 +46,10 @@ Todos os "issues conhecidos" abaixo foram resolvidos na reescrita.
 [OK] Seed: clinica-bela (rosa) + imob-center (verde) / senha123
 [OK] AGENTS.md no repo de codigo (regras duras)
 [OK] Especificação de White-Label Avançado (ADR-013, Skill, Prompt, Templates de Model e UI)
+[OK] Especificação de Autenticação, Recuperação de Senha e Gestão de Usuários (docs/sprints/01-auth-user-admin-spec.md)
+[OK] Skill do Coder Agent para Fluxos de Autenticação e Gestão de Usuários (.skills/auth-and-user-management.md)
+[OK] Especificação de Autenticação e Sign-up Opcional com Google (docs/sprints/01-auth-user-admin-spec.md)
+[OK] Skill do Coder Agent para Integração de Google OAuth2 (.skills/google-auth-integration.md)
 ```
 
 ## Issues da v0.1.0 — TODOS RESOLVIDOS

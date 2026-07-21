@@ -125,6 +125,19 @@ Observabilidade (Prometheus + Grafana + Loki):
 
 **Quando carregar**: adicionar Prometheus, Grafana, logs, alertas.
 
+### `.skills/google-auth-integration.md`
+
+```
+Integração de Google Sign-up e Login (OAuth2):
+  - Fluxo multi-tenant e isolamento por Host
+  - Validação de ID Token no backend (Google JWKS ou library)
+  - Auto-vinculação com conta de e-mail nativa
+  - Estratégia de testes mockados
+  - Anti-padrões comuns
+```
+
+**Quando carregar**: criar/modificar endpoints de autenticação social, integrar Google One Tap / OAuth2 no login ou cadastro.
+
 ## Combinacoes comuns
 
 ```
@@ -141,6 +154,12 @@ Criar UI HTMX:
   + revenue-sdr-os-architect
   + htmx-alpine-component
 
+Integrar Google Auth:
+  + revenue-sdr-os-architect
+  + fastapi-multi-tenant
+  + google-auth-integration
+  + pytest-tenant-isolation
+
 Integrar WhatsApp:
   + revenue-sdr-os-architect
   + fastapi-multi-tenant
@@ -152,6 +171,7 @@ Real-time updates:
   + sse-realtime-pattern
   + observability-stack
 ```
+
 
 ## Adicionar nova skill
 
