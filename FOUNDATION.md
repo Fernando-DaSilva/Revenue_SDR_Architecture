@@ -116,10 +116,12 @@ Consultoria. Para a engenharia isso significa:
 | **Arquitetura/docs (este repo)** | `~/AGENCIA/Revenue_SDR_Architecture/` -> [Revenue_SDR_Architecture](https://github.com/Fernando-DaSilva/Revenue_SDR_Architecture) |
 | Ideacao historica | `~/AGENCIA/SDR/docs/historico/` |
 
-## 10. Estado atual
+## 10. Estado atual (2026-07-21)
 
 **v0.2.0 (baseline, commit `4513a29`)**: fundacao profissional — multi-tenancy,
 auth dupla (cookie+Bearer), white-label, Alembic, 57 testes isolados, CI verde.
+
+O planejamento estratégico **(Sprint 00) está finalizado**, e todas as futuras Sprints (03 a 10) estão com especificações arquiteturais baseadas no `ROADMAP.md` e armazenadas na pasta `Sprints/`.
 
 **Proximo**: Sprint 02 — Lead Brain + Memory Brain
 ([spec](Sprints/02_Sprint_02_Lead_Brain_Memory_Brain/README.md)).

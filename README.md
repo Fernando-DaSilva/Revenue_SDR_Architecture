@@ -45,10 +45,18 @@ Revenue_SDR_Architecture/
 |   +-- observability-stack.md          (Sprint 5+)
 |
 +-- Sprints/                       <- spec por sprint
-|   +-- 00_Sprint_00_Arquitetura_e_Gestao/
+|   +-- 00_Sprint_00_Arquitetura_e_Gestao/           [CONCLUIDA]
 |   +-- 01_Sprint_01_Foundation_Auth_WhiteLabel/     [CONCLUIDA v0.2.0]
 |   +-- 02_Sprint_02_Lead_Brain_Memory_Brain/        [PROXIMA]
-|       +-- prompts/                <- specs por tarefa (T1-T12)
+|   |   +-- prompts/                <- specs por tarefa (T1-T12)
+|   +-- 03_Sprint_03_Conversations_Opportunity/      [DOCUMENTADA]
+|   +-- 04_Sprint_04_AI_Sales_Brain_WhatsApp/        [DOCUMENTADA]
+|   +-- 05_Sprint_05_Omnichannel_UI_Handoff_Calendar/[DOCUMENTADA]
+|   +-- 06_Sprint_06_Transcricao_DHS_Sugestoes/      [DOCUMENTADA]
+|   +-- 07_Sprint_07_Relatorio_PosConversa/          [DOCUMENTADA]
+|   +-- 08_Sprint_08_VPS_Dedicada_Automatizada/      [DOCUMENTADA]
+|   +-- 09_Sprint_09_MultiUnit_Franquias/            [DOCUMENTADA]
+|   +-- 10_Sprint_10_Marketplace_Tribo/              [DOCUMENTADA]
 |
 +-- prompts/                       <- specs genericas reutilizaveis
 |   +-- 01-create-api-endpoint.md
@@ -80,11 +88,12 @@ Revenue_SDR_Architecture/
 - Prompts: contexto + tasks com codigo-guia + validacao + checklist
 - Decisoes: registradas como ADR em [ARCHITECTURE.md](ARCHITECTURE.md)
 
-## Estado do projeto (2026-07-20)
+## Estado do projeto (2026-07-21)
 
 | Item | Status |
 |---|---|
 | Fundacao (Sprint 01) | **v0.2.0 reescrita e validada** (57 testes, CI verde) |
+| Estratégia (Sprint 00) | **Concluída**. Todas as Sprints (01 a 10) documentadas. |
 | Sprint 02 spec | Revisada e alinhada a v0.2.0 — pronta para execucao |
 | Proximo passo | Executar Sprint 02 (Lead Brain + Memory Brain) |
 

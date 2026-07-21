@@ -1,6 +1,6 @@
 # ROADMAP.md — Visao de Sprints
 
-> Status real do projeto. Atualizado em 2026-07-20 (baseline v0.2.0).
+> Status real do projeto. Atualizado em 2026-07-21 (baseline v0.2.0).
 
 ---
 
