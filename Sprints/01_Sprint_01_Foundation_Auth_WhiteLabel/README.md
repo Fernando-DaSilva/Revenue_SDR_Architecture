@@ -26,10 +26,11 @@ Todos os "issues conhecidos" abaixo foram resolvidos na reescrita.
 - [x] Stack funciona (FastAPI + SQLModel + HTMX + Alpine.js vendored)
 - [x] Multi-tenancy funciona (isolamento + middleware ASGI + ContextVar)
 - [x] White-label funciona (CSS variables por tenant)
+- [x] White-label Avançado (v2.1.0) (customização de idiomas pt-BR, es-ES, en-GB, de-DE, lt-LT por usuário/tela e 5 presets de cores)
 - [x] Auth funciona (Argon2id + PyJWT; cookie HttpOnly + Bearer)
 - [x] API-first funciona (/docs + envelope de erro consistente)
 
-## Entregaveis (v0.2.0)
+## Entregaveis (v0.2.0 & v2.1.0)
 
 ```
 [OK] App factory (create_app) + service layer + pacotes de dominio
@@ -44,6 +45,7 @@ Todos os "issues conhecidos" abaixo foram resolvidos na reescrita.
 [OK] ./start (setup + migrate + seed + serve em 1 comando)
 [OK] Seed: clinica-bela (rosa) + imob-center (verde) / senha123
 [OK] AGENTS.md no repo de codigo (regras duras)
+[OK] Especificação de White-Label Avançado (ADR-013, Skill, Prompt, Templates de Model e UI)
 ```
 
 ## Issues da v0.1.0 — TODOS RESOLVIDOS

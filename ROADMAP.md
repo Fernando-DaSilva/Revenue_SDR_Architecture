@@ -28,6 +28,7 @@ Entregue e **reescrita em qualidade profissional (v0.2.0)**:
 - Multi-tenancy: middleware ASGI + ContextVar; custom_domain; 404 cross-tenant
 - Auth: Argon2id + PyJWT; cookie HttpOnly + Bearer; roles
 - White-label: CSS variables por tenant; assets vendored
+- **White-label Avançado (v2.1.0)**: Tradução granular por tela e usuário (Locales: `pt-BR`, `es-ES`, `en-GB`, `de-DE`, `lt-LT`); 5 presets de cores iniciais (Sakura Bloom, Emerald Garden, Ocean Breeze, Obsidian Night, Amber Warmth).
 - Alembic desde o dia zero; 57 testes isolados; ruff limpo; CI verde
 - Script `./start` (setup + migrate + seed + serve)
 

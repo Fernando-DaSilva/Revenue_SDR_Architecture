@@ -1,0 +1,157 @@
+{# app/templates/settings/white_label.html #}
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container py-8" x-data="{
+    activeTab: 'theme',
+    currentPreset: 'sakura_bloom',
+    presets: {
+        sakura_bloom: { primary: '#EC4899', hover: '#DB2777', secondary: '#F472B6', bg: '#FDF2F8', text: '#111827' },
+        emerald_garden: { primary: '#10B981', hover: '#059669', secondary: '#34D399', bg: '#ECFDF5', text: '#111827' },
+        ocean_breeze: { primary: '#1E3A8A', hover: '#1E40AF', secondary: '#3B82F6', bg: '#F0F9FF', text: '#111827' },
+        obsidian_night: { primary: '#8B5CF6', hover: '#7C3AED', secondary: '#06B6D4', bg: '#0F172A', text: '#F9FAFB' },
+        amber_warmth: { primary: '#D97706', hover: '#B45309', secondary: '#F59E0B', bg: '#FEF3C7', text: '#111827' }
+    },
+    applyPreset(name) {
+        this.currentPreset = name;
+        const colors = this.presets[name];
+        document.documentElement.style.setProperty('--color-primary', colors.primary);
+        document.documentElement.style.setProperty('--color-primary-hover', colors.hover);
+        document.documentElement.style.setProperty('--color-secondary', colors.secondary);
+        document.documentElement.style.setProperty('--color-background', colors.bg);
+        document.documentElement.style.setProperty('--color-text', colors.text);
+    }
+}">
+    <!-- Page Header -->
+    <div class="mb-8">
+        <h1 class="text-3xl font-bold">{{ _("title") }}</h1>
+        <p class="text-muted">{{ _("subtitle") }}</p>
+    </div>
+
+    <!-- Configuration Navigation -->
+    <div class="tabs mb-6 flex border-b border-border">
+        <button class="px-4 py-2 font-medium border-b-2 transition"
+                :class="activeTab === 'theme' ? 'border-primary text-primary' : 'border-transparent text-muted'"
+                @click="activeTab = 'theme'">
+            {{ _("tab_theme") }}
+        </button>
+        <button class="px-4 py-2 font-medium border-b-2 transition"
+                :class="activeTab === 'language' ? 'border-primary text-primary' : 'border-transparent text-muted'"
+                @click="activeTab = 'language'">
+            {{ _("tab_language") }}
+        </button>
+    </div>
+
+    <!-- Theme Customization Section -->
+    <div x-show="activeTab === 'theme'" class="grid grid-cols-1 md:grid-cols-2 gap-8" x-transition>
+        <div class="card p-6">
+            <h2 class="text-xl font-semibold mb-4">{{ _("theme_presets_title") }}</h2>
+            <div class="grid grid-cols-1 gap-3">
+                <template x-for="(p, name) in presets" :key="name">
+                    <button class="flex items-center justify-between p-3 border border-border rounded-lg hover:border-primary transition text-left"
+                            :class="currentPreset === name ? 'ring-2 ring-primary border-primary' : ''"
+                            @click="applyPreset(name)">
+                        <div class="flex items-center gap-3">
+                            <!-- Color Swatches -->
+                            <div class="flex -space-x-1">
+                                <span class="w-4 h-4 rounded-full border border-white" :style="'background: ' + p.primary"></span>
+                                <span class="w-4 h-4 rounded-full border border-white" :style="'background: ' + p.secondary"></span>
+                                <span class="w-4 h-4 rounded-full border border-white" :style="'background: ' + p.bg"></span>
+                            </div>
+                            <span class="font-medium capitalize" x-text="name.replace('_', ' ')"></span>
+                        </div>
+                        <span class="text-xs text-muted" x-show="currentPreset === name">✓ {{ _("active") }}</span>
+                    </button>
+                </template>
+            </div>
+
+            <!-- Custom Form to save in DB -->
+            <form hx-post="/api/v1/theme/save" hx-swap="none" class="mt-6">
+                <input type="hidden" name="preset" :value="currentPreset">
+                <button type="submit" class="btn btn-primary w-full">
+                    {{ _("save_theme_button") }}
+                </button>
+            </form>
+        </div>
+
+        <!-- Live Preview Component -->
+        <div class="card p-6 flex flex-col justify-between border-dashed border-2 border-primary">
+            <div>
+                <span class="text-xs font-bold text-primary tracking-wider uppercase">{{ _("preview") }}</span>
+                <div class="mt-4 p-4 rounded bg-background text-text border border-border">
+                    <h3 class="font-bold text-lg">Exemplo de Dashboard</h3>
+                    <p class="text-sm mt-1 text-muted">Esta é uma simulação de como o cliente final verá o sistema operacional.</p>
+                    
+                    <div class="mt-4 flex gap-2">
+                        <button class="btn btn-primary btn-sm">Botão Primário</button>
+                        <button class="btn btn-ghost btn-sm">Botão Secundário</button>
+                    </div>
+                </div>
+            </div>
+            <p class="text-xs text-muted mt-4">Alterações visuais acima ocorrem instantaneamente no seu navegador via Alpine.js. Clique em Salvar para persistir no banco.</p>
+        </div>
+    </div>
+
+    <!-- Language Customization Section -->
+    <div x-show="activeTab === 'language'" class="card p-6" x-transition>
+        <h2 class="text-xl font-semibold mb-4">{{ _("language_settings_title") }}</h2>
+        
+        <!-- Default User Language -->
+        <form hx-post="/api/v1/user/settings" hx-swap="none" class="mb-8 max-w-md">
+            <div class="form-group">
+                <label class="block text-sm font-medium mb-1" for="preferred_locale">{{ _("select_language") }}</label>
+                <select name="preferred_locale" id="preferred_locale" class="form-input">
+                    <option value="pt-BR">Português (Brasil)</option>
+                    <option value="es-ES">Español (España)</option>
+                    <option value="en-GB">English (United Kingdom)</option>
+                    <option value="de-DE">Deutsch (Deutschland)</option>
+                    <option value="lt-LT">Lietuvių (Lietuva)</option>
+                </select>
+            </div>
+            <button type="submit" class="btn btn-primary mt-2">{{ _("save_language_button") }}</button>
+        </form>
+
+        <hr class="my-6 border-border" />
+
+        <!-- Screen-by-Screen (Fabric) Translations overrides -->
+        <div>
+            <h3 class="text-lg font-medium mb-3">{{ _("custom_translations_title") }}</h3>
+            <p class="text-sm text-muted mb-4">Você pode alterar os rótulos de textos específicos exibidos nas telas (fabrics) abaixo:</p>
+
+            <div class="grid grid-cols-1 gap-6" x-data="{ screenFilter: 'login' }">
+                <div class="flex gap-2 mb-4 overflow-x-auto pb-2">
+                    <button class="btn btn-sm" :class="screenFilter === 'login' ? 'btn-primary' : 'btn-ghost'" @click="screenFilter = 'login'">Login</button>
+                    <button class="btn btn-sm" :class="screenFilter === 'dashboard' ? 'btn-primary' : 'btn-ghost'" @click="screenFilter = 'dashboard'">Dashboard</button>
+                </div>
+
+                <!-- Custom Override List -->
+                <form hx-post="/api/v1/translations/override" hx-swap="none" class="space-y-4">
+                    <input type="hidden" name="screen" :value="screenFilter">
+                    
+                    <div x-show="screenFilter === 'login'" class="space-y-3">
+                        <div class="form-group">
+                            <label class="block text-xs font-semibold uppercase text-muted mb-1">login.title (Default: "Acessar Plataforma")</label>
+                            <input type="text" name="login.title" class="form-input" placeholder="Substituir título da tela de login...">
+                        </div>
+                        <div class="form-group">
+                            <label class="block text-xs font-semibold uppercase text-muted mb-1">login.submit_button (Default: "Entrar")</label>
+                            <input type="text" name="login.submit_button" class="form-input" placeholder="Substituir texto do botão...">
+                        </div>
+                    </div>
+
+                    <div x-show="screenFilter === 'dashboard'" class="space-y-3">
+                        <div class="form-group">
+                            <label class="block text-xs font-semibold uppercase text-muted mb-1">dashboard.welcome (Default: "Olá, bem-vindo de volta")</label>
+                            <input type="text" name="dashboard.welcome" class="form-input" placeholder="Substituir mensagem de boas-vindas...">
+                        </div>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary">
+                        {{ _("save_customizations") }}
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

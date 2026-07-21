@@ -208,6 +208,12 @@ tabela central de eventos do dominio. Regras:
 - **Consequencias**: fronteira clara: schemas validam, models persistem,
   banco reforca.
 
+### ADR-013 — Customização de Idiomas por Tela/Usuário e Presets de Cores (v2.1.0)
+- **Contexto**: A internacionalização padrão baseada em arquivos é rígida demais para parceiros white-label que precisam adaptar nomes e termos conforme suas marcas (ex: mudar "Leads" para "Contatos" ou "Oportunidades"). Além disso, a customização de cores precisa de presets estéticos predefinidos.
+- **Decisão**: Criar a tabela `user_translations` para sobrescrever chaves de tradução por tela e por usuário. Definir 5 presets de cores iniciais (Sakura Bloom, Emerald Garden, Ocean Breeze, Obsidian Night e Amber Warmth) no banco de dados e injetar as variáveis CSS no template base de acordo com a escolha do tenant.
+- **Consequências**: Maior flexibilidade no White-label real. Uso de cache em memória para mitigar overhead de query no banco a cada carregamento de página.
+
 ---
 
 *"Arquitetura e a arte de tomar decisoes faceis de reverter."*
+
