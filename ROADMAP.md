@@ -9,14 +9,14 @@
 ```
 Sprint 01 [OK] Foundation + Auth + White-Label        (reescrita v0.2.0)
 Sprint 02 [>>] Lead Brain + Memory Brain              PROXIMA
-Sprint 03 [  ] Conversations + Opportunity + Cadence
-Sprint 04 [  ] AI Sales Brain + Z-API WhatsApp
-Sprint 05 [  ] Monitoramento + handoff IA<->Humano + Google Calendar
-Sprint 06 [  ] Transcricao + grafico DHS + sugestoes de objecao (SSE)
-Sprint 07 [  ] Relatorio pos-conversa + Manager/Revenue Brain
-Sprint 08 [  ] Omnichannel completo (IG, email, voice)
-Sprint 09 [  ] VPS dedicada automatizada + Update orchestrator
-Sprint 10 [  ] Playbooks verticais + Marketplace
+Sprint 03 [DOC] Conversations + Opportunity + Cadence
+Sprint 04 [DOC] AI Sales Brain + Z-API WhatsApp
+Sprint 05 [DOC] Monitoramento + handoff IA<->Humano + Google Calendar
+Sprint 06 [DOC] Transcricao + grafico DHS + sugestoes de objecao (SSE)
+Sprint 07 [DOC] Relatorio pos-conversa + Manager/Revenue Brain
+Sprint 08 [DOC] Omnichannel completo (IG, email, voice)
+Sprint 09 [DOC] VPS dedicada automatizada + Update orchestrator
+Sprint 10 [DOC] Playbooks verticais + Marketplace
 ```
 
 ---

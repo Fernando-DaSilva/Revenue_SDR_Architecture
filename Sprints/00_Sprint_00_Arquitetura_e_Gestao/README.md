@@ -4,9 +4,9 @@
 +----------------------------------------------------------------------+
 |                                                                      |
 |   SPRINT 00 — ARQUITETURA E GESTAO                                  |
-|   Status:  BASE CONCLUIDA (continua evoluindo com o projeto)        |
+|   Status:  FINALIZADA / PRONTA PARA SPRINT 01                       |
 |   Owner:   Arquitetura (Fernando + agente de arquitetura)           |
-|   Quando:  Continuo (nao tem fim — evolui com o projeto)            |
+|   Quando:  Finalizada                                               |
 |                                                                      |
 +----------------------------------------------------------------------+
 ```
@@ -34,7 +34,7 @@ prompts (specs), templates e ADRs. Codigo do produto NAO vive aqui.
 [OK] Sprints/02 spec + 8 prompts alinhados a v0.2.0
 [OK] prompts/01-create-api-endpoint.md + templates/fastapi-route.py
 [--] ADRs formais em decisions/ (consolidados em ARCHITECTURE.md por ora)
-[--] Sprint docs 03-10 detalhadas (criar quando a sprint anterior fechar)
+[OK] Sprint docs 03-10 detalhadas (Especificações de alto nível definidas)
 ```
 
 ---
