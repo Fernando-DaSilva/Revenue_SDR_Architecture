@@ -112,13 +112,10 @@ tabela central de eventos do dominio. Regras:
 
 ## 7. ADRs (Architecture Decision Records)
 
-### ADR-001 — HTMX + Alpine.js, NAO React/Vue/Next
-- **Contexto**: SPA pesada adiciona build pipeline, estado cliente e
-  complexidade sem ganho para um app server-driven white-label.
-- **Decisao**: Jinja2 + HTMX (requisicoes parciais) + Alpine
-  (microinteratividade). CSS puro com variables por tenant.
-- **Consequencias**: frontend simples, server-rendered; tema por CSS;
-  libs **vendored** (self-contained para VPS offline).
+### ADR-001 — HTMX + Alpine.js + Tailwind (DaisyUI), NÃO React/Vue/Next
+- **Contexto**: SPA pesada adiciona complexidade sem ganho para um app server-driven white-label. O uso prévio de "CSS puro" limitava a estética e escalabilidade visual moderna.
+- **Decisão**: Jinja2 + HTMX (requisições parciais) + Alpine (microinteratividade). Adoção do **Tailwind CSS + DaisyUI** para design system e componentização semântica, integrado perfeitamente ao ecossistema sem JS extra (Virtual DOM).
+- **Consequências**: Frontend dinâmico, server-rendered, com estética altamente profissional. Necessidade de rodar o CLI do Tailwind (com DaisyUI) localmente para gerar o `theme.css` final e integrá-lo via variáveis nativas para o sistema de White Label (ADR-013). Libs HTMX/Alpine permanecem **vendored**.
 
 ### ADR-002 — SQLite (WAL) primeiro, NAO Postgres no MVP
 - **Contexto**: uma VPS por cliente pede zero-infra; SQLite suporta
