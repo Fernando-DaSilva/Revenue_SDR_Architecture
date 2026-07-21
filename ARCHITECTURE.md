@@ -215,6 +215,11 @@ tabela central de eventos do dominio. Regras:
 - **Decisão**: Implementar logs unificados em JSON Lines (`structlog`), estabelecendo propagação do `request_id`, rastreamento cross-layer (Frontend -> Middleware -> DB/LLM) e um endpoint dedicado (`/api/v1/logs/client`) para ingestão de eventos/erros do Client-side.
 - **Consequências**: Tracing robusto das jornadas de requests com contexto enriquecido (tenant_id, user_id). Necessário configurar rate-limiting estrito no ingestor de client-side.
 
+### ADR-015 — Arquivamento de Dados e Exportação Analítica (ETL / DW)
+- **Contexto**: O crescimento orgânico das operações de vendas no SQLite (transacional local) sobrecarregaria o banco em buscas analíticas ou longas janelas de retenção (ex: Dashboards da Sprint 07).
+- **Decisão**: Instituir um Data Pipeline/ETL (Jobs Assíncronos) que exporta eventos consolidados (Append-only) para um Data Warehouse / Database Analítico robusto (Supabase, Postgres, MS-SQL). E um job de Archiving (Cold Storage) purga os dados transacionais antigos e já consolidados no DW de volta no SQLite, mantendo-o rápido.
+- **Consequências**: SQLite se mantém enxuto e estritamente transacional; Dashboards analíticos ganham total poder, sofrendo leve *eventual consistency* em relação à atividade em tempo real; Arquitetura passa a ser híbrida em relação à armazenamento histórico e analítico.
+
 ---
 
 *"Arquitetura e a arte de tomar decisoes faceis de reverter."*

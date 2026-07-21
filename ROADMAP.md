@@ -13,7 +13,7 @@ Sprint 03 [DOC] Conversations + Opportunity + Cadence
 Sprint 04 [DOC] AI Sales Brain + Z-API WhatsApp
 Sprint 05 [DOC] Monitoramento + handoff IA<->Humano + Google Calendar
 Sprint 06 [DOC] Transcricao + grafico DHS + sugestoes de objecao (SSE)
-Sprint 07 [DOC] Relatorio pos-conversa + Manager/Revenue Brain
+Sprint 07 [DOC] Pos-conversa, Dashboards e Pipeline de Dados Analíticos
 Sprint 08 [DOC] Omnichannel completo (IG, email, voice)
 Sprint 09 [DOC] VPS dedicada automatizada + Update orchestrator
 Sprint 10 [DOC] Playbooks verticais + Marketplace
@@ -70,10 +70,12 @@ Decisoes em aberto: ver secao "Decisoes pendentes" no spec da sprint.
 - Notificacoes live, transcricao de audio, grafico DHS
 - SSE broker in-memory (skill pronta; ADR-005)
 
-## Sprint 07 — Pos-conversa + Manager/Revenue Brain
+## Sprint 07 — Pos-conversa, Dashboards e Pipeline Analítico (ADR-015)
 
+- Pipeline ETL/CDC para Data Warehouse externo (Supabase/Postgres/MS-SQL)
+- Rotina de Arquivamento (Cold Storage) e expurgo no SQLite local
 - Coach de vendedores (analise IA da conversa)
-- Dashboards de funil, CAC, ROI, canal vencedor
+- Dashboards Analíticos de funil, CAC, ROI, canal vencedor (Lendo do DW)
 
 ## Sprint 08 — Omnichannel completo
 
