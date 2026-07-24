@@ -58,8 +58,11 @@ Revenue_SDR_Architecture/
 |   +-- 09_Sprint_09_MultiUnit_Franquias/            [DOCUMENTADA]
 |   +-- 10_Sprint_10_Marketplace_Tribo/              [DOCUMENTADA]
 |
-+-- prompts/                       <- specs genericas reutilizaveis
++-- prompts/                       <- specs genericas e prompts de QC reutilizaveis
 |   +-- 01-create-api-endpoint.md
+|   +-- 02-ui-revamp-daisyui.md
+|   +-- 15_Gerenciador_de_Temas_White_Label_Prompt.md
+|   +-- 16_Prototype_Visual_Checker_Quality_Control_Prompt.md  <- Quality Control Visual QA
 |
 +-- templates/                     <- codigo base
     +-- fastapi-route.py

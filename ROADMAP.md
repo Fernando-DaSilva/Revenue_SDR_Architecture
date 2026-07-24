@@ -7,8 +7,10 @@
 ## Mapa geral
 
 ```
+Sprint 00 [OK] Arquitetura e Gestao
 Sprint 01 [OK] Foundation + Auth + White-Label        (reescrita v0.2.0)
-Sprint 02 [>>] Lead Brain + Memory Brain              PROXIMA
+Sprint 01.5 [>>] Prototipagem Frontend (01_SDR_Prototype) PROXIMA
+Sprint 02 [DOC] Lead Brain + Memory Brain
 Sprint 03 [DOC] Conversations + Opportunity + Cadence
 Sprint 04 [DOC] AI Sales Brain + Z-API WhatsApp
 Sprint 05 [DOC] Monitoramento + handoff IA<->Humano + Google Calendar

@@ -1,0 +1,301 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="min-h-screen bg-[var(--color-background)] flex flex-col font-sans transition-all duration-300">
+    <!-- Navbar -->
+    <header class="navbar bg-[var(--color-surface)] border-b border-[var(--color-border)] px-4 sm:px-6 z-20 shadow-sm">
+        <div class="flex-1 gap-3">
+            <div class="w-10 h-10 p-2 bg-primary/10 rounded-xl flex items-center justify-center transition-all hover:scale-105 duration-300">
+                <img src="{{ logo_url }}" alt="{{ brand_name }}" class="w-6 h-6 object-contain">
+            </div>
+            <div>
+                <h1 class="font-bold text-lg tracking-tight text-base-content">{{ brand_name }}</h1>
+                <span class="text-[10px] uppercase tracking-wider font-semibold opacity-45 block -mt-1">Revenue SDR OS</span>
+            </div>
+        </div>
+        
+        <div class="flex-none gap-4">
+            <!-- User Profile & Action -->
+            <div class="flex items-center gap-3">
+                <div class="hidden sm:flex flex-col items-end leading-tight">
+                    <span class="text-sm font-semibold text-base-content">{{ user_name }}</span>
+                    <span class="badge badge-primary badge-outline badge-xs text-[10px] uppercase font-bold tracking-wider mt-0.5 px-1.5 py-1">{{ user_role }}</span>
+                </div>
+                <div class="avatar placeholder">
+                    <div class="bg-primary/20 text-primary-content rounded-xl w-10 h-10 flex items-center justify-center font-bold border border-primary/30">
+                        {{ user_name[0] | uppercase }}
+                    </div>
+                </div>
+            </div>
+            
+            <div class="divider divider-horizontal my-2 opacity-50"></div>
+            
+            <form method="POST" action="/logout" class="m-0">
+                <button type="submit" class="btn btn-ghost btn-sm text-base-content/70 hover:text-error hover:bg-error/10 transition-all duration-200">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                    <span class="hidden md:inline">Sair</span>
+                </button>
+            </form>
+        </div>
+    </header>
+
+    <div class="flex-1 flex flex-col md:flex-row min-h-0">
+        <!-- Sidebar Navigation -->
+        <aside class="w-full md:w-64 bg-[var(--color-surface)] border-r border-[var(--color-border)] py-6 px-4 flex-shrink-0 md:block">
+            <ul class="menu menu-md gap-1 p-0">
+                <li class="menu-title px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-base-content/40">Menu Principal</li>
+                <li>
+                    <a href="/dashboard" class="active flex items-center gap-3 py-3 px-4 rounded-xl font-medium transition-all duration-200">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />
+                        </svg>
+                        Início
+                    </a>
+                </li>
+                
+                <div class="divider opacity-30 my-3"></div>
+                
+                <li class="menu-title px-3 py-1.5 text-xs font-bold uppercase tracking-widest text-base-content/40">Modulos (Lock)</li>
+                <li class="disabled opacity-50">
+                    <span class="flex items-center justify-between py-3 px-4 rounded-xl cursor-not-allowed">
+                        <span class="flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+                            </svg>
+                            Leads
+                        </span>
+                        <span class="badge badge-xs py-2 px-1.5 font-bold tracking-wider text-[9px] uppercase badge-neutral">S2</span>
+                    </span>
+                </li>
+                <li class="disabled opacity-50">
+                    <span class="flex items-center justify-between py-3 px-4 rounded-xl cursor-not-allowed">
+                        <span class="flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
+                            </svg>
+                            Conversas
+                        </span>
+                        <span class="badge badge-xs py-2 px-1.5 font-bold tracking-wider text-[9px] uppercase badge-neutral">S3</span>
+                    </span>
+                </li>
+                <li class="disabled opacity-50">
+                    <span class="flex items-center justify-between py-3 px-4 rounded-xl cursor-not-allowed">
+                        <span class="flex items-center gap-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+                            </svg>
+                            IA SDR
+                        </span>
+                        <span class="badge badge-xs py-2 px-1.5 font-bold tracking-wider text-[9px] uppercase badge-neutral">S4</span>
+                    </span>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- Main Content Area -->
+        <main class="flex-1 p-6 sm:p-10 overflow-y-auto space-y-8">
+            <!-- Page Header -->
+            <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-[var(--color-border)] pb-6">
+                <div>
+                    <h2 class="text-3xl font-extrabold tracking-tight text-[var(--color-text)]">Bem-vindo, {{ user_name }}</h2>
+                    {% if org_name %}
+                    <p class="text-sm text-[var(--color-text-muted)] mt-1 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 opacity-70 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        {{ org_name }} (Tenant: <code class="font-mono text-xs bg-[var(--color-surface-hover)] px-1 rounded">{{ tenant_slug }}</code>)
+                    </p>
+                    {% endif %}
+                </div>
+                <div>
+                    <span class="badge badge-success badge-lg py-4 px-4 font-bold gap-2 text-xs uppercase tracking-wider text-success-content shadow-sm">
+                        <span class="relative flex h-2 w-2">
+                            <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-success opacity-75"></span>
+                            <span class="relative inline-flex rounded-full h-2 w-2 bg-success"></span>
+                        </span>
+                        Fundação Ativa
+                    </span>
+                </div>
+            </div>
+
+            <!-- Dashboard Bento Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6">
+                <!-- Theme Card -->
+                <div class="card bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
+                    <div class="card-body p-6 flex flex-row items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-primary/10 text-primary flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 21a4 4 0 01-4-4V5a2 2 0 012-2h4a2 2 0 012 2v12a4 4 0 01-4 4zm0 0h12a2 2 0 002-2v-4a2 2 0 00-2-2h-2.343M11 7.343l1.657-1.657a2 2 0 012.828 0l2.829 2.829a2 2 0 010 2.828l-8.486 8.485M7 17h.01" />
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]/60">Design Tema</span>
+                            <h3 class="text-lg font-extrabold text-[var(--color-text)] mt-0.5">Preset: {{ theme_name | capitalize }}</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Auth Card -->
+                <div class="card bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
+                    <div class="card-body p-6 flex flex-row items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-success/10 text-success flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]/60">Segurança Ativa</span>
+                            <h3 class="text-lg font-extrabold text-[var(--color-text)] mt-0.5">Argon2id + JWT</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tenants Isolation Card -->
+                <div class="card bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
+                    <div class="card-body p-6 flex flex-row items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-info/10 text-info flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]/60">Multi-Tenancy</span>
+                            <h3 class="text-lg font-extrabold text-[var(--color-text)] mt-0.5">Isolamento Ativo</h3>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Database Card -->
+                <div class="card bg-[var(--color-surface)] border border-[var(--color-border)] shadow-sm overflow-hidden hover:shadow-md transition-all duration-300">
+                    <div class="card-body p-6 flex flex-row items-center gap-4">
+                        <div class="w-12 h-12 rounded-xl flex items-center justify-center bg-warning/10 text-warning flex-shrink-0">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4" />
+                            </svg>
+                        </div>
+                        <div>
+                            <span class="text-xs font-bold uppercase tracking-wider text-[var(--color-text-muted)]/60">Banco de Dados</span>
+                            <h3 class="text-lg font-extrabold text-[var(--color-text)] mt-0.5">SQLite / Mem</h3>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Platform Architecture & Checklist -->
+            <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                <!-- Checklist / Welcome Panel -->
+                <div class="card bg-base-100 border border-base-300/60 shadow-sm lg:col-span-2">
+                    <div class="card-body p-6 sm:p-8">
+                        <h3 class="card-title text-xl font-bold text-base-content mb-4 flex items-center gap-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-success" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            Funcionalidades Disponíveis
+                        </h3>
+                        <p class="text-base-content/70 mb-6 text-sm">
+                            A base estrutural e arquitetural do **Revenue SDR OS** foi totalmente testada e consolidada de acordo com as especificações exigidas. Abaixo estão os marcos técnicos ativos:
+                        </p>
+                        
+                        <div class="space-y-4">
+                            <div class="flex items-start gap-3">
+                                <span class="badge badge-success badge-sm mt-1 p-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-base-content">Autenticação Híbrida Cookie + Bearer</h4>
+                                    <p class="text-xs text-base-content/60 mt-0.5">Sessões gerenciadas de forma ultra segura usando Argon2id (backend) com emissão de tokens JWT e cookie HttpOnly com política de lax.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3">
+                                <span class="badge badge-success badge-sm mt-1 p-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-base-content">Branding White-Label Dinâmico por Tenant</h4>
+                                    <p class="text-xs text-base-content/60 mt-0.5">O sistema detecta automaticamente o slug do tenant no cabeçalho ou host, aplicando as cores primária/secundária do cliente e injetando o tema DaisyUI correspondente.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3">
+                                <span class="badge badge-success badge-sm mt-1 p-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-base-content">Isolamento Multi-Tenant Estrito</h4>
+                                    <p class="text-xs text-base-content/60 mt-0.5">Garante isolamento absoluto de dados. Tentativas de acessar dados de outras organizações retornam erro ou redirecionam de forma segura.</p>
+                                </div>
+                            </div>
+
+                            <div class="flex items-start gap-3">
+                                <span class="badge badge-success badge-sm mt-1 p-1">
+                                    <svg xmlns="http://www.w3.org/2000/svg" class="h-3 w-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7" />
+                                    </svg>
+                                </span>
+                                <div>
+                                    <h4 class="font-bold text-sm text-base-content">API REST Versionada v1</h4>
+                                    <p class="text-xs text-base-content/60 mt-0.5">Toda a lógica está exposta em endpoints JSON robustos (ex: <code class="font-mono bg-base-300 px-1 rounded text-xs">/api/v1/auth/me</code>, <code class="font-mono bg-base-300 px-1 rounded text-xs">/api/v1/users</code>) para futuras integrações móveis.</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Roadmap Panel -->
+                <div class="card bg-base-100 border border-base-300/60 shadow-sm">
+                    <div class="card-body p-6 flex flex-col justify-between">
+                        <div>
+                            <h3 class="card-title text-lg font-bold text-base-content mb-4 flex items-center gap-2">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 text-primary" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+                                </svg>
+                                Roadmap de Sprints
+                            </h3>
+                            
+                            <ul class="steps steps-vertical text-left space-y-4">
+                                <li class="step step-primary">
+                                    <div class="text-left pl-2">
+                                        <span class="font-extrabold text-sm block">Sprint 1: Base & Core UI</span>
+                                        <span class="text-xs text-base-content/50">Fundação robusta, Multi-tenancy & DaisyUI (Concluído)</span>
+                                    </div>
+                                </li>
+                                <li class="step">
+                                    <div class="text-left pl-2">
+                                        <span class="font-semibold text-sm block opacity-60">Sprint 2: Lead Brain</span>
+                                        <span class="text-xs text-base-content/40">Listagem de Leads, timeline e unificação de identidades</span>
+                                    </div>
+                                </li>
+                                <li class="step">
+                                    <div class="text-left pl-2">
+                                        <span class="font-semibold text-sm block opacity-60">Sprint 3: Conversas</span>
+                                        <span class="text-xs text-base-content/40">Gerenciador de canais, chat integrado e unificação</span>
+                                    </div>
+                                </li>
+                                <li class="step">
+                                    <div class="text-left pl-2">
+                                        <span class="font-semibold text-sm block opacity-60">Sprint 4: IA SDR</span>
+                                        <span class="text-xs text-base-content/40">Integração do motor de conversação inteligente via LLM</span>
+                                    </div>
+                                </li>
+                            </ul>
+                        </div>
+                        
+                        <div class="pt-6 border-t border-base-200 mt-6 text-center">
+                            <span class="text-xs font-mono text-base-content/50">Revenue SDR OS — v0.2.0</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+{% endblock %}

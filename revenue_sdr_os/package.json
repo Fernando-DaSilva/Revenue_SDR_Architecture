@@ -1,0 +1,37 @@
+{
+  "name": "revenue-sdr-os",
+  "version": "0.2.0",
+  "description": "White-label multi-tenant sales platform with AI SDR",
+  "main": "server.ts",
+  "type": "module",
+  "scripts": {
+    "dev": "tsx server.ts",
+    "build": "tailwindcss -i ./app/web/static/css/input.css -o ./app/web/static/css/output.css && tsc",
+    "start": "node dist/server.js"
+  },
+  "dependencies": {
+    "bcryptjs": "^2.4.3",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.19.2",
+    "jsonwebtoken": "^9.0.2",
+    "nunjucks": "^3.2.4"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.3.3",
+    "@types/bcryptjs": "^2.4.6",
+    "@types/cookie-parser": "^1.4.7",
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/jsonwebtoken": "^9.0.6",
+    "@types/node": "^22.0.0",
+    "@types/nunjucks": "^3.0.2",
+    "autoprefixer": "^10.5.4",
+    "daisyui": "^5.7.0",
+    "postcss": "^8.5.21",
+    "tailwindcss": "^4.3.3",
+    "tsx": "^4.16.2",
+    "typescript": "^5.5.3"
+  }
+}

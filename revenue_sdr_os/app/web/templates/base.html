@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="pt-BR" data-theme="{{ theme_name }}">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    {{ brand_meta | safe }}
+    <link rel="stylesheet" href="/static/css/output.css">
+    <style>{{ theme_css | safe }}</style>
+    <script src="/static/js/vendor/htmx.min.js" defer></script>
+    <script src="/static/js/vendor/alpine.min.js" defer></script>
+</head>
+<body class="bg-[var(--color-background)] text-[var(--color-text)] min-h-screen font-sans transition-colors duration-300">
+    {% block content %}{% endblock %}
+    <script src="/static/js/app.js" defer></script>
+</body>
+</html>

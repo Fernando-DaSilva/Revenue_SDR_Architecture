@@ -1,0 +1,130 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Main login container with high-tech mesh grid background -->
+<div class="min-h-screen w-full flex items-center justify-center relative overflow-hidden px-4 py-12 sm:px-6 lg:px-8">
+    
+    <!-- Cyber Grid background (Only CSS, no external CDNs) -->
+    <div class="absolute inset-0 z-0 opacity-[0.25]" style="
+        background-image: 
+            linear-gradient(rgba(var(--tenant-primary-rgb), 0.08) 1px, transparent 1px), 
+            linear-gradient(90deg, rgba(var(--tenant-primary-rgb), 0.08) 1px, transparent 1px);
+        background-size: 40px 40px;
+        background-position: center;
+    "></div>
+    
+    <!-- Futuristic Radial Glow Auras (Using CSS variables) -->
+    <div class="absolute -top-40 -right-40 w-96 h-96 rounded-full blur-[120px] opacity-25 pointer-events-none" style="background: radial-gradient(circle, rgba(var(--tenant-primary-rgb), 0.6) 0%, transparent 80%);"></div>
+    <div class="absolute -bottom-40 -left-40 w-96 h-96 rounded-full blur-[120px] opacity-20 pointer-events-none" style="background: radial-gradient(circle, rgba(var(--tenant-secondary-rgb), 0.5) 0%, transparent 80%);"></div>
+
+    <!-- Glassmorphic Login Card -->
+    <div class="w-full max-w-md bg-[var(--color-surface)]/75 backdrop-blur-xl border border-[var(--color-border)] rounded-[20px] shadow-[0_20px_50px_rgba(0,0,0,0.3)] hover:shadow-[0_20px_60px_rgba(var(--tenant-primary-rgb),0.15)] transition-all duration-500 z-10 transform hover:scale-[1.01]">
+        <div class="p-8 sm:p-10">
+            
+            <!-- Brand & Product Header -->
+            <div class="flex flex-col items-center text-center mb-8">
+                <!-- Glowing Logo Icon Frame -->
+                <div class="w-16 h-16 p-3 rounded-2xl flex items-center justify-center mb-5 transition-all duration-300 relative group" style="
+                    background: rgba(var(--tenant-primary-rgb), 0.08); 
+                    border: 1px solid rgba(var(--tenant-primary-rgb), 0.25);
+                    box-shadow: 0 0 25px -5px rgba(var(--tenant-primary-rgb), 0.4);
+                ">
+                    <!-- Dynamic Glowing Aura -->
+                    <span class="absolute inset-0 rounded-2xl bg-[var(--color-primary)] blur-md opacity-25 group-hover:opacity-40 transition-opacity duration-300"></span>
+                    <img src="{{ logo_url }}" alt="{{ brand_name }}" class="w-9 h-9 object-contain z-10 relative transition-transform duration-500 group-hover:rotate-12">
+                </div>
+                
+                <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight text-[var(--color-text)]">{{ brand_name }}</h1>
+                <p class="text-xs text-[var(--color-text-muted)] font-mono uppercase tracking-widest mt-1.5">Revenue SDR OS</p>
+                <div class="h-1 w-12 bg-gradient-to-r from-[var(--color-primary)] to-[var(--color-secondary)] rounded-full mt-4"></div>
+            </div>
+
+            <!-- Error Notifications -->
+            {% if error %}
+            <div class="alert alert-error flex items-start gap-3 text-xs p-4 rounded-xl mb-6 shadow-sm border border-red-500/20" style="background: rgba(239, 68, 68, 0.1); color: #F87171;" data-auto-dismiss>
+                <svg xmlns="http://www.w3.org/2000/svg" class="stroke-current shrink-0 h-5 w-5 mt-0.5" fill="none" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+                </svg>
+                <div>
+                    <span class="font-bold">Acesso Negado:</span> {{ error }}
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Interactive Login Form -->
+            <form method="POST" action="/login" class="space-y-6">
+                <!-- E-mail Field -->
+                <div class="form-control w-full">
+                    <label class="label pb-2" for="email">
+                        <span class="label-text font-bold text-xs uppercase tracking-wider text-[var(--color-text-muted)]">E-mail corporativo</span>
+                    </label>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-4 text-[var(--color-text-muted)]">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 12a4 4 0 10-8 0 4 4 0 008 0zm0 0v1.5a2.5 2.5 0 005 0V12a9 9 0 10-9 9m4.5-1.206a8.959 8.959 0 01-4.5 1.207" />
+                            </svg>
+                        </span>
+                        <input
+                            type="email"
+                            id="email"
+                            name="email"
+                            required
+                            autofocus
+                            autocomplete="email"
+                            placeholder="seu@email.com"
+                            class="input w-full pl-11 pr-4 py-3 bg-[var(--color-surface-hover)] border border-[var(--color-border)] focus:border-[var(--color-primary)] text-sm rounded-xl focus:outline-none transition-all duration-300"
+                            style="box-shadow: none;"
+                            onfocus="this.style.boxShadow='0 0 15px rgba(var(--tenant-primary-rgb), 0.15)'"
+                            onblur="this.style.boxShadow='none'"
+                        >
+                    </div>
+                </div>
+
+                <!-- Password Field -->
+                <div class="form-control w-full">
+                    <div class="flex justify-between items-center pb-2">
+                        <span class="label-text font-bold text-xs uppercase tracking-wider text-[var(--color-text-muted)]">Senha de acesso</span>
+                    </div>
+                    <div class="relative flex items-center">
+                        <span class="absolute left-4 text-[var(--color-text-muted)]">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+                            </svg>
+                        </span>
+                        <input
+                            type="password"
+                            id="password"
+                            name="password"
+                            required
+                            autocomplete="current-password"
+                            placeholder="••••••••"
+                            class="input w-full pl-11 pr-4 py-3 bg-[var(--color-surface-hover)] border border-[var(--color-border)] focus:border-[var(--color-primary)] text-sm rounded-xl focus:outline-none transition-all duration-300"
+                            style="box-shadow: none;"
+                            onfocus="this.style.boxShadow='0 0 15px rgba(var(--tenant-primary-rgb), 0.15)'"
+                            onblur="this.style.boxShadow='none'"
+                        >
+                    </div>
+                </div>
+
+                <!-- Action Button -->
+                <div class="pt-2">
+                    <button type="submit" class="w-full py-3.5 px-4 font-extrabold text-sm uppercase tracking-wider text-white rounded-xl shadow-md cursor-pointer hover:shadow-lg transition-all duration-300 hover:scale-[1.01]" style="
+                        background: linear-gradient(135deg, var(--color-primary) 0%, var(--color-secondary) 100%);
+                        box-shadow: 0 4px 15px rgba(var(--tenant-primary-rgb), 0.3);
+                    ">
+                        Entrar no Painel
+                    </button>
+                </div>
+            </form>
+
+            <!-- Support / Footer Area -->
+            <div class="mt-8 text-center border-t border-[var(--color-border)] pt-6">
+                <p class="text-xs text-[var(--color-text-muted)] leading-relaxed">
+                    Precisa de ajuda ou esqueceu sua senha?<br>
+                    <a href="mailto:suporte@myraos.ai" class="text-[var(--color-primary)] font-bold hover:underline transition-all">Contate o administrador do tenant</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

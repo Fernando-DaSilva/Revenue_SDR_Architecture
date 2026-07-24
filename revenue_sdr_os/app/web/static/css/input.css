@@ -1,0 +1,13 @@
+@import "tailwindcss";
+@plugin "daisyui";
+
+/* Custom tweaks to integrate tenant colors with DaisyUI */
+:root {
+  /* Dynamic tenant variables mapped to Tailwind v4 / DaisyUI variables */
+  --color-primary: var(--tenant-primary, #3B82F6);
+  --color-secondary: var(--tenant-secondary, #1E40AF);
+  --color-primary-hover: var(--tenant-primary-hover, #2563EB);
+  
+  /* Additional variables */
+  --radius: 0.5rem;
+}

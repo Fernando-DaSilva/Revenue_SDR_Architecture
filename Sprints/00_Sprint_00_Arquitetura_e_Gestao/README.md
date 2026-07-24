@@ -52,12 +52,12 @@ Sprint 03+     -> features do produto (conversas, IA, WhatsApp, omnichannel)
 
 ## Workflow vigente
 
-1. **Arquitetura** mantem FOUNDATION/ARCHITECTURE/ROADMAP + skills + specs
-2. **Fernando** aprova decisoes (ADRs novos ou revertidos)
-3. **Agente de codificacao** implementa no repo `~/AGENCIA/SDR/` seguindo
-   as specs e invariantes
-4. **Revisao** via pytest/ruff/CI + review humana
-5. **Decisoes novas** viram ADR em ARCHITECTURE.md
+1. **Arquitetura e Design** mantem FOUNDATION/ARCHITECTURE/ROADMAP + skills + specs + **Wireframes em Código**.
+2. **Fernando** aprova decisoes (ADRs novos, UI/UX, fluxos).
+3. **Design de Interface** (via Agente de IA em `01_SDR_Prototype`) prototipa as telas baseadas nas specs ANTES do início do desenvolvimento backend.
+4. **Agente de codificacao full-stack** implementa no repo `~/AGENCIA/SDR/` seguindo as specs, invariantes e o protótipo visual aprovado no frontend.
+5. **Revisao** via pytest/ruff/CI + review visual da UI.
+6. **Decisoes novas** viram ADR em ARCHITECTURE.md.
 
 ---
 
