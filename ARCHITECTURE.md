@@ -17,7 +17,7 @@
         |  organization_id)                 |   |   + billing                       |
         |                                   |   |        |                          |
         |  app self-contained:              |   |  Client Node (VPS por cliente)    |
-        |   - SQLite WAL                    |   |   + este app, 1 tenant ou poucos  |
+        |   - Turso (libSQL) / .db local    |   |   + este app, 1 tenant ou poucos  |
         |   - assets vendored (sem CDN)     |   |   + Update Agent (systemd)        |
         |   - Alembic upgrade no boot       |   |   + pull de updates a cada 6h     |
         +-----------------------------------+   |   + rollback automatico           |
@@ -117,13 +117,10 @@ tabela central de eventos do dominio. Regras:
 - **Decisão**: Jinja2 + HTMX (requisições parciais) + Alpine (microinteratividade). Adoção do **Tailwind CSS + DaisyUI** para design system e componentização semântica, integrado perfeitamente ao ecossistema sem JS extra (Virtual DOM).
 - **Consequências**: Frontend dinâmico, server-rendered, com estética altamente profissional. Necessidade de rodar o CLI do Tailwind (com DaisyUI) localmente para gerar o `theme.css` final e integrá-lo via variáveis nativas para o sistema de White Label (ADR-013). Libs HTMX/Alpine permanecem **vendored**.
 
-### ADR-002 — SQLite (WAL) primeiro, NAO Postgres no MVP
-- **Contexto**: uma VPS por cliente pede zero-infra; SQLite suporta
-  dezenas de milhares de leads com WAL.
-- **Decisao**: SQLite com `journal_mode=WAL`, `foreign_keys=ON`; SQLModel/
-  SQLAlchemy desde o inicio, entao Postgres futuro e troca de URL.
-- **Consequencias**: backups = copiar arquivo; sem servidor de banco;
-  atencao a concorrencia de escrita (fila de jobs serializa quando entrar).
+### ADR-002 — Turso (libSQL) & Embedded Replicas primeiro, NAO Postgres no MVP
+- **Contexto**: uma VPS por cliente pede zero-infra e custo zero, mas exige resiliência de backup e performance.
+- **Decisao**: Usar **Turso (libSQL)** com suporte a arquivo local `.db` (modo standalone) e opção de *Embedded Replicas* para backup automático em nuvem via dialect `sqlite+libsql://`. SQLModel/SQLAlchemy e Alembic 100% compatíveis (ver ADR-016).
+- **Consequencias**: backups automatizados em nuvem sem travar I/O local; leitura ultrarrápida no `.db` local da VPS; custo R$ 0,00 no modo standalone ou no plano Hobby do Turso.
 
 ### ADR-003 — Z-API para WhatsApp no MVP (Sprint 4)
 - **Contexto**: API oficial (Meta Cloud) tem friccao de aprovacao/custo no
@@ -215,10 +212,15 @@ tabela central de eventos do dominio. Regras:
 - **Decisão**: Implementar logs unificados em JSON Lines (`structlog`), estabelecendo propagação do `request_id`, rastreamento cross-layer (Frontend -> Middleware -> DB/LLM) e um endpoint dedicado (`/api/v1/logs/client`) para ingestão de eventos/erros do Client-side.
 - **Consequências**: Tracing robusto das jornadas de requests com contexto enriquecido (tenant_id, user_id). Necessário configurar rate-limiting estrito no ingestor de client-side.
 
-### ADR-015 — Arquivamento de Dados e Exportação Analítica (ETL / DW)
-- **Contexto**: O crescimento orgânico das operações de vendas no SQLite (transacional local) sobrecarregaria o banco em buscas analíticas ou longas janelas de retenção (ex: Dashboards da Sprint 07).
-- **Decisão**: Instituir um Data Pipeline/ETL (Jobs Assíncronos) que exporta eventos consolidados (Append-only) para um Data Warehouse / Database Analítico robusto (Supabase, Postgres, MS-SQL). E um job de Archiving (Cold Storage) purga os dados transacionais antigos e já consolidados no DW de volta no SQLite, mantendo-o rápido.
-- **Consequências**: SQLite se mantém enxuto e estritamente transacional; Dashboards analíticos ganham total poder, sofrendo leve *eventual consistency* em relação à atividade em tempo real; Arquitetura passa a ser híbrida em relação à armazenamento histórico e analítico.
+### ADR-015 — Arquivamento de Dados, Tiering de Histórico e Exportação Analítica (PostgreSQL / Supabase)
+- **Contexto**: O volume contínuo de conversas de SDR e transcrições sobrecarregaria o banco local (Turso/libSQL) se todo o histórico fosse mantido indefinidamente. Além disso, buscas textuais avançadas e semânticas (RAG) exigem suporte nativo a vetores e FTS.
+- **Decisão**: Instituir um modelo de **Storage Tiering (Hot/Cold)**. O Turso/libSQL local mantém apenas os dados de leads ativos e mensagens recentes (Hot Storage). Um pipeline de ETL assíncrono (D-1) replica conversas consolidadas e eventos para o **PostgreSQL / Supabase (Cold Storage / DW)** equipado com `pgvector` e Full-Text Search. Um job de Archiving purga os dados antigos do Turso local após confirmação da sincronia. O acesso na UI permanece unificado via `MessageService` e lazy loading no HTMX.
+- **Consequências**: Turso/libSQL se mantém ultraveloz e leve (< 10ms); histórico completo acessível transparente na UI; suporte nativo a RAG e relatórios analíticos pesados sem impactar o atendimento em tempo real.
+
+### ADR-016 — Adoção do Turso (libSQL) com Suporte a Embedded Replicas e Fallback Local
+- **Contexto**: O SQLite tradicional isolado trazia desafios para backups em tempo real sem trava de arquivos e observabilidade em escala.
+- **Decisão**: Adotar o Turso (libSQL) via `sqlalchemy-libsql`. O sistema grava e lê no arquivo `.db` local da VPS (custo zero, offline-first) e opcionalmente sincroniza em background com o cluster Turso em nuvem via *Embedded Replicas*.
+- **Consequências**: Backup contínuo em nuvem sem travar I/O local; suporte a *Database Branching* em CI/CD; 100% de compatibilidade com SQLModel, SQLAlchemy e Alembic.
 
 ---
 

@@ -40,7 +40,7 @@ Garantir que, ao clicar em **"Configurações Tenant"** na Sidebar principal (`a
     - *Idioma Padrão do Tenant* (seletor: `Português (pt-BR)`, `Inglês (en-US)`, `Espanhol (es-ES)`).
 - **Painel de Branding & Presets de Temas White-Label**:
   - **Seletor Visual de Presets**: Cards clicáveis dos 5 temas White-Label com preview das cores primárias e secundárias em badges.
-  - **Customização de Cores Hexadecimais**: Inputs do tipo color/hex para `Cor Primária` e `Cor Secundária`.
+  - **Acesso ao Studio de Temas**: Atalhos/Callout para abrir o Gerenciador de Temas completo (Studio).
   - **Gestão de Logos & Favicon**:
     - Upload / URL do Logo para Modo Claro (Preview em tempo real).
     - Upload / URL do Logo para Modo Escuro (Preview em tempo real).

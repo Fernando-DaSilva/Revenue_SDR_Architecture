@@ -38,7 +38,7 @@ metadata:
 |          | + CSS com tokens    | Cada tenant injeta seu proprio CSS |
 | Backend  | FastAPI async       | SSE nativo, async I/O            |
 | ORM      | SQLModel            | Pydantic + SQLAlchemy, tipagem fullstack |
-| Banco    | SQLite (WAL)        | Zero infra ate dezenas de milhares de leads |
+| Banco    | Turso (libSQL)      | .db local (custo zero) + backup nuvem opcional |
 | Real-time| SSE (NÃO WebSocket) | Unidirecional server→client, mais simples |
 | Fila     | ARQ + Redis         | Async, leve, in-process          |
 | Reverse  | Caddy               | Auto-SSL via Let's Encrypt      |
@@ -47,7 +47,7 @@ metadata:
 
 **NAO USE** (mesmo que alguem sugira):
 - React / Next.js / Vue (frontend)
-- Postgres (no MVP — SQLite resolve)
+- Postgres (no MVP — Turso/libSQL resolve)
 - WebSocket (use SSE)
 - MongoDB / NoSQL
 - Docker Swarm / Kubernetes (no MVP — unica VPS)

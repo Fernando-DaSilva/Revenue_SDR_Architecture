@@ -73,8 +73,8 @@ propria VPS dedicada** — isolamento absoluto e adequacao nativa a LGPD.
   cada 6h com rollback automatico.
 
 Consequencia direta de engenharia: **o app precisa ser self-contained** —
-assets vendored (sem CDN), SQLite embarcado, zero dependencia de servicos
-externos obrigatorios. (Decidido e aplicado na v0.2.0.)
+assets vendored (sem CDN), Turso (libSQL) com .db local embarcado, zero dependencia de servicos
+externos obrigatorios. (Decidido na v0.2.0 e evoluido no ADR-016.)
 
 ## 6. Modelo de operacao: consultivo (estilo SAP)
 
@@ -90,7 +90,7 @@ Consultoria. Para a engenharia isso significa:
 | Camada | Escolha | Motivo |
 |---|---|---|
 | Backend | Python 3.12+ / FastAPI | Async nativo, OpenAPI, API-first |
-| ORM/DB | SQLModel sobre SQLite (WAL) | Pydantic+SQLAlchemy; Postgres depois e troca de URL |
+| ORM/DB | SQLModel sobre Turso (libSQL) / Embedded Replicas | Pydantic+SQLAlchemy; 100% compatível com .db local + backup nuvem opcional |
 | Schema | Alembic | Versionamento rigido desde o dia zero |
 | Auth | PyJWT (HS256) + pwdlib/Argon2id | python-jose/passlib abandonados (CVEs) |
 | Frontend | Jinja2 + HTMX + Alpine.js **vendored** | Hypermedia-driven; sem complexidade de SPA |
