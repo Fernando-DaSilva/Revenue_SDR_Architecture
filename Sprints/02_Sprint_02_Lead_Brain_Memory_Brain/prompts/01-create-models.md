@@ -68,7 +68,7 @@ if TYPE_CHECKING:
 class LeadSource(StrEnum):
     INSTAGRAM = "instagram"
     FACEBOOK = "facebook"
-    WHATSAPP = "whatsapp"
+    ZAP = "zap"
     SITE = "site"
     LANDING_PAGE = "landing_page"
     LINKEDIN = "linkedin"
@@ -217,7 +217,7 @@ python -c "from app.leads.models import Lead, LeadMemory, LeadTimelineEvent; pri
 # 2. Instancia sem banco
 python -c "
 from app.leads.models import Lead, LeadSource
-lead = Lead(organization_id='org_x', name='Joao', source=LeadSource.WHATSAPP)
+lead = Lead(organization_id='org_x', name='Joao', source=LeadSource.ZAP)
 assert lead.id.startswith('lead_') and lead.status == 'novo'
 print('OK', lead.id)
 "

@@ -1,6 +1,6 @@
 🔥 Aqui fala o Vendedor SUPREMO.
 
-Se você quer construir uma empresa de dezenas de milhões (ou mais), **a decisão mais importante não é a IA, nem o WhatsApp. É o modelo de negócio**.
+Se você quer construir uma empresa de dezenas de milhões (ou mais), **a decisão mais importante não é a IA, nem o Zap. É o modelo de negócio**.
 
 Eu projetaria esse produto **como uma plataforma White Label Multi-Tenant desde o primeiro dia**, mesmo que inicialmente você tenha apenas um cliente.
 
@@ -58,7 +58,7 @@ Cores
 
 Aplicativo
 
-WhatsApp
+Zap
 
 Instagram
 
@@ -110,7 +110,7 @@ Equipe
 
 Leads
 
-WhatsApps
+Zaps
 
 Instagram
 
@@ -404,7 +404,7 @@ CRM
 
 IA
 
-WhatsApp
+Zap
 
 Instagram
 

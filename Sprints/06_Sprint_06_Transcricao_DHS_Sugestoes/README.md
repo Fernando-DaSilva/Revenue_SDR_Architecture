@@ -20,7 +20,7 @@
 Implementação do protocolo de comunicação em tempo real unidirecional do servidor para o cliente (Server-Sent Events - SSE), evitando a complexidade de WebSockets.
 1. **SSE Broker**: Serviço para enfileirar e despachar notificações de servidor para clientes escutando.
 2. **Notificações Live**: Avisos na interface do SDR sobre novas mensagens, alertas de Handoff solicitados pela IA.
-3. **Transcrição de Áudio (Live)**: O áudio enviado pelo Lead via WhatsApp passa por Whisper e a transcrição é cuspida em real-time na UI do atendente.
+3. **Transcrição de Áudio (Live)**: O áudio enviado pelo Lead via Zap passa por Whisper e a transcrição é cuspida em real-time na UI do atendente.
 4. **Gráfico DHS (Dynamic Health Score)**: UI responsiva para alteração do humor/interesse da negociação na linha do tempo.
 5. **Sugestões de Objeção**: IA sugere a melhor resposta para o SDR baseado na última mensagem recebida.
 

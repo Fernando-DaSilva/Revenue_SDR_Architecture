@@ -17,7 +17,7 @@ Instituir uma arquitetura de **Tiering de Dados (Hot Storage vs. Cold Storage)**
 
 * **Hot Storage (Turso / libSQL Local Operacional):**
   * Armazena leads ativos (em atendimento/prospecção) e a janela recente de conversas (mensagens do dia atual + retenção ativa de 30 dias).
-  * Foco em baixíssima latência (< 10ms) para gravação de webhooks de mensagens do WhatsApp/Canais e montagem rápida de contextos para prompts da IA SDR.
+  * Foco em baixíssima latência (< 10ms) para gravação de webhooks de mensagens do Zap/Canais e montagem rápida de contextos para prompts da IA SDR.
 * **Cold Storage / Data Warehouse (PostgreSQL / Supabase Gerenciado):**
   * Destino padrão para todo o histórico D-1 consolidado e mensagens de leads finalizados (Ganhos/Perdidos/Arquivados).
   * Equipado com a extensão **`pgvector`** para RAG / embeddings de histórico de conversas e suporte a **Full-Text Search (`tsvector`)** para buscas textuais avançadas.

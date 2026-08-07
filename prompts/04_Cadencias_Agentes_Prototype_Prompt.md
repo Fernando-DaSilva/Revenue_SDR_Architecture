@@ -30,7 +30,7 @@ Garantir que, ao clicar em **"Cadências & Agentes"** na Sidebar principal (`act
 
 #### ⚡ Sub-Visão 1: Réguas & Cadências Ativas (`cadenceTab = 'cadences'`)
 - **Header & Filtros**:
-  - Filtro por Canal (*Todos*, *WhatsApp*, *LinkedIn*, *E-mail*, *Omnichannel*) e por Status (*Todas*, *Ativas*, *Pausadas*, *Rascunhos*).
+  - Filtro por Canal (*Todos*, *Zap*, *LinkedIn*, *E-mail*, *Omnichannel*) e por Status (*Todas*, *Ativas*, *Pausadas*, *Rascunhos*).
   - Botão de destaque: `+ Nova Cadência`.
 - **Grid / Lista de Cadências**:
   - Cards detalhados de cadências (ex: *Inbound Qualificação Express*, *Outbound LinkedIn Enterprise*, *Resgate de No-Show*, *Re-engajamento Lead Frio*).
@@ -38,7 +38,7 @@ Garantir que, ao clicar em **"Cadências & Agentes"** na Sidebar principal (`act
     - Status (Badge visual: *Em Execução*, *Pausada*).
     - Agente SDR Responsável (com avatar e nome do Agente IA).
     - Métricas-chave: *Leads Ativos*, *Taxa de Resposta (%)*, *Reuniões Agendadas (SQL)* e *Conversão Final (%)*.
-    - Sequência visual dos canais (Ícones: WhatsApp ➔ E-mail ➔ Ligação IA ➔ LinkedIn).
+    - Sequência visual dos canais (Ícones: Zap ➔ E-mail ➔ Ligação IA ➔ LinkedIn).
   - **Ações Rápidas em cada Card**:
     - Toggle de Ativar/Pausar cadência com toast de notificação imediata.
     - Botão `Editar Passo-a-Passo` (direciona para o Construtor/Builder).
@@ -68,7 +68,7 @@ Garantir que, ao clicar em **"Cadências & Agentes"** na Sidebar principal (`act
 - **Fluxo Passo-a-Passo (Visual Step Builder)**:
   - Timeline vertical com os passos da régua:
     - **Gatilho Inicial (Trigger)**: Ex: *Lead inserido via Meta Ads / Webhook*.
-    - **Passo 1 (Ação)**: *Abordagem inicial WhatsApp via SDR Sofia (IA)* - Texto + Áudio Personalizado.
+    - **Passo 1 (Ação)**: *Abordagem inicial Zap via SDR Sofia (IA)* - Texto + Áudio Personalizado.
     - **Passo 2 (Espera/Delay)**: *Aguardar 2 horas se não houver resposta*.
     - **Passo 3 (Condição/Branching BANT)**: *Se Lead respondeu ➔ Qualificar BANT | Se não respondeu ➔ Enviar E-mail de Follow-up*.
     - **Passo 4 (Ação Final / Transbordo)**: *Agendar Reunião via Google Calendar + Handoff para SDR Humano*.

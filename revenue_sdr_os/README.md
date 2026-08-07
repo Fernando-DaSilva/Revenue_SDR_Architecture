@@ -21,7 +21,7 @@
 
 ## O produto
 
-Nao e um CRM (cadastros) nem um disparador de WhatsApp (mensagens).
+Nao e um CRM (cadastros) nem um disparador de Zap (mensagens).
 E um **Sistema Operacional de Vendas orientado a conversas**: a entidade
 raiz e o *Relacionamento*, que evolui no tempo, atravessa canais e e
 orquestrado por IA. Visao completa em [docs/historico/IDEA.md](docs/historico/IDEA.md).
@@ -177,7 +177,7 @@ alembic downgrade -1                      # reverte
 Sprint 1 [OK] Fundacao + Auth + White-Label (reescrita v0.2.0)
 Sprint 2 [ ]  Lead Brain + Memory Brain (CRUD + merge + timeline)
 Sprint 3 [ ]  Conversations + Opportunity Brain (score + cadencia)
-Sprint 4 [ ]  AI Sales Brain + integracao Z-API WhatsApp
+Sprint 4 [ ]  AI Sales Brain + integracao Z-API Zap
 Sprint 5 [ ]  UI monitoramento + handoff IA<->Humano + Google Calendar
 Sprint 6+ [ ] Transcricao, DHS, relatorios pos-conversa
 Sprint 8+ [ ] Omnichannel completo (IG, email, voice)

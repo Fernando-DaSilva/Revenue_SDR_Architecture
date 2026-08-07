@@ -8,7 +8,7 @@
 
 Você é um Engenheiro Frontend Especialista em UX/UI encarregado de implementar a funcionalidade e o fluxo interativo de **"Fazer Upgrade de Plano"** no protótipo do **Revenue SDR OS** no repositório `01_SDR_Prototype`.
 
-O objetivo desta tarefa é construir a experiência completa de visualização, seleção, customização de add-ons e confirmação de upgrade/downgrade de plano (`showUpgradePlanModal` ou sub-visão dedicada em `settingsTab = 'billing_usage'`), permitindo ao usuário selecionar novos planos, adicionar recursos extras (tokens, seats, canais de WhatsApp) e visualizar o cálculo de prorata e renovação em tempo real.
+O objetivo desta tarefa é construir a experiência completa de visualização, seleção, customização de add-ons e confirmação de upgrade/downgrade de plano (`showUpgradePlanModal` ou sub-visão dedicada em `settingsTab = 'billing_usage'`), permitindo ao usuário selecionar novos planos, adicionar recursos extras (tokens, seats, canais de Zap) e visualizar o cálculo de prorata e renovação em tempo real.
 
 ---
 
@@ -45,27 +45,27 @@ Exibir 4 cards de planos organizados horizontalmente/grid responsivo, destacando
 1. **Plano Starter (SDR Operacional)**
    - Preço: `R$ 890,00 / mês` (no mensal) ou `R$ 712,00 / mês` (no anual).
    - Indicado para: Pequenas equipes e testes de validação.
-   - Recursos inclusos: 1 Usuário SDR, 500 Leads/mês no Pipeline, 500k Tokens de IA/mês, 1 Instância WhatsApp.
+   - Recursos inclusos: 1 Usuário SDR, 500 Leads/mês no Pipeline, 500k Tokens de IA/mês, 1 Instância Zap.
    - Botão de Ação: `Migrar para Starter`.
 
 2. **Plano Enterprise Growth (Plano Atual do Tenant - Destaque)**
    - Preço: `R$ 2.490,00 / mês` (no mensal) ou `R$ 1.992,00 / mês` (no anual).
    - Badge visual proeminente: `● Seu Plano Atual`.
    - Indicado para: Operações de vendas em crescimento acelerado.
-   - Recursos inclusos: 5 Usuários SDR, 5.000 Leads/mês, 2M Tokens de IA/mês, 3 Instâncias WhatsApp, Suporte a BYOK (Chaves Próprias de IA OpenAI/Anthropic/DeepSeek), Cadências Multicanal.
+   - Recursos inclusos: 5 Usuários SDR, 5.000 Leads/mês, 2M Tokens de IA/mês, 3 Instâncias Zap, Suporte a BYOK (Chaves Próprias de IA OpenAI/Anthropic/DeepSeek), Cadências Multicanal.
    - Botão de Ação: Disabled ou `Plano Ativo`.
 
 3. **Plano Enterprise Scale (Alta Performance & IA Avançada)**
    - Preço: `R$ 5.990,00 / mês` (no mensal) ou `R$ 4.792,00 / mês` (no anual).
    - Badge de destaque visual: `🔥 Mais Popular` / `Recomendado`.
    - Indicado para: Grandes operações de SDR com múltiplos times e alto volume de disparos.
-   - Recursos inclusos: 15 Usuários SDR, 25.000 Leads/mês, 10M Tokens de IA/mês, 10 Instâncias WhatsApp, SDR Copilot com voz/áudio HD, Guardrails de IA avançados e SLA de Atendimento Prioritário.
+   - Recursos inclusos: 15 Usuários SDR, 25.000 Leads/mês, 10M Tokens de IA/mês, 10 Instâncias Zap, SDR Copilot com voz/áudio HD, Guardrails de IA avançados e SLA de Atendimento Prioritário.
    - Botão de Ação: `🚀 Fazer Upgrade para Scale` (Estilo primário vibrante).
 
 4. **Plano Custom / Corporate (Sob Medida)**
    - Preço: `Sob Consulta`.
    - Indicado para: Grandes corporações com volume ilimitado, infraestrutura dedicada (VPS isolada - ADR-004) e integrações customizadas.
-   - Recursos inclusos: Leads e Tokens ilimitados, Instâncias WhatsApp ilimitadas, Gerente de Conta Dedicado, Treinamento de Modelos LLM sob medida.
+   - Recursos inclusos: Leads e Tokens ilimitados, Instâncias Zap ilimitadas, Gerente de Conta Dedicado, Treinamento de Modelos LLM sob medida.
    - Botão de Ação: `💬 Falar com Especialista / Enterprise Sales`.
 
 ---
@@ -79,9 +79,9 @@ Permitir que o usuário personalize o plano escolhido adicionando capacidade ext
 - **Usuários / Seats SDR Adicionais**:
   - Incrementador (`+1 Usuário SDR` por `R$ 150,00 / mês`).
   - Selector numérico Alpine.js (`extraSeatsQty`).
-- **Canais / Instâncias WhatsApp Adicionais**:
-  - Incrementador (`+1 Instância WhatsApp` por `R$ 250,00 / mês`).
-  - Selector numérico Alpine.js (`extraWhatsappQty`).
+- **Canais / Instâncias Zap Adicionais**:
+  - Incrementador (`+1 Instância Zap` por `R$ 250,00 / mês`).
+  - Selector numérico Alpine.js (`extraZapQty`).
 
 ---
 
@@ -116,7 +116,7 @@ selectedPlan: 'growth', // 'starter', 'growth', 'scale', 'custom'
 billingCycle: 'monthly', // 'monthly', 'annual'
 extraTokensQty: 0,
 extraSeatsQty: 0,
-extraWhatsappQty: 0,
+extraZapQty: 0,
 
 selectPlan(planKey) {
   this.selectedPlan = planKey;

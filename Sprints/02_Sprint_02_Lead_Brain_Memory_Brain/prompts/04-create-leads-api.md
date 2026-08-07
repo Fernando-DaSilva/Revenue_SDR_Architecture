@@ -109,7 +109,7 @@ class LeadService:
 ```bash
 curl -X POST localhost:8000/api/v1/leads -H "X-Tenant-Slug: clinica-bela" \
   -H "Authorization: Bearer $TOKEN" -H "Content-Type: application/json" \
-  -d '{"name":"Joao Silva","phone":"+5511999990001","source":"whatsapp"}'
+  -d '{"name":"Joao Silva","phone":"+5511999990001","source":"zap"}'
 
 curl "localhost:8000/api/v1/leads?q=joao&status=novo" -H "X-Tenant-Slug: clinica-bela" -H "Authorization: Bearer $TOKEN"
 curl localhost:8000/api/v1/leads/{id}/timeline -H "X-Tenant-Slug: clinica-bela" -H "Authorization: Bearer $TOKEN"

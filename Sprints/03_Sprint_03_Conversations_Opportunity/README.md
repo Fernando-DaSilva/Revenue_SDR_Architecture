@@ -36,7 +36,7 @@ CREATE TABLE conversations (
     organization_id VARCHAR NOT NULL,
     lead_id VARCHAR NOT NULL,
     status VARCHAR(50) NOT NULL DEFAULT 'active', -- active, archived, won, lost
-    channel VARCHAR(50) NOT NULL, -- whatsapp, instagram, email
+    channel VARCHAR(50) NOT NULL, -- zap, instagram, email
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
     FOREIGN KEY (organization_id) REFERENCES organizations(id),

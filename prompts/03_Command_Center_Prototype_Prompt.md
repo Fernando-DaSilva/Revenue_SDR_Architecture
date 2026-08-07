@@ -45,7 +45,7 @@ Garantir que, quando o usuário clicar em **"Command Center"** na Sidebar (`acti
 
 #### 🔴 Sub-Visão 2: Live Monitor / Operations Feed (`commandCenterTab = 'live_feed'`)
 - **Stream em Tempo Real de Interações**:
-  - Tabela com feed ao vivo das abordagens do Agente IA e SDRs humanos (WhatsApp, E-mail, Ligação, LinkedIn).
+  - Tabela com feed ao vivo das abordagens do Agente IA e SDRs humanos (Zap, E-mail, Ligação, LinkedIn).
   - Badge de status de conexão WebSocket ("LIVE FEED" / "latência 14ms").
   - Campo de busca em tempo real por nome do lead ou empresa.
   - Visualização de Score BANT com barra de progresso visual.
@@ -66,7 +66,7 @@ Garantir que, quando o usuário clicar em **"Command Center"** na Sidebar (`acti
   - Lista detalhada de leads com atendimento retido que exigem intervenção humana (motivos: objeção não mapeada como HIPAA/LGPD, pedido de consultor humano, lead VIP enterprise).
   - Tags de urgência (*CRÍTICA*, *ALTA*), tempo de espera na fila e score BANT.
   - Trecho em destaque do motivo da escalação e última mensagem do lead.
-  - Botões de ação direta: `Assumir no WhatsApp`, `Iniciar Chamada` e `Ver Raio-X`.
+  - Botões de ação direta: `Assumir no Zap`, `Iniciar Chamada` e `Ver Raio-X`.
 
 ---
 
@@ -75,7 +75,7 @@ Garantir que, quando o usuário clicar em **"Command Center"** na Sidebar (`acti
 1. **Modal Raio-X do Lead (`selectedLead`)**:
    - Cabeçalho com dados e canal do lead.
    - Grid com breakdown do BANT (Budget, Authority, Need, Score).
-   - Caixas de diálogo com transcrição completa da conversa do WhatsApp com a IA (`SDR-01 IA`).
+   - Caixas de diálogo com transcrição completa da conversa do Zap com a IA (`SDR-01 IA`).
    - Botão para assumir atendimento.
 2. **Modal Novo Lead (`showNewLeadModal`)**:
    - Formulário completo para simular injeção manual de lead na esteira da IA.

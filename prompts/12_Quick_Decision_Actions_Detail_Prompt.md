@@ -41,7 +41,7 @@ Permitir a marcação instantânea de uma demonstração ou reunião de qualific
   - **Link da Sala Virtual**: Autogeração de link Google Meet / Zoom (`https://meet.google.com/rsd-demo-x89`).
   - **Disparos Automáticos & Lembretes**:
     - `[x]` Enviar convite por E-mail com arquivo `.ics`
-    - `[x]` Agendar mensagem de confirmação ativa no WhatsApp 2h antes da reunião
+    - `[x]` Agendar mensagem de confirmação ativa no Zap 2h antes da reunião
     - `[x]` Pausar cadência ativa do lead
 - **Ação Principal**: Botão **"📅 Confirmar Agendamento e Notificar Lead"**.
 - **Efeito Pós-Execução**:
@@ -51,22 +51,22 @@ Permitir a marcação instantânea de uma demonstração ou reunião de qualific
 
 ---
 
-#### 💬 AÇÃO 2: `Assumir Conversa no WhatsApp` (Gaveta / Modal de Transbordo Handoff)
+#### 💬 AÇÃO 2: `Assumir Conversa no Zap` (Gaveta / Modal de Transbordo Handoff)
 
 ##### 🎯 Práticas de Mercado & Objetivo
 Gerenciar a transição sem atrito do atendimento da IA para o SDR Humano (*Handoff Protocol*), pausando a autonomia da IA e abrindo o ambiente de bate-papo ao vivo com contexto imediato.
 
-##### 🏗️ Estrutura da Tela / Gaveta (`showWhatsAppTakeoverModal = true`)
-- **Header da Operação**: Título *"💬 Transbordo e Assumir Atendimento no WhatsApp"* + Status da IA (`🤖 IA Ativa -> 👤 Humano`).
+##### 🏗️ Estrutura da Tela / Gaveta (`showZapTakeoverModal = true`)
+- **Header da Operação**: Título *"💬 Transbordo e Assumir Atendimento no Zap"* + Status da IA (`🤖 IA Ativa -> 👤 Humano`).
 - **Resumo para Transbordo Rápidas (AI Handover Briefing)**:
   - **Motivo do Transbordo**: Dropdown (*Objeção de Preço/Orçamento*, *Solicitação de Atendimento Humano*, *Dúvida Técnica Avançada*, *Interesse Alto em Fechamento*).
   - **Pausa da IA Autônoma**: Toggle (*Pausar IA por 24h*, *Pausar Definitivemente para este Lead*, *Manter IA em modo Co-piloto / Sugestão*).
   - **Síntese de Contexto IA**: 3 tópicos com o que o SDR precisa saber antes de mandar a primeira mensagem.
 - **Interface de Live Chat / Envio Rápido**:
-  - Histórico recente das últimas 3 mensagens do WhatsApp.
+  - Histórico recente das últimas 3 mensagens do Zap.
   - Caixa de texto para o SDR digitar a mensagem de entrada humana.
   - **Respostas Rápidas (Quick Templates)**: Botões de clique único com templates de saudação humana (ex: *"Olá [Nome], sou [SDR] especialista da equipe. Assumi aqui para te ajudar..."*).
-- **Ação Principal**: Botão **"🚀 Assumir Conversa e Enviar Mensagem"** (Estilo WhatsApp Green).
+- **Ação Principal**: Botão **"🚀 Assumir Conversa e Enviar Mensagem"** (Estilo Zap Green).
 - **Efeito Pós-Execução**:
   - Altera o responsável (`assigned_sdr`) para o SDR logado.
   - Zera o cronômetro de SLA de resposta do SDR.
@@ -84,13 +84,13 @@ Permitir a recolocação do lead em um fluxo automatizado de cadência (Outbound
 - **Configuração do Re-engajamento**:
   - **Seleção de Cadência**: Dropdown com as cadências do tenant (ex: *Cadência Outbound MedTech Enterprise*, *Re-engajamento Lead Inativo 30 dias*, *Nutrição Pós-Objeção*).
   - **Passo Inicial de Disparo**:
-    - Radio Selector: `Reiniciar do Passo 1 (Boas-vindas)` vs `Selecionar Passo Específico` (ex: *Passo 3 - WhatsApp Direto com Oferta*).
+    - Radio Selector: `Reiniciar do Passo 1 (Boas-vindas)` vs `Selecionar Passo Específico` (ex: *Passo 3 - Zap Direto com Oferta*).
   - **Agendamento de Início**:
     - `Iniciar Imediatamente` vs `Agendar para [Data/Hora]` (ex: Próxima segunda-feira às 09:00).
   - **Gestão da Memória da IA**:
     - Checkbox: `[x] Preservar histórico de objeções e dados BANT coletados anteriormente`.
 - **Preview da Cadência Selecionada**:
-  - Resumo dos touchpoints (ex: *5 Passos em 12 dias: WhatsApp -> E-mail -> Voz IA -> E-mail -> WhatsApp final*).
+  - Resumo dos touchpoints (ex: *5 Passos em 12 dias: Zap -> E-mail -> Voz IA -> E-mail -> Zap final*).
 - **Ação Principal**: Botão **"🔄 Confirmar Reinício de Cadência"**.
 - **Efeito Pós-Execução**:
   - Atualiza status do lead para `"Em Cadência Active"`.
@@ -133,7 +133,7 @@ Adicione/Estenda no objeto retornado por `dashboardApp()` o controle de estado e
 ```js
 // --- ESTADO DOS MODAIS DAS AÇÕES RÁPIDAS DE DECISÃO ---
 showScheduleMeetingModal: false,
-showWhatsAppTakeoverModal: false,
+showZapTakeoverModal: false,
 showRestartCadenceModal: false,
 showChangeStageModal: false,
 changeStageTab: 'stage', // 'stage' | 'disqualify'
@@ -145,12 +145,12 @@ scheduleForm: {
   date: '',
   time: '14:30',
   sendEmailInvite: true,
-  sendWhatsappReminder: true,
+  sendZapReminder: true,
   pauseCadence: true,
   meetLink: 'https://meet.google.com/rsd-demo-x89'
 },
 
-whatsappTakeoverForm: {
+zapTakeoverForm: {
   reason: 'Objeção de Preço',
   pauseAiMode: '24h',
   initialMessage: ''
@@ -178,8 +178,8 @@ openQuickAction(actionType, lead) {
   
   if (actionType === 'schedule') {
     this.showScheduleMeetingModal = true;
-  } else if (actionType === 'whatsapp') {
-    this.showWhatsAppTakeoverModal = true;
+  } else if (actionType === 'zap') {
+    this.showZapTakeoverModal = true;
   } else if (actionType === 'cadence') {
     this.showRestartCadenceModal = true;
   } else if (actionType === 'stage') {
@@ -199,12 +199,12 @@ executeScheduleMeeting() {
   this.showNotification(`📅 Reunião agendada com sucesso com ${this.selectedLeadJourney?.name || 'o Lead'}!`, 'success');
 },
 
-executeWhatsAppTakeover() {
-  this.showWhatsAppTakeoverModal = false;
+executeZapTakeover() {
+  this.showZapTakeoverModal = false;
   if (this.selectedLeadJourney) {
     this.selectedLeadJourney.aiAutonomy = 'Híbrido (Assumido por SDR)';
   }
-  this.showNotification(`💬 Atendimento no WhatsApp assumido por ${this.currentUser?.name || 'SDR'}!`, 'success');
+  this.showNotification(`💬 Atendimento no Zap assumido por ${this.currentUser?.name || 'SDR'}!`, 'success');
 },
 
 executeRestartCadence() {
@@ -228,7 +228,7 @@ executeChangeStage() {
 
 - [ ] **Integração com o Card**: Ao clicar nos botões do card *"🚀 AÇÕES RÁPIDAS DE DECISÃO"*, o modal correspondente abre de forma limpa.
 - [ ] **Modal 1 (Agendar Reunião)**: Exibe sugestões inteligentes de horário, seleção de tipo de reunião, link do Google Meet e opções de convite/lembrete.
-- [ ] **Modal 2 (Assumir WhatsApp)**: Exibe briefing de transbordo, motivo da assunção, opção de pausar IA e input com respostas rápidas.
+- [ ] **Modal 2 (Assumir Zap)**: Exibe briefing de transbordo, motivo da assunção, opção de pausar IA e input com respostas rápidas.
 - [ ] **Modal 3 (Reiniciar Cadência)**: Exibe seletor de cadências, passo de início, agendamento e preservação de memória BANT.
 - [ ] **Modal 4 (Alterar Estágio / Desqualificar)**: Suporta troca visual de estágio e fluxo completo de desqualificação com motivo obrigatório e data de reciclagem.
 - [ ] **Conformidade White-Label**: Todos os componentes adaptam-se perfeitamente às variáveis CSS do tema ativo no Header.

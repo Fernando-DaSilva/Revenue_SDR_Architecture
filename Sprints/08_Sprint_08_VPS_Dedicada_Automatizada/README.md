@@ -17,11 +17,11 @@
 
 ## Visão Geral
 
-Expansão das fronteiras de aquisição e relacionamento. O que era primariamente WhatsApp, ganha paridade em múltiplos canais.
+Expansão das fronteiras de aquisição e relacionamento. O que era primariamente Zap, ganha paridade em múltiplos canais.
 1. **Instagram DM**: Conexão com Meta Graph API para responder mensagens diretas.
 2. **Email**: SMTP para envio, e IMAP ou webhook (ex: SendGrid Inbound Parse) para leitura.
 3. **Voice**: Integração com serviços de telefonia IP (ex: Twilio Voice) contendo síntese de voz (TTS) para um AI Voice Agent.
-4. **Omnichannel Engine**: Motor lógico que mapeia e une a identidade do Lead se ele conversar por IG de manhã e WhatsApp à tarde, garantindo contexto único.
+4. **Omnichannel Engine**: Motor lógico que mapeia e une a identidade do Lead se ele conversar por IG de manhã e Zap à tarde, garantindo contexto único.
 
 ---
 
@@ -41,7 +41,7 @@ CREATE TABLE channel_identities (
     id VARCHAR PRIMARY KEY,
     organization_id VARCHAR NOT NULL,
     lead_id VARCHAR NOT NULL,
-    provider VARCHAR(50) NOT NULL, -- instagram, whatsapp, email
+    provider VARCHAR(50) NOT NULL, -- instagram, zap, email
     external_id VARCHAR(255) NOT NULL, -- ID do usuário no provedor (e.g. IG user ID)
     created_at DATETIME NOT NULL,
     updated_at DATETIME NOT NULL,
@@ -64,4 +64,4 @@ CREATE TABLE channel_identities (
 ## Decisões Críticas
 
 - **Identity Resolution**: Definir estratégia conservadora de "Merge Automático". Se não houver certeza absoluta, cria um lead separado e oferece "Sugestão de Merge" para o operador.
-- **Compliance e Limites**: O envio massivo por e-mail ou WhatsApp possui limitações de spam rigorosas. A infraestrutura deve tratar backpressure (Too Many Requests).
+- **Compliance e Limites**: O envio massivo por e-mail ou Zap possui limitações de spam rigorosas. A infraestrutura deve tratar backpressure (Too Many Requests).

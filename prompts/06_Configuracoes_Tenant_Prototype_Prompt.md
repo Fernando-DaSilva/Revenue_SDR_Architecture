@@ -8,7 +8,7 @@
 
 Você é um Engenheiro Frontend Especialista em UX/UI encarregado de atualizar e implementar a seção **"Configurações Tenant"** no protótipo do **Revenue SDR OS** no repositório `01_SDR_Prototype`.
 
-O objetivo desta tarefa é construir a experiência completa da aba **"Configurações Tenant"** (`activeTab === 'settings'`), permitindo ao usuário gerenciar todas as configurações da organização/empresa, branding White-Label, gestão da equipe e permissões (RBAC), conectores de canais de comunicação (WhatsApp / E-mail / CRM) e monitoramento de plano, faturamento e cotas de uso de IA.
+O objetivo desta tarefa é construir a experiência completa da aba **"Configurações Tenant"** (`activeTab === 'settings'`), permitindo ao usuário gerenciar todas as configurações da organização/empresa, branding White-Label, gestão da equipe e permissões (RBAC), conectores de canais de comunicação (Zap / E-mail / CRM) e monitoramento de plano, faturamento e cotas de uso de IA.
 
 ---
 
@@ -70,7 +70,7 @@ Garantir que, ao clicar em **"Configurações Tenant"** na Sidebar principal (`a
 
 #### 🔌 Sub-Visão 3: Canais de Comunicação & Integrações (`settingsTab = 'channels_integrations'`)
 - **Conectores de Canais de Prospecção**:
-  - **Card WhatsApp Business (Evolution API / Baileys)**:
+  - **Card Zap Business (Evolution API / Baileys)**:
     - Status visual: Badge verde `● Conectado`, Número vinculado (`+55 11 99887-6655`), Nível de Bateria (88%), Nome do Aparelho ("Samsung S23 SDR").
     - Ações rápidas: `Escanear QR Code`, `Testar Conexão`, `Desconectar Instância`.
   - **Card E-mail Corporativo (SMTP / Google Workspace / Outlook)**:
@@ -96,7 +96,7 @@ Garantir que, ao clicar em **"Configurações Tenant"** na Sidebar principal (`a
 - **Métricas de Consumo em Tempo Real (Cotas de Uso no Mês)**:
   - **Tokens de IA / LLM**: Barra de progresso visual (ex: *1.250.000 / 2.000.000 Tokens* — 62.5% utilizado).
   - **Leads no Pipeline**: Barra de progresso (ex: *2.840 / 5.000 Leads* — 56.8% utilizado).
-  - **Mensagens WhatsApp Disparadas**: Barra de progresso (ex: *8.900 / 15.000 Mensagens* — 59.3% utilizado).
+  - **Mensagens Zap Disparadas**: Barra de progresso (ex: *8.900 / 15.000 Mensagens* — 59.3% utilizado).
 - **Provedores de IA & Chaves Próprias (BYOK - Bring Your Own Key)**:
   - Toggle: *Utilizar Infraestrutura Gerenciada do SDR OS* vs *Usar Chaves Próprias (BYOK)*.
   - Inputs mascarados para chaves de API: `OpenAI API Key` (`sk-proj-...****`), `Anthropic API Key` (`sk-ant-...****`) e `DeepSeek API Key` (`sk-ds-...****`), com botões para `Testar Chave` e `Salvar Keys`.
@@ -111,11 +111,11 @@ Garantir os seguintes modais e controles de estado no Alpine.js (`dashboardApp()
 
 1. **Modal Convidar Novo Membro (`showInviteUserModal`)**:
    - Form com: Nome Completo, E-mail Corporativo, Seleção de Papel/Role (`Tenant Admin`, `SDR Manager`, `Operador SDR`, `Auditor`), e Toggle *Enviar e-mail de convite com link de acesso*.
-2. **Modal Pareamento QR Code WhatsApp (`showQrCodeModal`)**:
-   - Exibição de QR Code simulado com instruções de conexão ("Abra o WhatsApp > Aparelhos Conectados > Conectar Aparelho").
+2. **Modal Pareamento QR Code Zap (`showQrCodeModal`)**:
+   - Exibição de QR Code simulado com instruções de conexão ("Abra o Zap > Aparelhos Conectados > Conectar Aparelho").
    - Timer regressivo visual de expiração do QR Code (ex: 45 segundos) e botão `Gerar Novo QR Code`.
 3. **Modal Editar Configuração de CRM (`showCrmConfigModal`)**:
-   - Configuração de chave de API do CRM (ex: HubSpot/Pipedrive) e mapeamento de campos (Nome -> Lead Name, E-mail -> Lead Email, WhatsApp -> Phone).
+   - Configuração de chave de API do CRM (ex: HubSpot/Pipedrive) e mapeamento de campos (Nome -> Lead Name, E-mail -> Lead Email, Zap -> Phone).
 
 ---
 

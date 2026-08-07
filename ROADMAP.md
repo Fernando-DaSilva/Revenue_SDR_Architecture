@@ -12,7 +12,7 @@ Sprint 01 [OK] Foundation + Auth + White-Label        (reescrita v0.2.0)
 Sprint 01.5 [>>] Prototipagem Frontend (01_SDR_Prototype) PROXIMA
 Sprint 02 [DOC] Lead Brain + Memory Brain
 Sprint 03 [DOC] Conversations + Opportunity + Cadence
-Sprint 04 [DOC] AI Sales Brain + Z-API WhatsApp
+Sprint 04 [DOC] AI Sales Brain + Z-API Zap
 Sprint 05 [DOC] Monitoramento + handoff IA<->Humano + Google Calendar
 Sprint 06 [DOC] Transcricao + grafico DHS + sugestoes de objecao (SSE)
 Sprint 07 [DOC] Pos-conversa, Dashboards e Pipeline de Dados Analíticos
@@ -54,9 +54,9 @@ Decisoes em aberto: ver secao "Decisoes pendentes" no spec da sprint.
 - Opportunity Brain: scoring por eventos
 - Cadence Engine: maquina de estados + jobs agendados (fila leve)
 
-## Sprint 04 — AI Sales Brain + Z-API WhatsApp
+## Sprint 04 — AI Sales Brain + Z-API Zap
 
-- Abstracao `WhatsAppProvider` (Z-API primeiro; ver ADR-003)
+- Abstracao `ZapProvider` (Z-API primeiro; ver ADR-003)
 - Webhook inbound + envio outbound
 - AI Sales Brain: LLM com RAG/Tools, persona de vendedor senior
 - Modo `ai` vs `human` por conversa

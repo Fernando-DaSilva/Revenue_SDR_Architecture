@@ -1,9 +1,9 @@
-# Especificação Técnica: Prototótipo WhatsApp SDR OS (`01_SDR_Prototipo`)
+# Especificação Técnica: Prototótipo Zap SDR OS (`01_SDR_Prototipo`)
 
 ```
 +----------------------------------------------------------------------+
 |                                                                      |
-|   ESPECIFICAÇÃO TÉCNICA — PROTOTIPO WHATSAPP SDR OS                  |
+|   ESPECIFICAÇÃO TÉCNICA — PROTOTIPO ZAP SDR OS                  |
 |   Sub-produto / Micro-App de Atendimento Isolado com Sync SDR OS     |
 |   Status:  APROVADO E DOCUMENTADO                                    |
 |   Stack:   HTML5 + TailwindCSS + DaisyUI + Alpine.js + Chart.js      |
@@ -17,7 +17,7 @@
 
 ## 1. Visão Geral e Arquitetura Standalone (Execução Isolada)
 
-O **01_SDR_Prototipo** é concebido como uma **interface de atendimento leve, focada e independente** (Micro-App / Standalone Copilot). Ele foi desenhado para permitir que vendedores, SDRs e clientes/leads interajam **exclusivamente através da interface no estilo WhatsApp Web**, sem necessitarem navegar pelos painéis e dashboards complexos do sistema central **Revenue SDR OS** (`00_SDR_architecture`).
+O **01_SDR_Prototipo** é concebido como uma **interface de atendimento leve, focada e independente** (Micro-App / Standalone Copilot). Ele foi desenhado para permitir que vendedores, SDRs e clientes/leads interajam **exclusivamente através da interface no estilo Zap Web**, sem necessitarem navegar pelos painéis e dashboards complexos do sistema central **Revenue SDR OS** (`00_SDR_architecture`).
 
 ### 1.1 Modos de Operação
 1. **Modo Standalone (Isolado)**: O aplicativo roda de forma autônoma (uma SPA estática/server-driven leve) acessível por vendedores via link direto ou subdomínio dedicado (ex: `chat.clinica-bela.com`).
@@ -32,7 +32,7 @@ O **01_SDR_Prototipo** é concebido como uma **interface de atendimento leve, fo
 |     SUB-PRODUTO ISOLADO (01_SDR_Prototipo)       |         |        SISTEMA PRINCIPAL (Revenue SDR OS)         |
 |                                                   |         |             (00_SDR_architecture)                 |
 | +-----------------------------------------------+ |         |                                                   |
-| | Interface WhatsApp Web Simplificada          | |         | +-----------------------------------------------+ |
+| | Interface Zap Web Simplificada          | |         | +-----------------------------------------------+ |
 | | - Vendedor & Lead negociam aqui              | |         | | Database Central & Multi-Tenant Engine        | |
 | | - Gráfico DHS + Sugestões de Resposta IA     | |         | | - Pipeline de Vendas & CRM                    | |
 | +-----------------------------------------------+ |         | | - Memory Brain (Base de Conhecimento RAG)     | |

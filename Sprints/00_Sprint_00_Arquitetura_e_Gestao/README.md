@@ -45,7 +45,7 @@ prompts (specs), templates e ADRs. Codigo do produto NAO vive aqui.
 Sprint 00 (este) -> define COMO construir (docs, skills, specs)
 Sprint 01 [OK]  -> fundacao profissional (v0.2.0: auth, tenancy, white-label)
 Sprint 02 [>>] -> Lead Brain + Memory Brain (spec pronta)
-Sprint 03+     -> features do produto (conversas, IA, WhatsApp, omnichannel)
+Sprint 03+     -> features do produto (conversas, IA, Zap, omnichannel)
 ```
 
 ---

@@ -20,7 +20,7 @@ Ou ainda melhor:
 
 > **Revenue SDR OS**
 
-Porque o cliente não compra WhatsApp.
+Porque o cliente não compra Zap.
 Não compra Instagram.
 Não compra IA.
 
@@ -60,7 +60,7 @@ Instagram
 
 Facebook
 
-WhatsApp
+Zap
 
 Website
 
@@ -92,7 +92,7 @@ Instagram DM
 
 ↓
 
-Mandou WhatsApp
+Mandou Zap
 
 ↓
 
@@ -218,7 +218,7 @@ Sem resposta.
 
 ↓
 
-WhatsApp
+Zap
 
 "Olá João, vi sua mensagem no Instagram..."
 
@@ -240,7 +240,7 @@ Instagram Story Reaction
 
 ↓
 
-WhatsApp novamente
+Zap novamente
 
 ↓
 
@@ -280,7 +280,7 @@ Instagram
 
 Dia 3
 
-WhatsApp
+Zap
 
 Dia 5
 
@@ -300,7 +300,7 @@ Oferta
 
 Lead Morno
 
-WhatsApp
+Zap
 
 ↓
 
@@ -602,7 +602,7 @@ Ele trabalha orientado por objetivos.
 
 # Se fosse meu SaaS
 
-Eu jamais venderia "CRM + WhatsApp".
+Eu jamais venderia "CRM + Zap".
 
 Eu venderia uma nova categoria:
 
@@ -625,7 +625,7 @@ E o verdadeiro diferencial competitivo estaria em quatro pilares difíceis de co
 
 A maioria dos CRMs é construída em torno de **cadastros**.
 
-A maioria das plataformas de WhatsApp é construída em torno de **mensagens**.
+A maioria das plataformas de Zap é construída em torno de **mensagens**.
 
 O seu produto deve ser construído em torno de **conversas que evoluem até a venda**.
 

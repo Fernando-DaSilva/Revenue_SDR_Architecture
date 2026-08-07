@@ -69,7 +69,7 @@ Em producao, **SEMPRE** use HTTPS. Configure:
 
 - **JWT e stateless**: logout invalida cookie mas token permanece valido ate expirar. Para revogacao imediata, implementar blacklist com `jti` (ja preparado).
 - **SQLite WAL**: arquivo .db pode ser copiado. Em prod, considere criptografia em repouso.
-- **WhatsApp Z-API**: nao-oficial, Meta pode bloquear. Mitigacao: provider abstraido, migracao para Twilio/Cloud API possivel.
+- **Zap Z-API**: nao-oficial, Meta pode bloquear. Mitigacao: provider abstraido, migracao para Twilio/Cloud API possivel.
 
 ## Contact
 

@@ -6,7 +6,7 @@ Este diretório contém os registros de decisões arquiteturais importantes do p
 
 * **ADR-001** — HTMX + Alpine.js, NÃO React/Vue/Next (definido em [ARCHITECTURE.md](../ARCHITECTURE.md))
 * **ADR-002** — SQLite (WAL) primeiro, NÃO Postgres no MVP (definido em [ARCHITECTURE.md](../ARCHITECTURE.md))
-* **ADR-003** — Z-API para WhatsApp no MVP (definido em [ARCHITECTURE.md](../ARCHITECTURE.md))
+* **ADR-003** — Z-API para Zap no MVP (definido em [ARCHITECTURE.md](../ARCHITECTURE.md))
 * **ADR-004** — VPS dedicada por cliente, NÃO SaaS compartilhado (definido em [ARCHITECTURE.md](../ARCHITECTURE.md))
 * **ADR-005** — SSE, NÃO WebSocket (definido em [ARCHITECTURE.md](../ARCHITECTURE.md))
 * **ADR-006** — Argon2id + PyJWT, NÃO passlib/python-jose (definido em [ARCHITECTURE.md](../ARCHITECTURE.md))

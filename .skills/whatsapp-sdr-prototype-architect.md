@@ -32,8 +32,8 @@ document.addEventListener('alpine:init', () => {
         
         // Conversa Ativa
         activeLeadId: 1,
-        activeLeadName: 'Renato Barasnevicius',
-        activeLeadAvatar: 'https://i.pravatar.cc/150?u=renato',
+        activeLeadName: 'Amanda Sinclair',
+        activeLeadAvatar: 'https://i.pravatar.cc/150?u=amanda',
         
         // Score de Saúde da Negociação (DHS)
         currentDhsScore: 78,

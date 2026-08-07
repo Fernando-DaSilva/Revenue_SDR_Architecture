@@ -122,10 +122,10 @@ tabela central de eventos do dominio. Regras:
 - **Decisao**: Usar **Turso (libSQL)** com suporte a arquivo local `.db` (modo standalone) e opção de *Embedded Replicas* para backup automático em nuvem via dialect `sqlite+libsql://`. SQLModel/SQLAlchemy e Alembic 100% compatíveis (ver ADR-016).
 - **Consequencias**: backups automatizados em nuvem sem travar I/O local; leitura ultrarrápida no `.db` local da VPS; custo R$ 0,00 no modo standalone ou no plano Hobby do Turso.
 
-### ADR-003 — Z-API para WhatsApp no MVP (Sprint 4)
+### ADR-003 — Z-API para Zap no MVP (Sprint 4)
 - **Contexto**: API oficial (Meta Cloud) tem friccao de aprovacao/custo no
   MVP; Z-API (unofficial) funciona hoje.
-- **Decisao**: abstracao `WhatsAppProvider`; implementacao Z-API primeiro;
+- **Decisao**: abstracao `ZapProvider`; implementacao Z-API primeiro;
   migracao para Twilio/Meta e mecanica pela interface.
 - **Consequencias**: risco de banimento do numero mitigado pela abstracao
   e por playbooks de aquecimento.

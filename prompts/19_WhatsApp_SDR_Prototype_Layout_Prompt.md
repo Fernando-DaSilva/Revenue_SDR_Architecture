@@ -1,4 +1,4 @@
-# Prompt para Agente de IA: Etapa 01 - Layout Base Standalone do Prototótipo WhatsApp SDR OS
+# Prompt para Agente de IA: Etapa 01 - Layout Base Standalone do Prototótipo Zap SDR OS
 
 > **Instruções para o Dono do Projeto:** Envie este prompt para o seu agente de codificação para construir a Etapa 01 do sub-produto `01_SDR_Prototipo`.
 
@@ -6,7 +6,7 @@
 
 **INÍCIO DO PROMPT:**
 
-Você é um Engenheiro de Frontend Especialista focado em UX/UI, encarregado de criar a estrutura de layout do sub-produto **01_SDR_Prototipo (WhatsApp SDR OS Standalone App)**.
+Você é um Engenheiro de Frontend Especialista focado em UX/UI, encarregado de criar a estrutura de layout do sub-produto **01_SDR_Prototipo (Zap SDR OS Standalone App)**.
 O objetivo desta tarefa é construir uma interface de atendimento estritamente focada e leve, que possa ser executada de forma **isolada (standalone)** por vendedores e clientes, enquanto garante o **compartilhamento automático de todos os dados coletados com o sistema principal (`Revenue SDR OS / 00_SDR_architecture`)**.
 
 **REGRAS DE ARQUITETURA E STACK (OBRIGATÓRIO - ADR-001 e ADR-013):**
@@ -17,7 +17,7 @@ O objetivo desta tarefa é construir uma interface de atendimento estritamente f
    - `theme-sakura` (Sakura Bloom)
    - `theme-emerald` (Emerald Garden)
    - `theme-ocean` (Ocean Breeze)
-   - `theme-obsidian` (Obsidian Night - Dark Mode inspirado no WhatsApp Web)
+   - `theme-obsidian` (Obsidian Night - Dark Mode inspirado no Zap Web)
    - `theme-amber` (Amber Warmth)
 
 ---
@@ -25,7 +25,7 @@ O objetivo desta tarefa é construir uma interface de atendimento estritamente f
 ### O QUE VOCÊ DEVE DESENVOLVER NESTA ETAPA:
 
 1. **Header Superior Standalone & Auto-Sync Status**:
-   - Logo / Título: `WhatsApp SDR Copilot (Standalone)`.
+   - Logo / Título: `Zap SDR Copilot (Standalone)`.
    - Seletor de Temas (Dropdown DaisyUI com os 5 presets).
    - Badge de Status de Auto-Sync com o Sistema Principal: `<span class="badge badge-success gap-2">🟢 Auto-Sync com Core SDR OS (Org: clinica-bela)</span>`.
 
@@ -35,7 +35,7 @@ O objetivo desta tarefa é construir uma interface de atendimento estritamente f
      - Lista de Conversas / Leads: Leads mockados com avatar, nome, última mensagem, horário e tag de status.
    - **Coluna 2 (Central - Flex Grow)**:
      - Header da Conversa Ativa: Avatar do Lead, status online, indicador do modo IA ("🤖 AI Copilot Active") e alternador para modo Humano.
-     - Área de Histórico de Mensagens: Balões estilo WhatsApp Web com micro-badges de sincronização em segundo plano.
+     - Área de Histórico de Mensagens: Balões estilo Zap Web com micro-badges de sincronização em segundo plano.
      - Rodapé de Input de Mensagens: Campo flexível `#messageInput` e botão enviar.
    - **Coluna 3 (Direita - 400px - Container dos Painéis Extras IA)**:
      - Container estruturado pronto para os **Painéis Extras de DHS (Gráfico) e Sugestões RAG**.
@@ -43,7 +43,7 @@ O objetivo desta tarefa é construir uma interface de atendimento estritamente f
 3. **Injeção de Dados Mockados no Alpine Store**:
    - Configure o `Alpine.store('sdrApp')` com dados iniciais de leads e métodos para registrar eventos isolados de chat e agendar a transmissão automática em background para a API do `00_SDR_architecture`.
 
-Entendido? Crie a estrutura HTML5 standalone completa e responsiva em `index.html` demonstrando a operação isolada do WhatsApp Copilot e o indicador de Auto-Sync!
+Entendido? Crie a estrutura HTML5 standalone completa e responsiva em `index.html` demonstrando a operação isolada do Zap Copilot e o indicador de Auto-Sync!
 
 ***
 **FIM DO PROMPT.**

@@ -56,7 +56,7 @@ Garantir que, ao clicar em **"AI Memory & Brain"** na Sidebar principal (`active
     - **Chave / Atributo**: Nome da variável (ex: `orcamento_teto`, `decisor_final`, `software_atual`, `dor_principal`).
     - **Valor Extraído**: Texto exato extraído (ex: *"Possui orçamento máximo de R$ 15k/mês"*, *"Precisa aprovar com CFO Sr. Carlos"*).
     - **Confiança (AI Score)**: Badge de confiança com barra de progresso (ex: `98% Confiança`).
-    - **Origem da Memória**: Badge de proveniência (ex: *WhatsApp IA*, *Transcrição de Chamada*, *Edição Manual*).
+    - **Origem da Memória**: Badge de proveniência (ex: *Zap IA*, *Transcrição de Chamada*, *Edição Manual*).
     - **Ações**: `Editar Fato`, `Aprovar/Validar`, `Remover`.
 
 #### 🛡️ Sub-Visão 3: Guardrails, Diretrizes & Objeções (`memoryTab = 'guardrails'`)
@@ -79,7 +79,7 @@ Garantir que, ao clicar em **"AI Memory & Brain"** na Sidebar principal (`active
   - Tabela/Cards com: Timestamp, Lead, Canal, Intenção Detectada, Confiança e Status do Guardrail (*Aprovado*, *Ajustado*, *Bloqueado pelo Guardrail*).
 - **Inspector Detalhado de Raciocínio (Drawer / Card Ampliado)**:
   - Ao selecionar um log, exibe os 3 pilares do raciocínio da IA:
-    - **1. Pergunta / Entradas do Lead**: Texto original recebido do WhatsApp/E-mail.
+    - **1. Pergunta / Entradas do Lead**: Texto original recebido do Zap/E-mail.
     - **2. Contexto Recuperado (RAG + Lead Memories)**: Quais documentos do RAG e quais memórias do lead foram injetados no prompt.
     - **3. Prompt Montado & Avaliação de Guardrail**: O prompt final enviado ao modelo LLM, a resposta gerada e a verificação do guardrail de segurança.
   - **Feedback & Fine-Tuning Humano (RLHF / DPO)**:

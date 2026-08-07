@@ -44,7 +44,7 @@ O **Command Center** do Revenue SDR OS atua como o painel executivo e operaciona
 - **Endpoint**: `GET /api/v1/command-center/leads-contacted`
 - **Query Parameters**:
   ```http
-  GET /api/v1/command-center/leads-contacted?period=custom&start_date=2026-07-01&end_date=2026-07-23&channel=whatsapp&stage=engajado_ia HTTP/1.1
+  GET /api/v1/command-center/leads-contacted?period=custom&start_date=2026-07-01&end_date=2026-07-23&channel=zap&stage=engajado_ia HTTP/1.1
   Host: clinica-bela.sdr-os.com
   Authorization: Bearer <jwt_token>
   ```
@@ -66,7 +66,7 @@ O **Command Center** do Revenue SDR OS atua como o painel executivo e operaciona
         "id": "lead_98a72b",
         "name": "Carlos Eduardo",
         "company": "TechMed Solutions",
-        "channel": "whatsapp",
+        "channel": "zap",
         "pipeline_stage": "qualificado_bant",
         "bant_score": 88,
         "assigned_agent": "SDR-01 IA",

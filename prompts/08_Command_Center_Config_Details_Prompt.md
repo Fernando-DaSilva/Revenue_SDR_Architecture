@@ -34,7 +34,7 @@ Ao clicar no card **"Leads Contatados"** (ou no seu atalho de drill-down), a int
      - Incluir botão **"Aplicar Período"** que filtra dinamicamente a contagem e a lista de leads contatados na janela temporal escolhida.
 2. **Correlação Direta com o Pipeline de Leads**:
    - Os dados exibidos nesta tela devem derivar da mesma base de dados usada no menu **"Pipeline de Leads"**, mantendo total consistência de status (*Novo Lead*, *Em Abordagem*, *Qualificado BANT*, *Reunião Agendada*, *Desqualificado*).
-   - Exibir badges do estágio atual do lead no funil, canal de contato de origem (*WhatsApp*, *E-mail*, *LinkedIn*, *Voz*) e data/hora do último contato.
+   - Exibir badges do estágio atual do lead no funil, canal de contato de origem (*Zap*, *E-mail*, *LinkedIn*, *Voz*) e data/hora do último contato.
 3. **Tabela Interativa de Leads Contatados**:
    - Colunas: *Lead / Empresa*, *Canal de Abordagem*, *Estágio no Pipeline*, *Data do Último Contato*, *SDR Responsável (IA ou Humano)*, *Score BANT* e *Ações*.
    - Filtros rápidos por canal de prospecção e status de resposta.

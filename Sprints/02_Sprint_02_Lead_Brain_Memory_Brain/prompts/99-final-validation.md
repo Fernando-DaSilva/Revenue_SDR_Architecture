@@ -61,7 +61,7 @@ TOKEN_B=$(curl -s -X POST localhost:8000/api/v1/auth/login \
 curl -s -X POST localhost:8000/api/v1/leads \
   -H "Content-Type: application/json" -H "X-Tenant-Slug: clinica-bela" \
   -H "Authorization: Bearer $TOKEN_A" \
-  -d '{"name":"Joao Teste","phone":"+5511999990001","source":"whatsapp"}'
+  -d '{"name":"Joao Teste","phone":"+5511999990001","source":"zap"}'
 
 # Duplicata em A -> merge (merged=true, mesmo id)
 # Mesmo telefone em B -> cria NOVO em B (sem merge cross-tenant)

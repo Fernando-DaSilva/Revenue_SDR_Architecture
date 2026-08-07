@@ -10,7 +10,7 @@
 ## 1. O paradigma (o "por que")
 
 O Revenue SDR OS **nao e** um CRM tradicional (focado em cadastros) e **nao e**
-uma plataforma de disparo de WhatsApp (focada em mensagens).
+uma plataforma de disparo de Zap (focada em mensagens).
 
 E um **Sistema Operacional de Vendas orientado a conversas**: a entidade raiz
 nao e o *Lead*, mas sim o **Relacionamento (Conversa)** — que evolui no tempo,
@@ -18,7 +18,7 @@ atravessa canais (omnichannel) e e orquestrado de forma autonoma por IA.
 
 > **Promessa: "Nunca mais perca um lead por falta de acompanhamento."**
 
-O cliente nao compra WhatsApp, Instagram ou IA. **Ele compra agenda cheia.**
+O cliente nao compra Zap, Instagram ou IA. **Ele compra agenda cheia.**
 
 ## 2. Os 4 pilares (dificeis de copiar)
 
@@ -38,7 +38,7 @@ O cliente nao compra WhatsApp, Instagram ou IA. **Ele compra agenda cheia.**
 | **Lead Brain** | Unifica identidades cross-channel: uma pessoa, nao N contatos por canal | S2 |
 | **Memory Brain** | Extrai e lembra atributos de longo prazo (objecoes, datas, contexto financeiro) | S2 |
 | **Opportunity Brain** | Scoring baseado em eventos (respondeu rapido +5, perguntou preco +25...) | S3 |
-| **Omnichannel Engine** | Continuidade entre canais: IG -> WhatsApp -> email -> ligacao | S3/S8 |
+| **Omnichannel Engine** | Continuidade entre canais: IG -> Zap -> email -> ligacao | S3/S8 |
 | **Cadence Engine** | Maquina de estados da regua de relacionamento por temperatura do lead | S3 |
 | **AI Sales Brain** | Abstracao de LLMs (OpenAI/Anthropic) com RAG/Tools; age como vendedor senior, nao chatbot | S4 |
 | **Manager Brain** | Numeros do dono: funil, CAC, ROI, canal vencedor, melhor vendedor | S5-S7 |
@@ -129,5 +129,5 @@ O planejamento estratégico **(Sprint 00) está finalizado**, e todas as futuras
 ---
 
 *"A maioria dos CRMs e construida em torno de cadastros. A maioria das
-plataformas de WhatsApp, em torno de mensagens. Nos somos construidos em
+plataformas de Zap, em torno de mensagens. Nos somos construidos em
 torno de conversas que evoluem ate a venda."*

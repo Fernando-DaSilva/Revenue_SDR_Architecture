@@ -40,7 +40,7 @@ Revenue_SDR_Architecture/
 |   +-- sqlmodel-migration.md           (models + Alembic)
 |   +-- htmx-alpine-component.md        (padroes de UI)
 |   +-- pytest-tenant-isolation.md      (testes — CRITICOS)
-|   +-- whatsapp-zapi-integration.md    (Sprint 4)
+|   +-- zap-zapi-integration.md    (Sprint 4)
 |   +-- sse-realtime-pattern.md         (Sprint 6)
 |   +-- observability-stack.md          (Sprint 5+)
 |
@@ -50,7 +50,7 @@ Revenue_SDR_Architecture/
 |   +-- 02_Sprint_02_Lead_Brain_Memory_Brain/        [PROXIMA]
 |   |   +-- prompts/                <- specs por tarefa (T1-T12)
 |   +-- 03_Sprint_03_Conversations_Opportunity/      [DOCUMENTADA]
-|   +-- 04_Sprint_04_AI_Sales_Brain_WhatsApp/        [DOCUMENTADA]
+|   +-- 04_Sprint_04_AI_Sales_Brain_Zap/        [DOCUMENTADA]
 |   +-- 05_Sprint_05_Omnichannel_UI_Handoff_Calendar/[DOCUMENTADA]
 |   +-- 06_Sprint_06_Transcricao_DHS_Sugestoes/      [DOCUMENTADA]
 |   +-- 07_Sprint_07_Relatorio_PosConversa/          [DOCUMENTADA]

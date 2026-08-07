@@ -39,7 +39,7 @@ Ao clicar no card **"Tempo Médio no Funil"** (`3.2 Dias`), a interface deve abr
        - *Qualificação BANT → Agendamento SQL*: `1.2 Dias` [🟢 Dentro do SLA]
      - Destaque automático da **Etapa Gargalo (Bottleneck Stage)** com indicador visual em contraste.
    - **Filtro de Cohort e Segmentação**:
-     - Filtros por **Canal** (*Todos*, *WhatsApp*, *E-mail*, *LinkedIn*, *Voz*), **Porte do Lead** (*Enterprise*, *Mid-Market*, *SMB*) e **SDR Responsável / Agente IA**.
+     - Filtros por **Canal** (*Todos*, *Zap*, *E-mail*, *LinkedIn*, *Voz*), **Porte do Lead** (*Enterprise*, *Mid-Market*, *SMB*) e **SDR Responsável / Agente IA**.
    - **Tabela de Leads no Funil e Tempos de Ciclo**:
      - Colunas: *Lead / Empresa*, *Canal de Origem*, *Data de Entrada*, *Estágio Atual*, *Dias no Estágio*, *Tempo Total Decorrido (Dias)* e *Status do SLA*.
      - Ação rápida: `👁️ Ver Jornada` para visualizar o timeline de mensagens e eventos do lead.
@@ -65,7 +65,7 @@ Ao clicar no card **"Custo por Agendamento"** (`R$ 14,80`), a interface deve abr
 1. **Aba 1: Detalhamento da Composição de Custos (`costModalTab = 'breakdown'`)**:
    - **Cards de Decomposição do Total (Custo Blended de R$ 14,80 por Reunião)**:
      - 📢 **Investimento em Mídia / Ads**: `R$ 8,50 / agendamento` (57.4% do total)
-     - 🤖 **Infraestrutura IA & APIs** (LLMs + WhatsApp API + Twilio): `R$ 3,80 / agendamento` (25.7% do total)
+     - 🤖 **Infraestrutura IA & APIs** (LLMs + Zap API + Twilio): `R$ 3,80 / agendamento` (25.7% do total)
      - 👤 **Operação Humana / Gestão**: `R$ 2,50 / agendamento` (16.9% do total)
    - **Gráfico de Rosca / Donut Chart ou Barras de Distribuição**:
      - Visualização rápida da proporção entre Mídia, APIs de IA e Custo Operacional.

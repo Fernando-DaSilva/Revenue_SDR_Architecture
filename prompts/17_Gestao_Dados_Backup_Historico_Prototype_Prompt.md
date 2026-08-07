@@ -43,7 +43,7 @@ Ao clicar em **"Gestão de Dados & Histórico"** no Menu Principal / Sidebar, a 
 #### 🔍 Sub-Visão 2: Histórico de Conversas & Cold Search (`dataTab === 'conversation_history'`)
 * **Barra de Busca Inteligente (Full-Text & Semântica / RAG)**:
   * Input de busca com seletor de modo: `🔍 Busca Por Texto Exato (FTS)` vs `🧠 Busca Semântica por Contexto (pgvector)`.
-  * Filtros avançados: *Período (Ex: Últimos 6 meses, Ano anterior)*, *Canal (WhatsApp, E-mail, Telefone)*, *SDR Responsável (IA ou Humano)*, *Status do Lead*.
+  * Filtros avançados: *Período (Ex: Últimos 6 meses, Ano anterior)*, *Canal (Zap, E-mail, Telefone)*, *SDR Responsável (IA ou Humano)*, *Status do Lead*.
 * **Visualizador de Threads Arquivadas**:
   * Lista de conversas históricas encontradas com destaque visual de badge `[Cold Storage - Postgres/Supabase]`.
   * Drawer / Modal de Inspeção Completa do Chat: Ao clicar na conversa, abre a transcrição completa com tags de horário, remetente (Lead / AI SDR), pontuação de sentimento e resumo gerado pela IA.
@@ -85,8 +85,8 @@ dataManagement: {
   searchMode: 'fts', // 'fts' ou 'semantic'
   searchQuery: '',
   searchResults: [
-    { id: 'hist_101', leadName: 'Dr. Roberto Alves', company: 'Clínica Sorriso', channel: 'WhatsApp', date: '2026-03-14', messageCount: 42, matchSnippet: '...gostaria de agendar a demonstração sobre o plano premium...' },
-    { id: 'hist_102', leadName: 'Mariana Lima', company: 'Imóveis Prime', channel: 'WhatsApp', date: '2026-02-20', messageCount: 28, matchSnippet: '...fechamos a proposta conforme enviado no contrato...' }
+    { id: 'hist_101', leadName: 'Dr. Roberto Alves', company: 'Clínica Sorriso', channel: 'Zap', date: '2026-03-14', messageCount: 42, matchSnippet: '...gostaria de agendar a demonstração sobre o plano premium...' },
+    { id: 'hist_102', leadName: 'Mariana Lima', company: 'Imóveis Prime', channel: 'Zap', date: '2026-02-20', messageCount: 28, matchSnippet: '...fechamos a proposta conforme enviado no contrato...' }
   ],
   backups: [
     { id: 'bak_01', filename: 'rsdr_snapshot_2026-07-27_0200.db.gz', size: '138.4 MB', type: 'Automático D-1', date: '2026-07-27 02:00', checksum: 'a8f9c2d1...' },

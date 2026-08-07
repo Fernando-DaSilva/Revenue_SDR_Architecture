@@ -61,7 +61,7 @@ A Sidebar principal deve ser organizada nas seguintes **5 Categorias Semânticas
 * **🎯 Central de Controle / DHS (`activeTab === 'dhs'`)**:
   * *Funções UI:* Monitoramento em tempo real do SDR Humano + IA, fila de execução diária (Daily High-Speed), métricas operacionais e confirmação de ações de Copilot.
 * **💬 Inbox de Atendimento (`activeTab === 'inbox'`)**:
-  * *Funções UI:* Chat multicanal (WhatsApp/E-mail) unificado, envio de mensagens manuais, assunção de conversa (Handoff IA -> Humano).
+  * *Funções UI:* Chat multicanal (Zap/E-mail) unificado, envio de mensagens manuais, assunção de conversa (Handoff IA -> Humano).
 
 #### Categoria 2: 🤖 Inteligência & Automação
 * **⚡ Cadências & Agentes IA (`activeTab === 'cadences'`)**:
@@ -83,7 +83,7 @@ A Sidebar principal deve ser organizada nas seguintes **5 Categorias Semânticas
 
 #### Categoria 5: 🏢 Administração Tenant
 * **⚙️ Configurações Tenant (`activeTab === 'settings'`)**:
-  * *Sub-visões:* Perfil da Organização, Gestão da Equipe & Permissões RBAC, Conectores de Canais (WhatsApp/E-mail/CRM), Tradução e Localização de Telas.
+  * *Sub-visões:* Perfil da Organização, Gestão da Equipe & Permissões RBAC, Conectores de Canais (Zap/E-mail/CRM), Tradução e Localização de Telas.
 * **💳 Planos, Faturamento & Cotas (`activeTab === 'billing'`)**:
   * *Funções UI:* Monitoramento de consumo de tokens de IA, licenças de usuários, histórico de faturas e upgrade de plano.
 

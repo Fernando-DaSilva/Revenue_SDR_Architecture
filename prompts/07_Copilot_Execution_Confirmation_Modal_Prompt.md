@@ -33,13 +33,13 @@ O modal deve ser um `<dialog class="modal">` do DaisyUI controlado pela flag de 
 - **Grid de Metadados da Operação**:
   - **Público / Volume Afetado**: Ex: *34 Leads parados há 24h na Qualificação*.
   - **Nível de Risco**: Badge visual (*Médio Risco*, *Baixo Risco* ou *Alto Risco*).
-  - **Canais Envolvidos**: Badges com os canais (WhatsApp, E-mail, Ligação).
+  - **Canais Envolvidos**: Badges com os canais (Zap, E-mail, Ligação).
   - **Agentes Executores**: Ex: *SDR-01 IA (Lead Inbound)*.
 - **Detalhamento do Script / Prompt**: Caixa destacada mostrando o resumo das alterações de script ou cadência que serão aplicadas.
 
 #### ⚙️ C. Configurações de Envio / Ajuste Fino
 - **Modo de Agendamento**: Seletor rádio ou tabs (*Executar Imediatamente* vs *Agendar para Horário Comercial*).
-- **Opções de Notificação**: Checkbox para notificar a equipe comercial via Slack/WhatsApp ao concluir a ordem.
+- **Opções de Notificação**: Checkbox para notificar a equipe comercial via Slack/Zap ao concluir a ordem.
 
 #### 🔐 D. Trava de Autorização e Segurança
 - **Caixa de Consentimento Explícito**: Checkbox de confirmação com texto claro:

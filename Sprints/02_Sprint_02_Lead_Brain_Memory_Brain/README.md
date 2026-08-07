@@ -20,7 +20,7 @@
 Implementar os dois primeiros "cerebros" do Revenue SDR OS:
 
 ### Lead Brain
-Unifica identidade de uma pessoa atraves de todos os canais. Lead = entidade unica independente de onde veio (WhatsApp, Instagram, site, indicacao, etc). Deteccao de duplicatas por telefone/email + merge conservador.
+Unifica identidade de uma pessoa atraves de todos os canais. Lead = entidade unica independente de onde veio (Zap, Instagram, site, indicacao, etc). Deteccao de duplicatas por telefone/email + merge conservador.
 
 ### Memory Brain
 Lembra absolutamente tudo sobre o lead: preferencias, objecoes, datas importantes, contexto financeiro, relacionamento. Notas estruturadas + deteccao automatica em mensagens (placeholder nesta sprint).

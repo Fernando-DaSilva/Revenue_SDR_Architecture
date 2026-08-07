@@ -1,14 +1,14 @@
-# Sprint 04 — AI Sales Brain + Z-API WhatsApp
+# Sprint 04 — AI Sales Brain + Z-API Zap
 
 ```
 +----------------------------------------------------------------------+
 |                                                                      |
-|   SPRINT 04 — AI SALES BRAIN + Z-API WHATSAPP                       |
+|   SPRINT 04 — AI SALES BRAIN + Z-API ZAP                       |
 |   Status:  DOCUMENTADA                                              |
 |   Owner:   Agente de codificacao                                     |
 |   Quando:  Apos conclusao da Sprint 03                               |
 |   Repo:    ~/AGENCIA/SDR/                                            |
-|   Branch:  feature/sprint-04-ai-whatsapp                             |
+|   Branch:  feature/sprint-04-ai-zap                             |
 |                                                                      |
 +----------------------------------------------------------------------+
 ```
@@ -17,8 +17,8 @@
 
 ## Visão Geral
 
-Esta sprint dá "vida" ao sistema, conectando-o ao mundo externo (WhatsApp) e ativando a inteligência artificial para conduzir negociações.
-1. **WhatsAppProvider (Z-API)**: Implementação concreta da abstração de provedor de mensagens definida na arquitetura.
+Esta sprint dá "vida" ao sistema, conectando-o ao mundo externo (Zap) e ativando a inteligência artificial para conduzir negociações.
+1. **ZapProvider (Z-API)**: Implementação concreta da abstração de provedor de mensagens definida na arquitetura.
 2. **Webhooks de Entrada**: Recepção de mensagens, status de leitura/entrega em tempo real.
 3. **Envio Outbound**: Serviço para enviar mensagens através da Z-API.
 4. **AI Sales Brain**: Agente conversacional construído com LLM (RAG para conhecimento de produto, Tools para ações como marcar reunião, Persona configurável por tenant).
