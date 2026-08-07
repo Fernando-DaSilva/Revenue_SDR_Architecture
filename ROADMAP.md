@@ -4,13 +4,20 @@
 
 ---
 
+> [!IMPORTANT]
+> **Alinhamento do Roadmap com a Realidade do Produto:**
+> - **Sprints 00–01.5 (Fundacao & Prototipos)**: Representam a infraestrutura base de arquitetura e prototipos de design (UI/UX). A **capacidade real do produto** (funcionalidades integradas no backend) inicia formalmente a partir da **Sprint 02 (Lead Brain)**.
+> - **Prototipos em Codigo**: `01_SDR_Prototype` e `02_ZAP_Prototype` sao **UI/UX Wireframes em Codigo** (prototipos visuais standalone), NAO funcionalidades integradas ao backend do produto.
+
+---
+
 ## Mapa geral
 
 ```
-Sprint 00 [OK] Arquitetura e Gestao
-Sprint 01 [OK] Foundation + Auth + White-Label        (reescrita v0.2.0)
-Sprint 01.5 [OK] Standalone Zap Micro-App Prototype (02_ZAP_Prototype) — UI Grid 3 Colunas, DHS Chart, RAG Suggestions, 5 Themes, Auto-Sync Background Protocol
-Sprint 02 [DOC] Lead Brain + Memory Brain
+Sprint 00 [OK] Arquitetura e Gestao                  (Fundacao & Specs)
+Sprint 01 [OK] Foundation + Auth + White-Label        (reescrita v0.2.0 — Fundacao Tecnica)
+Sprint 01.5 [OK] Standalone Zap Micro-App Prototype   (02_ZAP_Prototype — UI/UX Wireframe em Codigo)
+Sprint 02 [DOC] Lead Brain + Memory Brain             (INICIO DO PRODUTO REAL)
 Sprint 03 [DOC] Conversations + Opportunity + Cadence
 Sprint 04 [DOC] AI Sales Brain + Z-API Zap + Copilot Mode (02_ZAP_Prototype Integration)
 Sprint 05 [DOC] Monitoramento + Handoff IA<->Humano + Google Calendar
@@ -24,7 +31,7 @@ Sprint 10 [DOC] Playbooks verticais + Marketplace
 
 ---
 
-## Sprint 01 — Foundation + Auth + White-Label [CONCLUIDA]
+## Sprint 01 — Foundation + Auth + White-Label [CONCLUIDA — FUNDACAO TECNICA]
 
 Entregue e **reescrita em qualidade profissional (v0.2.0)**:
 
@@ -38,7 +45,13 @@ Entregue e **reescrita em qualidade profissional (v0.2.0)**:
 Docs: [spec](Sprints/01_Sprint_01_Foundation_Auth_WhiteLabel/README.md) |
 Codigo: [Revenue_SDR_OS](https://github.com/Fernando-DaSilva/Revenue_SDR_OS)
 
-## Sprint 02 — Lead Brain + Memory Brain [PROXIMA]
+## Sprint 01.5 — Standalone Zap Micro-App Prototype (02_ZAP_Prototype) [CONCLUIDA — PROTOTIPO UI/UX]
+
+Prototipo visual interativo (`02_ZAP_Prototype`):
+- **Classificacao**: UI/UX Wireframe em Codigo (Standalone Prototype), NAO uma funcionalidade integrada ao backend central.
+- UI Grid 3 Colunas, DHS Chart, RAG Suggestions, 5 Themes, Auto-Sync Background Protocol
+
+## Sprint 02 — Lead Brain + Memory Brain [PROXIMA — INICIO DO PRODUTO REAL]
 
 Escopo: CRUD de leads com merge de identidades, memories estruturadas,
 timeline de eventos append-only, UI de lista/detalhe.

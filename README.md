@@ -95,12 +95,18 @@ Revenue_SDR_Architecture/
 
 ## Estado do projeto (2026-07-21)
 
+> [!NOTE]
+> **Clarificacao de Status & Prototipos:**
+> - **Sprints 00–01.5**: Representam a **Fundacao Tecnica e Prototipos de Design (UI/UX)**. A capacidade real de produto (funcionalidades integradas no backend) inicia formalmente a partir da **Sprint 02 (Lead Brain)**.
+> - **Prototipos em Codigo**: As pastas/repositorios `01_SDR_Prototype` e `02_ZAP_Prototype` sao **UI/UX Wireframes em Codigo** (prototipos visuais isolados), NAO funcionalidades integradas ao backend do produto.
+
 | Item | Status |
 |---|---|
-| Fundacao (Sprint 01) | **v0.2.0 reescrita e validada** (57 testes, CI verde) |
+| Fundacao Tecnica (Sprint 01) | **v0.2.0 reescrita e validada** (57 testes, CI verde) |
+| Prototipos UI/UX (Sprints 00-01.5) | **Concluidos** (`01_SDR_Prototype` e `02_ZAP_Prototype` como wireframes standalone em codigo) |
 | Estratégia (Sprint 00) | **Concluída**. Todas as Sprints (01 a 10) documentadas. |
 | Sprint 02 spec | Revisada e alinhada a v0.2.0 — pronta para execucao |
-| Proximo passo | Executar Sprint 02 (Lead Brain + Memory Brain) |
+| Proximo passo | Executar Sprint 02 (Lead Brain + Memory Brain) — Inicio do Produto Real |
 
 ---
 
