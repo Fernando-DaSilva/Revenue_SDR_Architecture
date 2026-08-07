@@ -125,7 +125,24 @@ Observabilidade (Prometheus + Grafana + Loki):
 
 **Quando carregar**: adicionar Prometheus, Grafana, logs, alertas.
 
+### `.skills/whatsapp-sdr-prototype-architect.md`
+
+```
+Engenharia do Standalone Zap SDR Micro-App (02_ZAP_Prototype):
+  - Arquitetura Standalone & Auto-Sync em Background
+  - Grid de 3 Colunas e Controle Dinâmico de Painéis (Move/Minimize/Maximize)
+  - Alternador de Modo (IA Copiloto vs SDR Humano)
+  - Gráfico de Saúde da Negociação DHS (-100 a +100) via Chart.js v4
+  - Sugestões de Resposta RAG da Base Central + Feedback Loop Memory Brain
+  - Mensagens de Áudio com Transcrição Whisper
+  - Seletor White-Label de 5 Temas CSS
+  - Inspector de Transmissão (Auto-Sync Ledger) e Fila Local Offline (localStorage)
+```
+
+**Quando carregar**: Desenvolver, modificar ou integrar a interface standalone do Zap Copilot ou seus protocolos de sincronização em segundo plano.
+
 ### `.skills/google-auth-integration.md`
+
 
 ```
 Integração de Google Sign-up e Login (OAuth2):

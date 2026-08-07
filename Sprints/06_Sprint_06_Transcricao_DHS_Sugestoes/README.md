@@ -51,12 +51,18 @@ CREATE TABLE user_notifications (
 
 - **SSE Stream**: `GET /api/v1/stream/events`
   - Endpoint assíncrono mantido aberto devolvendo dados no formato `text/event-stream`.
-- **Audio Service**: Worker em background (dependência de Speech-to-Text) que escuta os webhooks com anexos de áudio da Z-API, transcreve, salva na tabela de mensagens e emite o evento via Broker SSE.
-- **Coach Assistant Service**: Escuta ativamente cada nova mensagem e proativamente emite dicas via SSE.
+- **DHS Pipeline Push Endpoint**: `POST /api/v1/copilot/dhs`
+  - Ingestão de atualizações do gráfico de saúde da negociação (**DHS Score -100 a +100**) enviadas pelo `02_ZAP_Prototype` (`PIPELINE_SCORE_UPDATE`).
+- **RAG Suggestions & Feedback Endpoint**: `POST /api/v1/copilot/suggestions/feedback`
+  - Recebe os eventos `AI_SUGGESTION_USED` para registrar o uso e assertividade da resposta no Memory Brain.
+- **Audio Service**: Worker em background (Whisper Speech-to-Text) que escuta webhooks de áudio, transcreve, dispara o evento `AUDIO_TRANSCRIPTION_COMPLETED` e notifica via Broker SSE.
+- **Coach Assistant Service**: Escuta ativamente cada nova mensagem e proativamente emite dicas via SSE para o painel de sugestões do `02_ZAP_Prototype`.
 
 ---
 
 ## Lógica Crítica de Negócio
 
 - **Autenticação no SSE**: Como o SSE é invocado nativamente pelos navegadores através da interface `EventSource`, a autenticação preferencial deve ser feita pelo Cookie `rsdros_session`.
-- **Desconexão/Reconexão**: SSE já trata reconexão nativamente, mas o client deve passar um `Last-Event-ID` caso precise reaver mensagens perdidas, ou a arquitetura pode tratar a tela do usuário como descartável (state em banco é fonte de verdade para history).
+- **Sincronia Bidirecional com `02_ZAP_Prototype`**: As pontuações DHS e transcrições de áudio geradas na API central são enviadas via SSE para o `02_ZAP_Prototype`, atualizando reativamente o gráfico Chart.js v4 e o stream de mensagens.
+- **Desconexão/Reconexão**: SSE já trata reconexão nativamente, e o protocolo de Auto-Sync descarrega a fila `pendingSyncQueue` ao reconectar.
+

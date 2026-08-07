@@ -20,4 +20,6 @@ Este diretório contém os registros de decisões arquiteturais importantes do p
 * **ADR-014** — [Logs Estruturados e Observabilidade](014-system-logs-observability.md)
 * **ADR-015** — [Arquivamento de Dados e Exportação Analítica (ETL / DW)](015-data-archiving-and-analytics-export.md)
 * **ADR-016** — [Adoção do Turso (libSQL) com Suporte a Embedded Replicas e Fallback Local](016-turso-libsql-database-evolution.md)
+* **ADR-017** — [Standalone Zap SDR Micro-App, Grid de Painéis 3 Colunas e Protocolo de Auto-Sync em Background](017-standalone-zap-micro-app-sync-protocol.md)
+
 

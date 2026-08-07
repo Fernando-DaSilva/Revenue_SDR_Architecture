@@ -222,7 +222,13 @@ tabela central de eventos do dominio. Regras:
 - **Decisão**: Adotar o Turso (libSQL) via `sqlalchemy-libsql`. O sistema grava e lê no arquivo `.db` local da VPS (custo zero, offline-first) e opcionalmente sincroniza em background com o cluster Turso em nuvem via *Embedded Replicas*.
 - **Consequências**: Backup contínuo em nuvem sem travar I/O local; suporte a *Database Branching* em CI/CD; 100% de compatibilidade com SQLModel, SQLAlchemy e Alembic.
 
+### ADR-017 — Standalone Zap SDR Micro-App, Grid de Painéis 3 Colunas e Protocolo de Auto-Sync em Background (`02_ZAP_Prototype`)
+- **Contexto**: A necessidade de permitir atendimento ao vivo rápido por vendedores e SDRs sem carregar a interface administrativa central motivou a criação do sub-produto standalone **02_ZAP_Prototype**.
+- **Decisão**: Implementar a aplicação de atendimento Zap Web em arquitetura de **Standalone Micro-App**: layout grid de 3 colunas com controle independente de painéis (move/minimize/maximize), alternador de modo (`🤖 Copilot Active` vs `👤 SDR Humano`), player de áudio com transcrição Whisper, gráfico de saúde da negociação (**DHS Score** via Chart.js v4), sugestões RAG da base central e protocolo de **Auto-Sync em Background** (`dispatchAutoSyncEvent`) com fila offline em `localStorage`.
+- **Consequências**: Experiência ultra-leve para o operador de vendas com garantia de sincronia total de histórico, métricas DHS e feedback RAG com o backend do Core SDR OS.
+
 ---
 
 *"Arquitetura e a arte de tomar decisoes faceis de reverter."*
+
 

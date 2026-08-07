@@ -11,12 +11,13 @@
 
 ```
 1. Leia FOUNDATION.md (visao) + ARCHITECTURE.md (decisoes vigentes)
-2. Carregue .skills/revenue-sdr-os-architect.md + skills da tarefa
+2. Carregue .skills/revenue-sdr-os-architect.md + .skills/whatsapp-sdr-prototype-architect.md + skills da tarefa
 3. Leia o spec da sprint em Sprints/XX_*/ (+ prompts por tarefa)
-4. Code no repo ~/AGENCIA/SDR/ seguindo os invariantes da v0.2.0
+4. Code no repo ~/AGENCIA/SDR/ e ~/AGENCIA/02_ZAP_Prototype/ seguindo os invariantes da v0.2.0 e ADR-017
 5. Valide com o checklist (pytest + ruff + alembic round-trip)
 6. Commit + push (Conventional Commits PT-BR)
 ```
+
 
 ---
 

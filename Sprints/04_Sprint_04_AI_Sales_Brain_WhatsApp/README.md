@@ -52,6 +52,9 @@ ALTER TABLE conversations ADD COLUMN ai_mode BOOLEAN NOT NULL DEFAULT TRUE;
 ## Endpoints e Serviços
 
 - **Webhooks**: `POST /api/v1/webhooks/zapi/{organization_id}` - Extremamente performático, validando o origin e despachando para processamento (job ou em background).
+- **Copilot Standalone Integration API (`02_ZAP_Prototype`)**:
+  - `POST /api/v1/copilot/sync` - Recebe os eventos de auto-sync do micro-app standalone (`SDR_MESSAGE_SENT`, `LEAD_CONVERSATION_LOADED`, `THEME_PRESET_CHANGED`).
+  - `POST /api/v1/copilot/mode` - Atualiza o modo da conversa (`isCopilotActive: true/false`, `badge: SDR_COPILOT_ASSISTED` vs `SDR_HUMAN_OPERATOR`).
 - **AI Brain Service**:
   - `generate_reply(conversation_id)`
   - Acessa o Memory Brain (da Sprint 2) e o histórico de mensagens (da Sprint 3) para montar o *prompt context*.
@@ -62,4 +65,6 @@ ALTER TABLE conversations ADD COLUMN ai_mode BOOLEAN NOT NULL DEFAULT TRUE;
 ## Lógica Crítica de Negócio
 
 1. **Abstração Obrigatória**: O código não pode depender fortemente de Z-API em suas camadas de negócio. O payload de webhook Z-API deve ser normalizado para um formato de evento interno (`StandardMessageEvent`) no adapter.
-2. **Handoff Prevention**: Se `ai_mode` for false, a IA ignora a mensagem recebida. Se o humano envia uma mensagem, o sistema muda o `ai_mode` para false automaticamente.
+2. **Handoff Prevention & Copilot Sync**: Se `ai_mode` for false (SDR Humano no `02_ZAP_Prototype`), a IA ignora a mensagem recebida e atua apenas como copiloto de sugestões RAG. Se o humano envia uma mensagem, o sistema registra o papel `SDR_HUMAN_OPERATOR` e atualiza o estado para Handoff.
+3. **Resiliência Offline Standalone**: A API `/copilot/sync` aceita batched payloads da fila `pendingSyncQueue` provenientes do `localStorage` do `02_ZAP_Prototype` após a reconexão.
+

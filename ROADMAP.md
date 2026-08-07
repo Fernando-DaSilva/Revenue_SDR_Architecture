@@ -9,16 +9,17 @@
 ```
 Sprint 00 [OK] Arquitetura e Gestao
 Sprint 01 [OK] Foundation + Auth + White-Label        (reescrita v0.2.0)
-Sprint 01.5 [>>] Prototipagem Frontend (01_SDR_Prototype) PROXIMA
+Sprint 01.5 [OK] Standalone Zap Micro-App Prototype (02_ZAP_Prototype) — UI Grid 3 Colunas, DHS Chart, RAG Suggestions, 5 Themes, Auto-Sync Background Protocol
 Sprint 02 [DOC] Lead Brain + Memory Brain
 Sprint 03 [DOC] Conversations + Opportunity + Cadence
-Sprint 04 [DOC] AI Sales Brain + Z-API Zap
-Sprint 05 [DOC] Monitoramento + handoff IA<->Humano + Google Calendar
-Sprint 06 [DOC] Transcricao + grafico DHS + sugestoes de objecao (SSE)
+Sprint 04 [DOC] AI Sales Brain + Z-API Zap + Copilot Mode (02_ZAP_Prototype Integration)
+Sprint 05 [DOC] Monitoramento + Handoff IA<->Humano + Google Calendar
+Sprint 06 [DOC] Transcricao Whisper + Grafico DHS + Sugestoes RAG (SSE & Auto-Sync Stream)
 Sprint 07 [DOC] Pos-conversa, Dashboards e Pipeline de Dados Analíticos
 Sprint 08 [DOC] Omnichannel completo (IG, email, voice)
 Sprint 09 [DOC] VPS dedicada automatizada + Update orchestrator
 Sprint 10 [DOC] Playbooks verticais + Marketplace
+
 ```
 
 ---

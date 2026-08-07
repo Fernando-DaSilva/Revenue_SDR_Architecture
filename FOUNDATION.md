@@ -114,7 +114,9 @@ Consultoria. Para a engenharia isso significa:
 |---|---|
 | **Codigo do produto** | `~/AGENCIA/SDR/` -> [Revenue_SDR_OS](https://github.com/Fernando-DaSilva/Revenue_SDR_OS) |
 | **Arquitetura/docs (este repo)** | `~/AGENCIA/Revenue_SDR_Architecture/` -> [Revenue_SDR_Architecture](https://github.com/Fernando-DaSilva/Revenue_SDR_Architecture) |
+| **Zap Standalone Micro-App** | `~/AGENCIA/02_ZAP_Prototype/` (Micro-app Zap Copilot + Auto-Sync Background) |
 | Ideacao historica | `~/AGENCIA/SDR/docs/historico/` |
+
 
 ## 10. Estado atual (2026-07-21)
 
