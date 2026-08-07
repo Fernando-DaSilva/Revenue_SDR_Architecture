@@ -1,284 +1,284 @@
-# MASTER PLAN — Revenue SDR OS & Arquitetura Conversacional de IA
+# MASTER PLAN — Revenue SDR OS & AI Conversational Architecture
 
-> **Plano Mestre Executivo e Tecnico para Desenvolvimento da Solucao End-to-End**  
-> **Elaborado por**: Taskforce de Engenharia (Arquitetos de Software, Engenheiros de IA, Desenvolvedores de Sistemas e Engenheiros FinOps)  
-> **Versao**: 1.0.0 (Baseline pos-v0.2.0)  
-> **Data**: Agosto de 2026  
-
----
-
-## 1. Visao Geral e Estrategia da Solucao
-
-O **Revenue SDR OS** e um **Sistema Operacional de Vendas Conversacional Autonomo** projetado sob uma mudanca fundamental de paradigma: **a entidade raiz da automacao comercial nao e o cadastro estatico do Lead nem um disparo de mensagens em massa, mas sim o Relacionamento (Conversa)** em evolucao continua atraves dos canais.
-
-### Promessa e Valor Central
-> *"Nunca mais perca um lead por falta de acompanhamento. O cliente compra agenda cheia."*
-
-### Pilares Arquiteturais Principais
-1. **Memoria Persistente do Relacionamento**: Atributos extraidos no longo prazo (orcamento, tomadores de decisao, objecoes, cronograma) armazenados por lead e fornecidos dinamicamente aos Agentes de IA.
-2. **Ecosistema Multi-Agente de IA**: Agentes autonomos especializados atuando como SDRs seniores, extratores de memoria em background, qualificadores de oportunidade, agendadores de cadencia e coaches de vendas pos-conversa.
-3. **Engine Omnichannel**: Continuidade fluida de conversa entre WhatsApp (Z-API), Instagram DM, E-mail e Voz.
-4. **Arquitetura On-Premise-as-a-Service**: VPSs dedicadas single-tenant por organizacao, gerenciadas centralmente pelo **MyraOS Platform Console**, garantindo conformidade LGPD, zero compartilhamento de dados entre empresas e resiliencia de execucao local.
-5. **Stack Auto-Contida**: Backend FastAPI + SQLModel sobre banco embarcado Turso (libSQL) + Frontend hypermedia Jinja2/HTMX/Alpine.js + streaming em tempo real SSE.
+> **Executive & Technical Blueprint for End-to-End Solution Development**  
+> **Prepared by**: Engineering Taskforce (Software Architects, AI Engineers, Systems Developers & FinOps Engineers)  
+> **Version**: 1.0.0 (Post v0.2.0 Baseline)  
+> **Date**: August 2026  
 
 ---
 
-## 2. Estrutura da Equipe de Engenharia e Papeis
+## 1. Solution Overview & Strategic Vision
 
-A execucao desta solucao exige uma equipe de engenharia multidisciplinar:
+The **Revenue SDR OS** is an **Autonomous Conversational Sales Operating System** designed around a fundamental paradigm shift: **the root entity of sales automation is not the static Lead record or a mass message batch, but the evolving Relationship (Conversation)** across channels.
 
-| Papel | Responsabilidades Principais |
+### Core Value Proposition
+> *"Never lose a lead due to lack of follow-up. The client buys a full calendar."*
+
+### Key Architectural Pillars
+1. **Persistent Relationship Memory**: Long-term extracted memories (budget, decision makers, objections, timeline) stored per lead and fed dynamically to AI Agents.
+2. **Multi-Agent Conversational AI Engine**: Specialized autonomous agents acting as senior SDRs, background memory extractors, lead qualifiers, cadence schedulers, and post-call sales coaches.
+3. **Omnichannel Engine**: Seamless conversation continuity across WhatsApp (Z-API), Instagram DM, Email, and Voice.
+4. **On-Premise-as-a-Service Deployment**: Dedicated single-tenant VPS nodes per organization managed centrally via the **MyraOS Platform Console**, guaranteeing LGPD compliance, zero data co-mingling, and local execution resilience.
+5. **Self-Contained Tech Stack**: FastAPI backend + SQLModel over Turso (libSQL) embedded databases + Jinja2/HTMX/Alpine.js hypermedia frontend + SSE real-time streaming.
+
+---
+
+## 2. Engineering Team Structure & Roles
+
+Executing this solution requires a disciplined, multi-disciplinary engineering taskforce:
+
+| Role | Core Responsibilities |
 |---|---|
-| **Arquiteto Principal de Software** | Topologia do sistema, invariantes de multi-tenancy, evolucao de schema, orquestracao de VPS, arquitetura On-Premise-as-a-Service. |
-| **Engenheiro Lider de Sistemas de IA** | Arquitetura do sistema multi-agente, engenharia de prompt, pipelines RAG, schemas de tool calling, roteamento de fallback de LLMs, compressao de contexto. |
-| **Engenheiro Senior de Backend e Dados** | Servicos de dominio FastAPI, integracao com Turso/libSQL, arquitetura de eventos append-only, jobs em background (ARQ/APScheduler), broker SSE. |
-| **Engenheiro Senior de Frontend e UX** | Implementacao hypermedia com Jinja2 + HTMX + Alpine.js, sistema de traducao de presets de cores white-label, integracao copilot do ZAP Prototype. |
-| **Especialista em FinOps e Otimizacao de Custos** | Previsao de consumo de tokens, roteamento multi-tier de LLMs, estrategias de prompt caching, custos unitarios mensais por tenant. |
-| **Engenheiro de QA, Seguranca e Infraestrutura** | Suite de testes isolados cross-tenant com Pytest, linting ruff, validacao de migrations Alembic, seguranca do Update Agent via systemd. |
+| **Principal Software Architect** | System topology, multi-tenancy invariants, schema evolution, VPS orchestration, On-Premise-as-a-Service architecture. |
+| **Lead AI Systems Engineer** | Multi-agent framework design, prompt engineering, RAG pipelines, function calling schemas, LLM fallback routing, context window compression. |
+| **Senior Backend & Data Engineer** | FastAPI domain services, Turso/libSQL database integration, event-driven timeline architecture, ARQ/APScheduler background jobs, SSE broker. |
+| **Senior Frontend & UX Engineer** | Jinja2 + HTMX + Alpine.js implementation, white-label color preset translation system, ZAP Copilot Prototype integration. |
+| **FinOps & Cost Optimization Specialist** | Token consumption forecasting, multi-tier LLM routing, prompt caching strategies, monthly unit economics per tenant. |
+| **QA & Infrastructure/Security Engineer** | Pytest cross-tenant isolation test suite, ruff linting, Alembic migration verification, systemd Update Agent security. |
 
 ---
 
-## 3. Cronograma Detalhado e Estimativa de Prazos
+## 3. Comprehensive Phased Roadmap & Timeframe Estimation
 
-O tempo total estimado de desenvolvimento e de **22 Semanas (~5,5 Meses)** divididos em **10 sprints de execucao**, considerando uma equipe dedicada.
+The total estimated development timeline is **22 Weeks (~5.5 Months)** divided into **10 execution sprints**, assuming a dedicated core team.
 
 ```
-Sprint 00 [CONCLUIDA] Arquitetura e Gestao
-Sprint 01 [CONCLUIDA] Foundation + Auth + White-Label (Baseline v0.2.0)
-Sprint 01.5 [CONCLUIDA] Prototype Standalone ZAP Copilot (02_ZAP_Prototype)
+Sprint 00 [DONE] Architecture & Governance
+Sprint 01 [DONE] Foundation + Auth + White-Label (v0.2.0 Baseline)
+Sprint 01.5 [DONE] Standalone ZAP Copilot Prototype (02_ZAP_Prototype)
 Sprint 02 [W1-W2] Lead Brain + Memory Brain
 Sprint 03 [W3-W4] Conversations + Opportunity Brain + Cadence Engine
-Sprint 04 [W5-W7] AI Sales Brain + Integracao Z-API WhatsApp
-Sprint 05 [W8-W9] Handoff Humano-IA + Integracao Google Calendar + Observabilidade
-Sprint 06 [W10-W11] Transcricao Whisper de Audio + Grafico DHS + Stream SSE Real-Time
-Sprint 07 [W12-W14] Analise Pos-Conversa + Data Warehouse ETL/CDC + Dashboards Analiticos
-Sprint 08 [W15-W17] Engine Omnichannel (Instagram DM, E-mail, Agente de Voz)
-Sprint 09 [W18-W19] Automacao de VPS Dedicada + Orquestrador de Updates MyraOS
-Sprint 10 [W20-W22] Playbooks Verticais + Marketplace de Agentes Tribo
+Sprint 04 [W5-W7] AI Sales Brain + Z-API WhatsApp Integration
+Sprint 05 [W8-W9] Human-AI Handoff + Google Calendar Integration + Observability
+Sprint 06 [W10-W11] Audio Whisper Transcription + DHS Chart + SSE Real-Time Stream
+Sprint 07 [W12-W14] Post-Call Analysis + Data Warehouse ETL/CDC + Analytics Dashboards
+Sprint 08 [W15-W17] Omnichannel Engine (Instagram DM, Email, Voice Agent)
+Sprint 09 [W18-W19] Single-Tenant VPS Automation + MyraOS Update Orchestrator
+Sprint 10 [W20-W22] Vertical Playbooks + Tribo Agent Marketplace
 ```
 
-### Detalhamento por Fase e Entregaveis
+### Detailed Breakdown & Milestone Deliverables
 
-#### Fase 1: Inteligencia Core e Fundacao da Engine (Sprints 02 - 04) | Prazo: Semanas 1 - 7
-* **Sprint 02: Lead Brain & Memory Brain (2 Semanas)**
-  * Unificacao de identidades cross-channel em `leads` e `lead_identities`.
-  * Tabela estruturada de `memories` de longo prazo com scores de confianca e categorias.
-  * Timeline de eventos append-only (`events`).
-* **Sprint 03: Conversations, Scoring de Oportunidade e Cadence Engine (2 Semanas)**
-  * Agregado raiz `conversations` com historico de `messages`.
-  * Sistema de scoring por eventos (`Opportunity Brain`) calculando temperatura (Quente/Morno/Frio).
-  * Fila leve de background jobs (ARQ/APScheduler) para gatilhos de regua de relacionamento.
-* **Sprint 04: AI Sales Brain & Engine Z-API WhatsApp (3 Semanas)**
-  * Abstracao `ZapProvider` para webhooks inbound e envios outbound da Z-API.
-  * Agente conversacional AI Sales Brain com tool calling (`schedule_meeting`, `add_memory`, `change_stage`).
-  * Toggle `ai_mode` com sincronizacao em tempo real para interface copilot do `02_ZAP_Prototype`.
+#### Phase 1: Core Intelligence & Engine Foundation (Sprints 02 - 04) | Timeline: Weeks 1 - 7
+* **Sprint 02: Lead Brain & Memory Brain (2 Weeks)**
+  * Unification of cross-channel identities under `leads` and `lead_identities`.
+  * Structured long-term `memories` table with confidence scores & category classifications.
+  * Append-only event timeline (`events`).
+* **Sprint 03: Conversations, Opportunity Scoring & Cadence Engine (2 Weeks)**
+  * `conversations` as root aggregate with `messages`.
+  * Event-driven lead scoring system (`Opportunity Brain`) calculating dynamic Hot/Warm/Cold temperature.
+  * Lightweight background job queue (ARQ/APScheduler) for cadence follow-up triggers.
+* **Sprint 04: AI Sales Brain & Z-API WhatsApp Engine (3 Weeks)**
+  * `ZapProvider` abstraction for Z-API inbound webhooks and outbound messaging.
+  * AI Sales Brain conversational agent with tool calling (`schedule_meeting`, `add_memory`, `change_stage`).
+  * `ai_mode` toggle with real-time sync for `02_ZAP_Prototype` copilot interface.
 
-#### Fase 2: Operacoes em Tempo Real, Handoff e Analytics (Sprints 05 - 07) | Prazo: Semanas 8 - 14
-* **Sprint 05: Handoff Humano-IA e Sincronizacao de Calendario (2 Semanas)**
-  * Transferencia sem friccao entre agente IA e operador humano com resumo de contexto.
-  * Integracao bidirecional com Google Calendar via chamada de ferramenta da IA.
-  * Endpoints de metricas Prometheus e logs JSON estruturados.
-* **Sprint 06: Processamento de Audio e Streaming SSE em Tempo Real (2 Semanas)**
-  * Transcricao de mensagens de audio inbound via OpenAI Whisper / Groq API.
-  * Broker Server-Sent Events (SSE) para atualizacao live da UI sem WebSockets.
-  * Grafico de saude da conversa DHS (Dynamic Health Score) em tempo real.
-* **Sprint 07: Analise Pos-Conversa, Data Warehouse e Dashboards (3 Semanas)**
-  * Agente coach de vendas pos-conversa (identificando padroes de objecao e oportunidades perdidas).
-  * Pipeline ETL/CDC para arquivamento e exportacao dos dados locais do Turso para Data Warehouse externo (PostgreSQL/Supabase).
-  * Dashboards analiticos do Manager Brain (conversao de funil, CAC, ROI, canais campeoes).
+#### Phase 2: Real-time Operations, Human Handoff & Analytics (Sprints 05 - 07) | Timeline: Weeks 8 - 14
+* **Sprint 05: Human-AI Handoff & Calendar Sync (2 Weeks)**
+  * Seamless transfer between AI agent and human operator with context summary generation.
+  * Two-way Google Calendar integration via AI tool invocation.
+  * Structured JSON logging and Prometheus metric endpoints.
+* **Sprint 06: Audio Processing & SSE Real-time Streaming (2 Weeks)**
+  * Inbound audio message transcription via OpenAI Whisper / Groq API.
+  * Server-Sent Events (SSE) broker for live UI updates without WebSockets.
+  * DHS (Dynamic Health Score) real-time conversation progress chart.
+* **Sprint 07: Post-Call Analysis, Data Warehouse & Dashboards (3 Weeks)**
+  * Post-conversation sales coaching agent (identifying objection patterns and missed opportunities).
+  * Data archiving & ETL/CDC pipeline exporting local Turso data to external analytical storage (PostgreSQL/Supabase).
+  * Manager Brain analytical dashboards (Funnel conversion, CAC, ROI, top channels).
 
-#### Fase 3: Expansao Omnichannel, Infraestrutura e Marketplace (Sprints 08 - 10) | Prazo: Semanas 15 - 22
-* **Sprint 08: Engine Omnichannel (3 Semanas)**
-  * Conectores nativos para Instagram DMs, E-mail e chamadas de Voz com IA.
-  * Gerenciador de continuidade entre canais permitindo que a conversa migre de plataforma sem perder contexto.
-* **Sprint 09: VPS Dedicada e Orquestracao de Updates (2 Semanas)**
-  * Console Central MyraOS para provisionamento e monitoramento de VPSs dos clientes.
-  * Agent de Update automatico via `systemd` fazendo pull de releases a cada 6h com rollback automatico.
-* **Sprint 10: Playbooks Verticais e Marketplace de Agentes (3 Semanas)**
-  * Playbooks verticais pre-configurados (Saude/Clinicas, Imobiliario, Automotivo, Servicos Financeiros).
-  * Framework de Marketplace para distribuicao de personas e fluxos customizados.
+#### Phase 3: Omnichannel Expansion, Infrastructure & Marketplace (Sprints 08 - 10) | Timeline: Weeks 15 - 22
+* **Sprint 08: Omnichannel Engine (3 Weeks)**
+  * Native connectors for Instagram DMs, Email, and Voice AI calling.
+  * Channel continuity manager allowing lead conversations to jump between platforms seamlessly.
+* **Sprint 09: VPS Dedication & Update Orchestration (2 Weeks)**
+  * MyraOS Central Platform Console for client VPS provisioning and fleet monitoring.
+  * Automated background `systemd` Update Agent pulling releases every 6 hours with automatic rollback capabilities.
+* **Sprint 10: Vertical Playbooks & Agent Marketplace (3 Weeks)**
+  * Pre-packaged niche playbooks (Healthcare/Clinics, Real Estate, Automotive, Financial Services).
+  * Marketplace framework for custom agent personas and workflow distribution.
 
 ---
 
-## 4. Arquitetura do Sistema Multi-Agente de IA
+## 4. Multi-AI Agent System Architecture
 
-O sistema opera como um **ecosistema orquestrado de 6 Agentes de IA especializados**, garantindo modularidade, separacao clara de responsabilidades e otimizacao de custos e latencia:
+The solution operates as an **orchestrated ecosystem of 6 specialized AI Agents**, ensuring modularity, clear separation of concerns, and cost/latency optimization:
 
 ```
                           +-----------------------------------+
-                          |    Mensagem / Evento de Entrada   |
+                          |     Inbound Message / Event       |
                           +-----------------+-----------------+
                                             |
                                             v
 +-----------------------------------------------------------------------------------+
-|                              1. Agente AI Sales SDR                               |
-|  - Conduz conversa ativa com Lead via WhatsApp / Instagram / E-mail / Voz         |
-|  - Acessa Base RAG, Persona do System Prompt e Memorias do Lead                   |
-|  - Invoca Ferramentas: schedule_meeting(), update_stage(), add_lead_memory()     |
+|                              1. AI Sales SDR Agent                                |
+|  - Conducts active conversation with Lead via Z-API / Instagram / Email / Voice   |
+|  - Accesses RAG Knowledge Base, System Prompt Persona, and Lead Memories          |
+|  - Invokes Tools: schedule_meeting(), update_stage(), add_lead_memory()          |
 +-------------------+-------------------------------------------+-------------------+
                     |                                           |
-                    v (Background Assincrono)                   v (Background Assincrono)
+                    v (Async Background)                        v (Async Background)
 +---------------------------------------+   +---------------------------------------+
-|      2. Agente Extrator de Memoria     |   | 3. Classificador de Scoring e Intencao |
-| - Analisa dialogo para extrair fatos, |   | - Avalia intencao e sentimento do lead|
-|   orcamento, objecoes e preferencias  |   | - Atualiza score DHS e temperatura    |
-| - Salva registros estruturados no DB  |   | - Dispara alerta prioritario se Quente|
+|       2. Memory Extraction Agent      |   | 3. Opportunity Scoring Classifier     |
+| - Analyzes dialogue for facts, dates, |   | - Evaluates lead intent & sentiment   |
+|   budget, objections, and preferences |   | - Updates DHS score & temperature     |
+| - Saves structured records to DB      |   | - Triggers priority alert if Hot      |
 +---------------------------------------+   +---------------------------------------+
                     |                                           |
                     +-------------------+-----------------------+
                                         |
                                         v
 +-----------------------------------------------------------------------------------+
-|                    4. Agente de Cadencia e Reengajamento                          |
-| - Disparado pelo ARQ Scheduler em inatividade de leads ou regras de regua         |
-| - Gera mensagem contextual de follow-up usando memorias passadas                  |
+|                         4. Cadence & Re-Engagement Agent                          |
+| - Triggered by ARQ scheduler on lead inactivity or rule breaches                  |
+| - Generates contextual follow-up message using past conversation memories         |
 +-----------------------------------------------------------------------------------+
                                         |
                                         v
 +-----------------------------------------------------------------------------------+
-|                     5. Agente de Processamento de Voz e Audio                     |
-| - Transcreve mensagens de audio inbound/outbound via Whisper API                  |
-| - Formata texto para processamento downstream pelo AI Sales SDR                   |
+|                        5. Voice & Audio Processing Agent                          |
+| - Transcribes inbound/outbound audio messages with Whisper API                    |
+| - Formats text for downstream processing by Sales SDR Agent                       |
 +-----------------------------------------------------------------------------------+
                                         |
                                         v
 +-----------------------------------------------------------------------------------+
-|                     6. Coach de Vendas e Analista Pos-Conversa                    |
-| - Roda ao encerrar conversa/chamada para avaliar desempenho do SDR                |
-| - Alimenta insights analiticos para os Brains Manager e Revenue                   |
+|                      6. Post-Call Sales Coach & Analyst                           |
+| - Runs post-conversation close/abandonment to evaluate SDR performance           |
+| - Feeds analytical insights to Manager Brain & Revenue Brain                      |
 +-----------------------------------------------------------------------------------+
 ```
 
-### Especificacao dos Agentes e Estrategia de Modelos
+### Agent Specifications & Model Selection Strategy
 
-| Nome do Agente | Funcao Principal | Gatilho de Execucao | Modelo de LLM Recomendado | Recursos Chave |
+| Agent Name | Primary Function | Execution Triggers | Recommended LLM Model | Key Features |
 |---|---|---|---|---|
-| **1. Agente AI Sales SDR** | Atendimento direto, qualificacao e agendamento | Mensagem Inbound do Lead | **Claude 3.5 Sonnet / GPT-4o** (Alto valor); **Gemini 1.5 Flash** (Padrao) | Tool Calling, Busca vetorial RAG, Adaptacao de Persona, Modo Copilot. |
-| **2. Extrator de Memoria** | Extração de memoria de longo prazo | Lote assincrono pos-mensagem | **Gemini 1.5 Flash-Lite / GPT-4o-mini** | Saida JSON estruturada estrita, validacao Pydantic, baixo custo. |
-| **3. Classificador de Intencao** | Scoring de intencao e definicao de temperatura | Pos-turno assincrono | **Gemini 1.5 Flash / Claude 3.5 Haiku** | Classificacao rapida, analise de sentimento, ajuste de DHS. |
-| **4. Agente de Cadencia** | Reativacao de leads frios ou dormentes | Timer agendado no ARQ | **Claude 3.5 Haiku / Gemini 1.5 Flash** | Reentrada contextual, tom anti-spam, integracao de memoria. |
-| **5. Processador de Voz** | Transcricao e diarizacao de audio | Audio inbound recebido | **Groq Whisper Large v3 / OpenAI Whisper** | Alta precisao em PT-BR, formatacao texto-audio. |
-| **6. Coach de Vendas** | Auditoria de performance e analise de perdas | Fim da conversa / Mudanca de estagio | **Claude 3.5 Sonnet / Gemini 1.5 Pro** | Raciocinio profundo, scoring de tecnicas de vendas, relatorios. |
+| **1. AI Sales SDR Agent** | Direct lead engagement, qualification & booking | Inbound Lead message | **Claude 3.5 Sonnet / GPT-4o** (High stakes); **Gemini 1.5 Flash** (Standard) | Tool Calling, RAG vector retrieval, Persona adaptation, Copilot Mode suggestion. |
+| **2. Memory Extraction Agent** | Long-term memory extraction | Async post-message batch | **Gemini 1.5 Flash-Lite / GPT-4o-mini** | Strict JSON Schema output, Pydantic validation, low cost. |
+| **3. Opportunity & Intent Classifier** | Intent scoring & temperature assignment | Async post-turn | **Gemini 1.5 Flash / Claude 3.5 Haiku** | Fast classification, sentiment scoring, DHS adjustment. |
+| **4. Cadence & Re-Engagement Agent** | Re-activating cold/dormant leads | ARQ scheduled timer | **Claude 3.5 Haiku / Gemini 1.5 Flash** | Contextual re-entry, anti-spam tone, memory integration. |
+| **5. Voice Processing Agent** | Audio transcription & diarization | Inbound voice note | **Groq Whisper Large v3 / OpenAI Whisper** | High accuracy in PT-BR, audio-to-text formatting. |
+| **6. Sales Coach & Revenue Analyst** | Sales performance audit & deal loss analysis | Conversation end / stage change | **Claude 3.5 Sonnet / Gemini 1.5 Pro** | Deep reasoning, sales technique scoring, managerial reports. |
 
 ---
 
-## 5. Estimativa de Tokens, Previsao e Modelo de Precos (FinOps)
+## 5. Token Estimation, Forecasting & Pricing Model (FinOps)
 
-Para garantir a viabilidade comercial e margens previsiveis, o consumo de tokens foi modelado por ciclo de vida de lead e projetado para diferentes perfis operacionais.
+To guarantee commercial viability and predictable margins, token consumption is modeled across single lead lifecycles and scaled to tenant operational profiles.
 
-### 5.1 Consumo Base de Tokens por Ciclo de Vida do Lead
+### 5.1 Token Consumption Baseline per Lead Lifecycle
 
-Considerando um ciclo medio de **12 turnos conversacionais** (pares inbound/outbound):
+Assuming an average lead lifecycle of **12 conversational turns** (inbound/outbound pairs):
 
 ```
-Detalhamento de Contexto por Turno (Agente AI Sales SDR):
-- Persona do Sistema e Instrucoes Prompt: ~1.000 tokens
-- Contexto de Memoria do Lead Extraido: ~500 tokens
-- Contexto de Produto Relevante via RAG: ~500 tokens
-- Historico de Chat (janela deslizante de 6 turnos): ~500 tokens
+Turn Context Breakdown (Sales SDR Agent):
+- System Persona Prompt & Instructions: ~1,000 tokens
+- Extracted Lead Memory & Context: ~500 tokens
+- Relevant RAG Product Context: ~500 tokens
+- Chat History (sliding window of last 6 turns): ~500 tokens
 --------------------------------------------------------------
-Entrada (Input) Media por turno:  2.500 Tokens
-Saida (Output) Media por turno:   250 Tokens
+Average Input per turn:  2,500 Tokens
+Average Output per turn: 250 Tokens
 ```
 
-| Tarefa do Agente | Frequencia por Lead | Tokens por Gatilho | Total de Tokens / Ciclo do Lead |
+| Agent Task | Frequency per Lead | Tokens per Trigger | Total Tokens / Lead Lifecycle |
 |---|---|---|---|
-| **Agente AI Sales SDR** | 12 turnos | 2.500 Input / 250 Output | **30.000 Input / 3.000 Output** |
-| **Extrator de Memoria** | 4 lotes (a cada 3 turnos) | 1.500 Input / 150 Output | **6.000 Input / 600 Output** |
-| **Classificador de Intencao** | 3 avaliacoes | 1.000 Input / 50 Output | **3.000 Input / 150 Output** |
-| **Agente de Cadencia** | 2 disparos de regua | 2.000 Input / 200 Output | **4.000 Input / 400 Output** |
-| **Coach de Vendas / Analista** | 1 execucao pos-conversa | 4.000 Input / 400 Output | **4.000 Input / 400 Output** |
-| **Processamento de Voz (Whisper)**| 2 audios por lead | 2 minutos de audio | **2,0 Minutos de Audio** |
-| **TOTAL DO CICLO DO LEAD** | — | — | **47.000 Input / 4.550 Output + 2 min Audio** |
+| **AI Sales SDR Agent** | 12 turns | 2,500 Input / 250 Output | **30,000 Input / 3,000 Output** |
+| **Memory Extraction Agent** | 4 batches (every 3 turns) | 1,500 Input / 150 Output | **6,000 Input / 600 Output** |
+| **Opportunity Classifier Agent** | 3 evaluations | 1,000 Input / 50 Output | **3,000 Input / 150 Output** |
+| **Cadence Re-engagement Agent** | 2 re-engagement triggers | 2,000 Input / 200 Output | **4,000 Input / 400 Output** |
+| **Sales Coach & Revenue Analyst** | 1 post-conversation run | 4,000 Input / 400 Output | **4,000 Input / 400 Output** |
+| **Audio Processing (Whisper)** | 2 audio notes per lead | 2 minutes audio | **2.0 Audio Minutes** |
+| **TOTAL LIFECYCLE PER LEAD** | — | — | **47,000 Input / 4,550 Output + 2 min Audio** |
 
 ---
 
-### 5.2 Tabela Benchmark de Precos dos Modelos (Por 1 Milhao de Tokens)
+### 5.2 Model Pricing Benchmark Matrix (Per 1 Million Tokens)
 
-*Baseado nos precos oficiais de API em Agosto de 2026:*
+*Based on current August 2026 API provider pricing:*
 
-| Provedor / Modelo | Preco Input / 1M Tokens | Preco Output / 1M Tokens | Preco Input Cache / 1M Tokens |
+| Provider / Model | Input Price / 1M Tokens | Output Price / 1M Tokens | Cached Input Price / 1M Tokens |
 |---|---|---|---|
-| **Google Gemini 1.5 Flash-Lite** | $0,0375 | $0,150 | $0,009 |
-| **Google Gemini 1.5 Flash** | $0,075 | $0,300 | $0,018 |
-| **Google Gemini 1.5 Pro** | $1,250 | $5,000 | $0,312 |
-| **Anthropic Claude 3.5 Haiku** | $1,000 | $5,000 | $0,100 |
-| **Anthropic Claude 3.5 Sonnet** | $3,000 | $15,000 | $0,300 |
-| **OpenAI GPT-4o-mini** | $0,150 | $0,600 | $0,075 |
-| **OpenAI GPT-4o** | $2,500 | $10,000 | $1,250 |
-| **Whisper Audio API** | $0,006 / minuto | — | — |
+| **Google Gemini 1.5 Flash-Lite** | $0.0375 | $0.150 | $0.009 |
+| **Google Gemini 1.5 Flash** | $0.075 | $0.300 | $0.018 |
+| **Google Gemini 1.5 Pro** | $1.250 | $5.000 | $0.312 |
+| **Anthropic Claude 3.5 Haiku** | $1.000 | $5.000 | $0.100 |
+| **Anthropic Claude 3.5 Sonnet** | $3.000 | $15.000 | $0.300 |
+| **OpenAI GPT-4o-mini** | $0.150 | $0.600 | $0.075 |
+| **OpenAI GPT-4o** | $2.500 | $10.000 | $1.250 |
+| **Whisper Audio API** | $0.006 / minute | — | — |
 
 ---
 
-### 5.3 Previsao de Custos Mensais por Porte de Empresa
+### 5.3 Monthly Cost Forecast by Business Tier
 
-Comparamos duas estrategias de implantacao:
-- **Stack Hibrida Otimizada**: Roteamento multi-tier usando *Gemini 1.5 Flash / Flash-Lite* para extrações, classificacoes e dialogos padrao, reservando *Claude 3.5 Haiku / Sonnet* para negociacoes complexas.
-- **Stack Premium**: Utilizando *Claude 3.5 Sonnet* e *GPT-4o* em todas as etapas.
+We compare two architectural deployment strategies:
+- **Hybrid Cost-Optimized Stack**: Multi-tier model routing using *Gemini 1.5 Flash / Flash-Lite* for high-frequency extraction, classification, and standard sales dialogues, with *Claude 3.5 Haiku / Sonnet* for complex negotiations.
+- **Premium Stack**: Utilizing *Claude 3.5 Sonnet* and *GPT-4o* across all conversational steps.
 
-#### Tier 1: Pequena Empresa / Clinica (500 Leads / Mes)
-* Volume Mensal: 23,5 Milhoes de Tokens Input | 2,27 Milhoes de Tokens Output | 1.000 Minutos de Audio
+#### Tier 1: Small Business / Single Clinic (500 Leads / Month)
+* Monthly Volume: 23.5 Million Input Tokens | 2.27 Million Output Tokens | 1,000 Audio Minutes
 
-| Metrica | Stack Hibrida Otimizada | Stack Premium |
+| Metric | Hybrid Cost-Optimized Stack | Premium Stack |
 |---|---|---|
-| **Custo Agente AI Sales SDR** | $2,02 (Gemini 1.5 Flash) | $56,25 (Claude 3.5 Sonnet) |
-| **Custo Extracao de Memoria** | $0,16 (Gemini 1.5 Flash-Lite) | $4,95 (GPT-4o-mini) |
-| **Custo Scoring de Oportunidade** | $0,13 (Gemini 1.5 Flash) | $2,47 (Claude 3.5 Haiku) |
-| **Custo Cadencia e Coaching** | $1,20 (Claude 3.5 Haiku) | $12,00 (Claude 3.5 Sonnet) |
-| **Transcricao de Audio (Whisper)** | $6,00 | $6,00 |
-| **ESTIMATIVA TOTAL MENSAL** | **~$9,51 / mes** | **~$81,67 / mes** |
+| **AI Sales SDR Agent Cost** | $2.02 (Gemini 1.5 Flash) | $56.25 (Claude 3.5 Sonnet) |
+| **Memory Extraction Cost** | $0.16 (Gemini 1.5 Flash-Lite) | $4.95 (GPT-4o-mini) |
+| **Opportunity Scoring Cost** | $0.13 (Gemini 1.5 Flash) | $2.47 (Claude 3.5 Haiku) |
+| **Cadence & Coaching Cost** | $1.20 (Claude 3.5 Haiku) | $12.00 (Claude 3.5 Sonnet) |
+| **Audio Transcription (Whisper)** | $6.00 | $6.00 |
+| **TOTAL ESTIMATED MONTHLY COST** | **~$9.51 / month** | **~$81.67 / month** |
 
-#### Tier 2: Empresa Medio Porte (2.500 Leads / Mes)
-* Volume Mensal: 117,5 Milhoes de Tokens Input | 11,37 Milhoes de Tokens Output | 5.000 Minutos de Audio
+#### Tier 2: Mid-Market Organization (2,500 Leads / Month)
+* Monthly Volume: 117.5 Million Input Tokens | 11.37 Million Output Tokens | 5,000 Audio Minutes
 
-| Metrica | Stack Hibrida Otimizada | Stack Premium |
+| Metric | Hybrid Cost-Optimized Stack | Premium Stack |
 |---|---|---|
-| **Custo Agente AI Sales SDR** | $10,10 (Gemini 1.5 Flash) | $281,25 (Claude 3.5 Sonnet) |
-| **Custo Extracao de Memoria** | $0,80 (Gemini 1.5 Flash-Lite) | $24,75 (GPT-4o-mini) |
-| **Custo Scoring de Oportunidade** | $0,65 (Gemini 1.5 Flash) | $12,35 (Claude 3.5 Haiku) |
-| **Custo Cadencia e Coaching** | $6,00 (Claude 3.5 Haiku) | $60,00 (Claude 3.5 Sonnet) |
-| **Transcricao de Audio (Whisper)** | $30,00 | $30,00 |
-| **ESTIMATIVA TOTAL MENSAL** | **~$47,55 / mes** | **~$408,35 / mes** |
+| **AI Sales SDR Agent Cost** | $10.10 (Gemini 1.5 Flash) | $281.25 (Claude 3.5 Sonnet) |
+| **Memory Extraction Cost** | $0.80 (Gemini 1.5 Flash-Lite) | $24.75 (GPT-4o-mini) |
+| **Opportunity Scoring Cost** | $0.65 (Gemini 1.5 Flash) | $12.35 (Claude 3.5 Haiku) |
+| **Cadence & Coaching Cost** | $6.00 (Claude 3.5 Haiku) | $60.00 (Claude 3.5 Sonnet) |
+| **Audio Transcription (Whisper)** | $30.00 | $30.00 |
+| **TOTAL ESTIMATED MONTHLY COST** | **~$47.55 / month** | **~$408.35 / month** |
 
-#### Tier 3: Enterprise / Grande Agencia (10.000 Leads / Mes)
-* Volume Mensal: 470 Milhoes de Tokens Input | 45,5 Milhoes de Tokens Output | 20.000 Minutos de Audio
+#### Tier 3: Enterprise / Large Agency (10,000 Leads / Month)
+* Monthly Volume: 470 Million Input Tokens | 45.5 Million Output Tokens | 20,000 Audio Minutes
 
-| Metrica | Stack Hibrida Otimizada | Stack Premium |
+| Metric | Hybrid Cost-Optimized Stack | Premium Stack |
 |---|---|---|
-| **Custo Agente AI Sales SDR** | $40,40 (Gemini 1.5 Flash) | $1.125,00 (Claude 3.5 Sonnet) |
-| **Custo Extracao de Memoria** | $3,20 (Gemini 1.5 Flash-Lite) | $99,00 (GPT-4o-mini) |
-| **Custo Scoring de Oportunidade** | $2,60 (Gemini 1.5 Flash) | $49,40 (Claude 3.5 Haiku) |
-| **Custo Cadencia e Coaching** | $24,00 (Claude 3.5 Haiku) | $240,00 (Claude 3.5 Sonnet) |
-| **Transcricao de Audio (Whisper)** | $120,00 | $120,00 |
-| **ESTIMATIVA TOTAL MENSAL** | **~$190,20 / mes** | **~$1.633,40 / mes** |
+| **AI Sales SDR Agent Cost** | $40.40 (Gemini 1.5 Flash) | $1,125.00 (Claude 3.5 Sonnet) |
+| **Memory Extraction Cost** | $3.20 (Gemini 1.5 Flash-Lite) | $99.00 (GPT-4o-mini) |
+| **Opportunity Scoring Cost** | $2.60 (Gemini 1.5 Flash) | $49.40 (Claude 3.5 Haiku) |
+| **Cadence & Coaching Cost** | $24.00 (Claude 3.5 Haiku) | $240.00 (Claude 3.5 Sonnet) |
+| **Audio Transcription (Whisper)** | $120.00 | $120.00 |
+| **TOTAL ESTIMATED MONTHLY COST** | **~$190.20 / month** | **~$1,633.40 / month** |
 
 ---
 
-### 5.4 Otimizacoes FinOps (Boas Praticas)
+### 5.4 Token Optimization Strategies (FinOps Best Practices)
 
-1. **Prompt Caching**: Ativar cache de prompt Anthropic / Gemini para prompts de sistema e documentacao de produto. *Reduz custos de input em ate 75-90% em turnos repetitivos.*
-2. **Extracao em Lote Assincrona**: Nao executar extracao de memoria a cada mensagem individual. Processar em lotes em segundo plano usando modelos ultrabaratos (*Gemini 1.5 Flash-Lite*).
-3. **Compressao Dinamica de Contexto**: Truncar historico de chat usando janelas deslizantes e confiar nas memorias de longo prazo extraidas em vez de enviar transcricoes brutas completas.
-4. **Escalonamento Inteligente de Modelos (Smart Router)**: Rotear perguntas padrao para modelos leves ($0,075/1M) e escalar para modelos premium ($3,00/1M) apenas quando a gravidade da objecao ou a temperatura do lead forem elevadas.
-
----
-
-## 6. Invariantes Tecnicos e Governanca
-
-Todos os desenvolvedores e agentes de IA devem seguir rigorosamente os seguintes invariantes estabelecidos desde a v0.2.0:
-
-1. **Padrao App Factory**: Sem singletons globais de modulo. O estado vive estritamente em `app.state`.
-2. **Camadas Estritas**: Rota FastAPI -> `service.py` de dominio -> Tabelas SQLModel. Queries SQL NUNCA vivem nas rotas da API.
-3. **Defesa em Profundidade Multi-Tenant**: Toda query DEVE filtrar por `organization_id`. Tentativas cross-tenant retornam `404 Not Found` generico. O `organization_id` vem estritamente do contexto `ContextVar`, NUNCA do payload enviado pelo usuario.
-4. **Envelope de Erros Unificado**: Erros lancam subclasses de `AppError` resultando no envelope JSON padrao `{"error": {"code": ..., "message": ..., "details": ...}}`.
-5. **Versionamento Rigido com Alembic**: Modelos de tabela refletem o banco. Alteracoes de schema exigem script de migration (`alembic revision --autogenerate`).
-6. **Auto-Contencao On-Premise**: Zero dependencia de CDNs ou assets externos. Todos os assets estao embarcados localmente.
-7. **Tempo Real via SSE**: Utilizar Server-Sent Events para atualizacoes unidirecionais do servidor para o cliente.
+1. **Prompt Caching**: Enable Anthropic / Gemini prompt caching for static system prompts and product documentation. *Reduces input costs by up to 75-90% on repetitive turns.*
+2. **Asynchronous Batch Extraction**: Do not run memory extraction on every single turn. Process in batches of 3-4 turns in background worker tasks using low-cost models (*Gemini 1.5 Flash-Lite*).
+3. **Dynamic Context Compression**: Truncate chat history using sliding windows and rely on high-density extracted long-term memories instead of sending full raw transcripts.
+4. **Model Tier Escalation (Smart Router)**: Route standard questions to lightweight models ($0.075/1M) and escalate to premium models ($3.00/1M) only when objection severity or lead temperature is high.
 
 ---
 
-## 7. Proximos Passos de Execucao
+## 6. Technical Invariants & Governance
 
-- **Acao Imediata**: Iniciar a implementacao da **Sprint 02 — Lead Brain + Memory Brain** em `~/AGENCIA/SDR/`.
-- **Validacao Arquitetural**: Testar isolamento cross-tenant e scripts de migration Alembic antes do merge do Pull Request.
-- **Monitoramento FinOps**: Implementar contador de tokens no middleware FastAPI para monitorar o gasto real de tokens por organizacao em tempo real.
+All developers and automated agents contributing code MUST adhere strictly to the following invariants established in `v0.2.0` and architectural decisions:
+
+1. **App Factory Pattern**: No module singletons. Global state resides strictly on `app.state`.
+2. **Strict Layering**: FastAPI route -> Domain `service.py` -> SQLModel tables. Database queries NEVER live in API routes.
+3. **Multi-Tenant Defense-in-Depth**: Every database query MUST filter by `organization_id`. Cross-tenant record access attempts return generic `404 Not Found`. `organization_id` is extracted strictly from request `ContextVar` context, NEVER from user payload.
+4. **Unified Error Envelopes**: Errors raise `AppError` subclasses resulting in standard JSON envelopes `{"error": {"code": ..., "message": ..., "details": ...}}`.
+5. **Database Migration Standard**: Table models strictly reflect database state. All schema modifications require Alembic migration scripts (`alembic revision --autogenerate`).
+6. **On-Premise Self-Containment**: Zero reliance on external CDNs or external static dependencies. Assets are vendored locally.
+7. **Real-Time via SSE**: Use Server-Sent Events for unidirection server-to-client updates (no complex WebSockets).
+
+---
+
+## 7. Sign-off & Execution Next Steps
+
+- **Immediate Action**: Proceed with **Sprint 02 — Lead Brain + Memory Brain** implementation in `~/AGENCIA/SDR/`.
+- **Architectural Validation**: Verify cross-tenant isolation and Alembic migration scripts prior to pull request merge.
+- **FinOps Monitoring**: Implement API token counter in FastAPI middleware to track exact real-world token spend per organization.
