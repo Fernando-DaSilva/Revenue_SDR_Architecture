@@ -22,6 +22,7 @@
 
 | Doc | Conteudo | Status |
 |---|---|---|
+| [MASTER_PLAN.md](MASTER_PLAN.md) | Plano Mestre de Execução, Arquitetura Multi-Agente, Prazos e Previsão de Custos/Tokens | v1.0 |
 | [FOUNDATION.md](FOUNDATION.md) | Visao do produto, 8 Brains, modelo de negocio/deploy, stack | v2.0 |
 | [ARCHITECTURE.md](ARCHITECTURE.md) | Arquitetura vigente + 12 ADRs | v2.0 |
 | [ROADMAP.md](ROADMAP.md) | Sprints 01-10 com status real | v2.0 |
@@ -32,7 +33,7 @@
 ```
 Revenue_SDR_Architecture/
 |
-+-- FOUNDATION.md / ARCHITECTURE.md / ROADMAP.md / AGENTS.md
++-- MASTER_PLAN.md / FOUNDATION.md / ARCHITECTURE.md / ROADMAP.md / AGENTS.md
 |
 +-- .skills/                       <- contexto tecnico carregavel por tema
 |   +-- revenue-sdr-os-architect.md     (SEMPRE carregar primeiro)
