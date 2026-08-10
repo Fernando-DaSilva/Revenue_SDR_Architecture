@@ -7,7 +7,7 @@
 Skills sao arquivos markdown em `.skills/` que agentes de IA carregam pra ter contexto tecnico sobre o projeto.
 
 **Workflow**:
-1. Abra o agente (Claude Code, Codex, OpenCode, etc)
+1. Abra o agente (Claude Code, Codex, OpenCode, Antigravity Agent, etc)
 2. Carregue a skill `revenue-sdr-os-architect.md` (sempre primeiro)
 3. Carregue skills especificas conforme a tarefa
 4. Carregue o prompt correspondente em `prompts/` ou `Sprints/XX/prompts/`
@@ -23,6 +23,18 @@ modelo de dados, estrutura do repo, ONDE encontrar tudo.
 
 **Quando carregar**: TODA tarefa, ANTES de qualquer outra skill.
 
+### `.skills/ai-agent-coding-guidelines.md` (GUARDIÕES DE CODIFICAÇÃO)
+
+```
+Diretrizes e guardiões para Agentes de IA construindo código:
+  - Separação de camadas (models, schemas, service, api)
+  - Regras de segurança Multi-Tenant Zero-Trust
+  - Harness de verificação pré-commit (pytest, ruff, alembic round-trip)
+  - Anti-patterns e checklist
+```
+
+**Quando carregar**: carregar sempre que for implementar ou refatorar código backend/frontend.
+
 ### `.skills/fastapi-multi-tenant.md`
 
 ```
@@ -37,20 +49,69 @@ Padroes de API FastAPI para o projeto:
 
 **Quando carregar**: criar/modificar endpoint, router, dependency.
 
-### `.skills/sqlmodel-migration.md`
+### `.skills/sqlmodel-migration.md` e `.skills/alembic-sqlite-batch-migrations.md`
 
 ```
-Padroes de SQLModel + Alembic:
+Padroes de SQLModel + Alembic em Modo Batch (SQLite/libSQL):
   - Tenant model (organization_id FK NOT NULL)
   - ID factory (prefixed: user_xxx, lead_xxx)
   - JSON fields (tags, custom_fields)
   - Soft delete (status='deletado')
-  - Alembic setup + autogenerate
-  - Migrations reversiveis (upgrade + downgrade)
-  - Indices (quando criar)
+  - Alembic setup + autogenerate com render_as_batch=True
+  - Migrations reversiveis com op.batch_alter_table (upgrade + downgrade)
 ```
 
-**Quando carregar**: criar/alterar model, criar migration.
+**Quando carregar**: criar/alterar model, criar migration Alembic.
+
+### `.skills/llm-agent-orchestration-and-instructor.md`
+
+```
+Orquestração de LLMs e Saídas Estruturadas via Instructor:
+  - Instructor + Pydantic v2 para extração estrita de JSON
+  - LLM Router com fallback automático (Gemini/Sonnet -> GPT-4o-mini/Llama-3.3)
+  - System Prompt Caching (economia de 75-90% de tokens)
+  - Prevenção de exceções de parsing JSON
+```
+
+**Quando carregar**: implementar extração de memória em batch ou validações estritas de schema.
+
+### `.skills/langchain-langgraph-agent-architecture.md` (ORQUESTRAÇÃO MULTI-AGENTE)
+
+```
+Orquestração de Agentes Conversacionais e Grafos de Estado via LangChain & LangGraph:
+  - Models com fallbacks nativos (with_fallbacks)
+  - Definition de ferramentas @tool com Pydantic args_schema
+  - Grafos de estado (StateGraph) com MemorySaver Checkpointer
+  - Human-in-the-Loop interrupts (interrupt()) para aprovação no Zap Copilot
+  - Streaming SSE via astream_events
+  - Observabilidade e Tracing no LangSmith (LANGCHAIN_TRACING_V2=true)
+```
+
+**Quando carregar**: implementar ou refatorar qualquer Agente SDR conversacional, fluxo multi-agente, ou tool calling.
+
+### `.skills/background-jobs-taskiq-arq.md`
+
+```
+Processamento de Jobs Assíncronos e Fila de Tarefas (Taskiq / SAQ):
+  - Retorno HTTP 202 em webhooks (<50ms)
+  - Idempotência com job_key e cache deduplication
+  - Configuração de retentativas com Exponential Backoff e DLQ
+  - Configuração de workers standalone (AioSQLite) ou nuvem (Redis)
+```
+
+**Quando carregar**: criar tarefas em segundo plano, webhooks ou cadências.
+
+### `.skills/vector-search-rag-pgvector.md`
+
+```
+Busca Vetorial Híbrida e RAG (sqlite-vec + pgvector):
+  - Hot RAG local (<15ms) na VPS via sqlite-vec com pré-filtragem por tenant
+  - Cold RAG no Data Warehouse via pgvector com índice HNSW
+  - Algoritmo Reciprocal Rank Fusion (RRF) combinando BM25/FTS + Cosine Similarity
+  - Deduplicação de embeddings via hash MD5
+```
+
+**Quando carregar**: criar busca semântica, bases de conhecimento ou RAG comercial.
 
 ### `.skills/htmx-alpine-component.md`
 
@@ -86,10 +147,9 @@ Padroes de testes pytest:
 Integracao WhatsApp via Z-API:
   - Interface WhatsAppProvider (abstracao)
   - ZAPIProvider implementation
-  - Webhook handler (validar instance_id, async processing)
+  - Webhook handler (validar instance_id, async processing via Taskiq)
   - Factory pattern (migracao futura pra Twilio)
   - Multi-tenant (instance_id por Organization)
-  - Anti-patterns (chamada sincrona bloqueante, hardcoded instance)
 ```
 
 **Quando carregar**: implementar webhook WhatsApp, envio de mensagem, Z-API.
@@ -100,109 +160,57 @@ Integracao WhatsApp via Z-API:
 Server-Sent Events (real-time):
   - SSE endpoint com EventSourceResponse (sse-starlette)
   - Broker in-memory (publish/subscribe)
-  - Subscribe + unsubscribe em try/finally
   - Keep-alive ping (evita timeout de proxy)
   - Auth obrigatoria + tenant isolation
   - Cliente JS com auto-reconnect
-  - Migracao futura pra Redis Pub/Sub
 ```
 
-**Quando carregar**: implementar notificacoes live, transcricao, grafico DHS, qualquer real-time.
+**Quando carregar**: implementar notificacoes live, transcricao, grafico DHS.
 
 ### `.skills/observability-stack.md`
 
 ```
-Observabilidade (Prometheus + Grafana + Loki):
-  - Metricas Prometheus (latencia, count, errors)
-  - Middleware FastAPI instrumenta todos os requests
-  - Metricas de negocio (leads, conversations, sales)
-  - Metricas de IA (tokens, custo, latencia)
+Observabilidade (Prometheus + Grafana + structlog):
+  - Metricas Prometheus (latencia, count, errors, LLM tokens)
   - Logger estruturado em JSON
-  - Grafana dashboards provisionados
-  - Alertas Prometheus (VPS down, disco cheio, SSL expirando)
-  - Pushgateway (VPS clientes empurram metricas)
+  - Ingestor de client-side logs (/api/v1/logs/client)
 ```
 
-**Quando carregar**: adicionar Prometheus, Grafana, logs, alertas.
+**Quando carregar**: adicionar observabilidade, logs, métricas.
 
 ### `.skills/whatsapp-sdr-prototype-architect.md`
 
 ```
 Engenharia do Standalone Zap SDR Micro-App (02_ZAP_Prototype):
   - Arquitetura Standalone & Auto-Sync em Background
-  - Grid de 3 Colunas e Controle Dinâmico de Painéis (Move/Minimize/Maximize)
-  - Alternador de Modo (IA Copiloto vs SDR Humano)
-  - Gráfico de Saúde da Negociação DHS (-100 a +100) via Chart.js v4
-  - Sugestões de Resposta RAG da Base Central + Feedback Loop Memory Brain
-  - Mensagens de Áudio com Transcrição Whisper
-  - Seletor White-Label de 5 Temas CSS
-  - Inspector de Transmissão (Auto-Sync Ledger) e Fila Local Offline (localStorage)
+  - Grid de 3 Colunas e Controle Dinâmico de Painéis
+  - Gráfico DHS Score via Chart.js v4
 ```
 
-**Quando carregar**: Desenvolver, modificar ou integrar a interface standalone do Zap Copilot ou seus protocolos de sincronização em segundo plano.
+**Quando carregar**: integrar a interface standalone do Zap Copilot.
 
-### `.skills/google-auth-integration.md`
-
-
-```
-Integração de Google Sign-up e Login (OAuth2):
-  - Fluxo multi-tenant e isolamento por Host
-  - Validação de ID Token no backend (Google JWKS ou library)
-  - Auto-vinculação com conta de e-mail nativa
-  - Estratégia de testes mockados
-  - Anti-padrões comuns
-```
-
-**Quando carregar**: criar/modificar endpoints de autenticação social, integrar Google One Tap / OAuth2 no login ou cadastro.
+---
 
 ## Combinacoes comuns
 
 ```
-Criar API endpoint novo:
+Criar/Refatorar Código de Backend:
   + revenue-sdr-os-architect
+  + ai-agent-coding-guidelines
   + fastapi-multi-tenant
   + pytest-tenant-isolation
 
-Criar model + migration:
+Criar Agente de IA com RAG e Tool Calling:
+  + revenue-sdr-os-architect
+  + llm-agent-orchestration-and-instructor
+  + vector-search-rag-pgvector
+  + background-jobs-taskiq-arq
+
+Criar Model + Migration Alembic:
   + revenue-sdr-os-architect
   + sqlmodel-migration
-
-Criar UI HTMX:
-  + revenue-sdr-os-architect
-  + htmx-alpine-component
-
-Integrar Google Auth:
-  + revenue-sdr-os-architect
-  + fastapi-multi-tenant
-  + google-auth-integration
-  + pytest-tenant-isolation
-
-Integrar WhatsApp:
-  + revenue-sdr-os-architect
-  + fastapi-multi-tenant
-  + whatsapp-zapi-integration
-  + pytest-tenant-isolation
-
-Real-time updates:
-  + revenue-sdr-os-architect
-  + sse-realtime-pattern
-  + observability-stack
+  + alembic-sqlite-batch-migrations
 ```
-
-
-## Adicionar nova skill
-
-Quando uma tecnologia nova precisar de skill (ex: Redis, Kafka, OAuth2):
-
-1. Crie arquivo em `.skills/<nome-descritivo>.md`
-2. Use o formato:
-   - Frontmatter YAML (name, description, version, platforms)
-   - Principio basico
-   - Estrutura/codigo exemplo
-   - Padroes e convencoes
-   - Anti-patterns
-   - Checklist
-3. Adicione entrada neste README
 
 ---
 

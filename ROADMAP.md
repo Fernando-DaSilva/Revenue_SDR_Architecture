@@ -68,12 +68,12 @@ Decisoes em aberto: ver secao "Decisoes pendentes" no spec da sprint.
 - Opportunity Brain: scoring por eventos
 - Cadence Engine: maquina de estados + jobs agendados (fila leve)
 
-## Sprint 04 — AI Sales Brain + Z-API Zap
+## Sprint 04 — AI Sales Brain + Z-API Zap (LangChain & LangGraph Multi-Agent Engine)
 
 - Abstracao `ZapProvider` (Z-API primeiro; ver ADR-003)
-- Webhook inbound + envio outbound
-- AI Sales Brain: LLM com RAG/Tools, persona de vendedor senior
-- Modo `ai` vs `human` por conversa
+- Webhook inbound + envio outbound via fila Taskiq (ADR-021)
+- AI Sales Brain: Grafo **LangGraph (`StateGraph`)** com checkpointer de memória, `@tool` calling, fallbacks `with_fallbacks()` (Gemini 2.5 Flash / Sonnet 3.5 -> GPT-4o-mini), e tracing no **LangSmith** (ADR-027, ADR-028, ADR-029)
+- Modo `ai` vs `human` por conversa via interrupção `interrupt()` (Human-in-the-Loop no `02_ZAP_Prototype`)
 
 ## Sprint 05 — Monitoramento + handoff + Calendar
 

@@ -2,7 +2,7 @@
 
 > **Plano Mestre Técnico de Engenharia para Desenvolvimento da Solução End-to-End**  
 > **Elaborado por**: Equipe de Engenharia (Arquitetos de Software, Engenheiros de IA, Desenvolvedores Backend/Frontend e DevOps/SRE)  
-> **Versão**: 2.0.0 (Baseline pós-v0.2.0 — Software Engineering Execution Plan)  
+> **Versão**: 2.2.0 (Baseline v0.2.0+ — Software Engineering Execution Plan for AI-Agent Development)  
 > **Data**: Agosto de 2026  
 
 ---
@@ -19,7 +19,8 @@ O **Revenue SDR OS** é um **Sistema Operacional de Vendas Conversacional Autôn
 2. **Ecossistema Multi-Agente de IA**: Agentes autônomos especializados atuando como SDRs seniores, extratores de memória em background, qualificadores de oportunidade, agendadores de cadência e coaches de vendas pós-conversa.
 3. **Engine Omnichannel**: Continuidade fluida de conversa entre WhatsApp (Z-API), Instagram DM, E-mail e Voz.
 4. **Arquitetura On-Premise-as-a-Service**: VPSs dedicadas single-tenant por organização, gerenciadas centralmente pelo **MyraOS Platform Console**, garantindo conformidade LGPD, zero compartilhamento de dados entre empresas e resiliência de execução local.
-5. **Stack Auto-Contida**: Backend FastAPI + SQLModel sobre banco embarcado Turso (libSQL) + Frontend hypermedia Jinja2/HTMX/Alpine.js (vendored) + streaming em tempo real SSE.
+5. **Stack Auto-Contida**: Backend FastAPI + SQLModel sobre banco embarcado Turso (libSQL) + Frontend hypermedia Jinja2/HTMX/Alpine.js (vendored) + streaming em tempo real SSE + Fila de Jobs Taskiq + Orquestração Instructor/Pydantic v2.
+6. **Desenvolvimento Orientado a Agentes de IA**: Repositório projetado com contratos estritos, schemas OpenAPI 3.1 legíveis por máquina e guardiões de código para execução autônoma por LLMs de codificação (ADR-026).
 
 ---
 
@@ -31,16 +32,16 @@ A execução desta solução exige uma equipe de engenharia multidisciplinar ope
 
 | Papel | Responsabilidades Principais |
 |---|---|
-| **Arquiteto Principal de Software** | Topologia do sistema, invariantes de multi-tenancy, evolução de schema, orquestração de VPS, arquitetura On-Premise-as-a-Service. |
-| **Engenheiro Líder de Sistemas de IA** | Arquitetura do sistema multi-agente, engenharia de prompt, pipelines RAG, schemas de tool calling, roteamento de fallback de LLMs, compressão de contexto. |
-| **Engenheiro Sênior de Backend e Dados** | Serviços de domínio FastAPI, integração com Turso/libSQL, arquitetura de eventos append-only, jobs em background (ARQ/APScheduler), broker SSE. |
-| **Engenheiro Sênior de Frontend e UX** | Implementação hypermedia com Jinja2 + HTMX + Alpine.js, sistema de tradução de presets de cores white-label, integração copilot do ZAP Prototype. |
-| **Especialista em Telemetria e FinOps Técnico** | Contabilidade de tokens por tenant, instrumentação Prometheus, otimização de janelas de contexto, estratégias de prompt caching e roteamento multi-tier de LLMs. |
-| **Engenheiro de QA, Segurança e Infraestrutura** | Suíte de testes isolados cross-tenant com Pytest, linting ruff, validação de migrations Alembic, segurança do Update Agent via systemd. |
+| **Arquiteto Principal de Software** | Topologia do sistema, invariantes de multi-tenancy Zero-Trust, evolução de schema Alembic Batch, orquestração de VPS. |
+| **Engenheiro Líder de Sistemas de IA** | Arquitetura do sistema multi-agente, engenharia de prompt, pipelines RAG híbridos (sqlite-vec + pgvector), Instructor/Pydantic schemas, fallback LLM Router. |
+| **Engenheiro Sênior de Backend e Dados** | Serviços de domínio FastAPI, integração Turso/libSQL local + Cold DW PostgreSQL, jobs assíncronos Taskiq, broker SSE. |
+| **Engenheiro Sênior de Frontend e UX** | Implementação hypermedia Jinja2 + HTMX + Alpine.js, sistema de presets de cores white-label, integração do Zap Prototype (`02_ZAP_Prototype`). |
+| **Especialista em Telemetria e FinOps Técnico** | Contabilidade de tokens por tenant, instrumentação Prometheus, otimização de janelas de contexto, System Prompt Caching e Rate Limiting. |
+| **Engenheiro de QA, Segurança e IA Code Guardrails** | Suíte de testes isolados cross-tenant com Pytest, linting ruff, validação de migrations Alembic, automação do harness de teste para agentes de IA (ADR-026). |
 
-### 2.2 Workflow Oficial do Desenvolvedor
+### 2.2 Workflow Oficial do Agente de Codificação / Desenvolvedor
 
-Para garantir consistência e evitar regressões, todo membro da equipe de engenharia deve seguir o workflow em camadas:
+Para garantir consistência e evitar regressões, todo agente de codificação ou desenvolvedor deve seguir o workflow em 6 camadas:
 
 ```
 +-----------------------------------------------------------------------------------+
@@ -49,7 +50,7 @@ Para garantir consistência e evitar regressões, todo membro da equipe de engen
                                           |
                                           v
 +-----------------------------------------------------------------------------------+
-| 2. Alterações de Banco & Migration (SQLModel -> alembic revision --autogenerate)   |
+| 2. Alterações de Banco & Migration (SQLModel -> alembic revision --autogenerate Batch)|
 +-----------------------------------------+-----------------------------------------+
                                           |
                                           v
@@ -59,7 +60,7 @@ Para garantir consistência e evitar regressões, todo membro da equipe de engen
                                           |
                                           v
 +-----------------------------------------------------------------------------------+
-| 4. Schemas & Validação de Entrada (Pydantic schemas com validação estrita)         |
+| 4. Schemas & Validação de Entrada (Pydantic / Instructor schemas com validação)    |
 +-----------------------------------------+-----------------------------------------+
                                           |
                                           v
@@ -69,7 +70,7 @@ Para garantir consistência e evitar regressões, todo membro da equipe de engen
                                           |
                                           v
 +-----------------------------------------------------------------------------------+
-| 6. Matriz de Qualidade & Verificação (pytest 100% verde + cross-tenant + ruff)   |
+| 6. Harness de Qualidade (pytest >85% + cross-tenant 100% + ruff + alembic round-trip)|
 +-----------------------------------------------------------------------------------+
 ```
 
@@ -84,91 +85,43 @@ Sprint 00 [CONCLUÍDA] Arquitetura e Gestão
 Sprint 01 [CONCLUÍDA] Foundation + Auth + White-Label (Baseline v0.2.0)
 Sprint 01.5 [CONCLUÍDA] Prototype Standalone ZAP Copilot (02_ZAP_Prototype)
 Sprint 02 [W1-W2] Lead Brain + Memory Brain
-Sprint 03 [W3-W4] Conversations + Opportunity Brain + Cadence Engine
-Sprint 04 [W5-W7] AI Sales Brain + Integração Z-API WhatsApp
+Sprint 03 [W3-W4] Conversations + Opportunity Brain + Cadence Engine + Taskiq
+Sprint 04 [W5-W7] AI Sales Brain + Instructor + Integração Z-API WhatsApp
 Sprint 05 [W8-W9] Handoff Humano-IA + Integração Google Calendar + Observabilidade
 Sprint 06 [W10-W11] Transcrição Whisper de Áudio + Gráfico DHS + Stream SSE Real-Time
-Sprint 07 [W12-W14] Análise Pós-Conversa + Data Warehouse ETL/CDC + Dashboards Analíticos
+Sprint 07 [W12-W14] Análise Pós-Conversa + Data Warehouse ETL/CDC + Cold RAG pgvector
 Sprint 08 [W15-W17] Engine Omnichannel (Instagram DM, E-mail, Agente de Voz)
 Sprint 09 [W18-W19] Automação de VPS Dedicada + Orquestrador de Updates MyraOS
 Sprint 10 [W20-W22] Playbooks Verticais + Marketplace de Agentes Tribo
 ```
 
-### Detalhamento Técnico por Fase e Entregáveis
-
-#### Fase 1: Inteligência Core e Fundação da Engine (Sprints 02 - 04)
-* **Sprint 02: Lead Brain & Memory Brain**
-  * Unificação de identidades cross-channel em `leads` e `lead_identities`.
-  * Tabela estruturada de `memories` de longo prazo com scores de confiança e categorias.
-  * Timeline de eventos append-only (`lead_timeline_events`).
-  * *Critério de Aceite*: Testes de isolamento cross-tenant 100% aprovados e endpoints CRUD funcionais.
-* **Sprint 03: Conversations, Scoring de Oportunidade e Cadence Engine**
-  * Agregado raiz `conversations` com histórico de `messages`.
-  * Sistema de scoring por eventos (`Opportunity Brain`) calculando temperatura (Quente/Morno/Frio).
-  * Fila leve de background jobs (ARQ/APScheduler) para gatilhos de régua de relacionamento.
-  * *Critério de Aceite*: Transição autônoma de estágios do funil por scoring de eventos e agendador idempotente.
-* **Sprint 04: AI Sales Brain & Engine Z-API WhatsApp**
-  * Abstração `ZapProvider` para webhooks inbound e envios outbound da Z-API.
-  * Agente conversacional AI Sales Brain com tool calling (`schedule_meeting`, `add_memory`, `update_stage`).
-  * Toggle `ai_mode` com sincronização em tempo real para interface copilot do `02_ZAP_Prototype`.
-  * *Critério de Aceite*: Execução de ciclo conversacional end-to-end com suporte a chamadas de ferramentas.
-
-#### Fase 2: Operações em Tempo Real, Handoff e Analytics (Sprints 05 - 07)
-* **Sprint 05: Handoff Humano-IA e Sincronização de Calendário**
-  * Transferência sem fricção entre agente IA e operador humano com resumo de contexto.
-  * Integração bidirecional com Google Calendar via chamada de ferramenta da IA.
-  * Endpoints de métricas Prometheus e logs JSON estruturados via `structlog`.
-  * *Critério de Aceite*: Preservação total de histórico no handoff e exportação limpa de métricas.
-* **Sprint 06: Processamento de Áudio e Streaming SSE em Tempo Real**
-  * Transcrição de mensagens de áudio inbound via OpenAI Whisper / Groq API.
-  * Broker Server-Sent Events (SSE) para atualização live da UI sem WebSockets.
-  * Gráfico de saúde da conversa DHS (Dynamic Health Score) em tempo real.
-  * *Critério de Aceite*: Streaming unidirecional estável e transcrição com latência controlada.
-* **Sprint 07: Análise Pós-Conversa, Data Warehouse e Dashboards**
-  * Agente coach de vendas pós-conversa (identificando padrões de objeção e oportunidades perdidas).
-  * Pipeline ETL/CDC para arquivamento e exportação dos dados locais do Turso para Data Warehouse externo (PostgreSQL/Supabase com `pgvector`).
-  * Dashboards analíticos do Manager Brain (conversão de funil, CAC, ROI, canais campeões).
-  * *Critério de Aceite*: Expurgo seguro de dados frios mantendo acesso unificado via DW.
-
-#### Fase 3: Expansão Omnichannel, Infraestrutura e Marketplace (Sprints 08 - 10)
-* **Sprint 08: Engine Omnichannel**
-  * Conectores nativos para Instagram DMs, E-mail e chamadas de Voz com IA.
-  * Gerenciador de continuidade entre canais permitindo que a conversa migre de plataforma sem perder contexto.
-  * *Critério de Aceite*: Continuidade de diálogo identificando o lead em múltiplos canais.
-* **Sprint 09: VPS Dedicada e Orquestração de Updates**
-  * Console Central MyraOS para provisionamento e monitoramento de VPSs dos clientes.
-  * Agent de Update automático via `systemd` fazendo pull de releases a cada 6h com rollback automático.
-  * *Critério de Aceite*: Deploy automatizado com recuperação autônoma diante de falhas de healthcheck.
-* **Sprint 10: Playbooks Verticais e Marketplace de Agentes**
-  * Playbooks verticais pré-configurados (Saúde/Clínicas, Imobiliário, Automotivo, Serviços Financeiros).
-  * Framework de Marketplace para distribuição de personas e fluxos customizados.
-  * *Critério de Aceite*: Instalação de novos playbooks com substituição dinâmica de prompts e memórias.
-
 ---
 
-## 4. Arquitetura do Sistema Multi-Agente de IA
+## 4. Arquitetura do Sistema Multi-Agente de IA (LangChain & LangGraph)
 
-O sistema opera como um **ecossistema orquestrado de 6 Agentes de IA especializados**, garantindo modularidade, separação clara de responsabilidades e controle refinado de contexto e execução:
+O sistema opera como um **ecossistema orquestrado de 6 Agentes de IA especializados**, construído sobre **LangChain (`langchain-core`)** e **LangGraph (`langgraph`)**, garantindo grafos de estado persistentes (`StateGraph`), separação clara de responsabilidades, resiliência via fallbacks (`with_fallbacks`) e rastreabilidade total no LangSmith (ADR-027, ADR-028, ADR-029):
 
 ```
                           +-----------------------------------+
                           |    Mensagem / Evento de Entrada   |
                           +-----------------+-----------------+
                                             |
-                                            v
+                                            v (Taskiq Queue - Immediate HTTP 202)
 +-----------------------------------------------------------------------------------+
 |                              1. Agente AI Sales SDR                               |
-|  - Conduz conversa ativa com Lead via WhatsApp / Instagram / E-mail / Voz         |
-|  - Acessa Base RAG, Persona do System Prompt e Memórias do Lead                   |
-|  - Invoca Ferramentas: schedule_meeting(), update_stage(), add_lead_memory()     |
+|  - LangGraph StateGraph com MemorySaver Checkpointer & Thread ID por (Org:Lead)   |
+|  - Acessa Hot RAG (sqlite-vec), Persona do System Prompt e Memórias do Lead       |
+|  - Invoca Ferramentas @tool: schedule_meeting(), update_stage(), add_memory()     |
+|  - Pausa via interrupt() para Human-in-the-Loop em ações sensíveis                |
+|  - Modelo resiliente com with_fallbacks(): Gemini 2.5 Flash -> Sonnet 3.5 -> GPT  |
 +-------------------+-------------------------------------------+-------------------+
                     |                                           |
-                    v (Background Assíncrono)                   v (Background Assíncrono)
+                    v (Taskiq Background Task)                  v (Taskiq Background Task)
 +---------------------------------------+   +---------------------------------------+
 |      2. Agente Extrator de Memória     |   | 3. Classificador de Scoring e Intenção |
-| - Analisa diálogo para extrair fatos, |   | - Avalia intenção e sentimento do lead|
-|   orçamento, objeções e preferências  |   | - Atualiza score DHS e temperatura    |
-| - Salva registros estruturados no DB  |   | - Dispara alerta prioritário se Quente|
+| - LCEL Chain + Instructor / Pydantic  |   | - LangChain with_structured_output()  |
+| - Extrai orçamentos, objeções e fatos |   | - Atualiza score DHS (-100 a +100)    |
+| - Salva registros de longo prazo      |   | - Dispara alertas de temperatura      |
 +---------------------------------------+   +---------------------------------------+
                     |                                           |
                     +-------------------+-----------------------+
@@ -176,22 +129,22 @@ O sistema opera como um **ecossistema orquestrado de 6 Agentes de IA especializa
                                         v
 +-----------------------------------------------------------------------------------+
 |                    4. Agente de Cadência e Reengajamento                          |
-| - Disparado pelo ARQ Scheduler em inatividade de leads ou regras de régua         |
-| - Gera mensagem contextual de follow-up usando memórias passadas                  |
+| - Grafo LangGraph disparado por Taskiq Scheduler em inatividade de leads          |
+| - Gera mensagem contextual de follow-up usando memórias passadas do Lead          |
 +-----------------------------------------------------------------------------------+
                                         |
                                         v
 +-----------------------------------------------------------------------------------+
 |                     5. Agente de Processamento de Voz e Áudio                     |
-| - Transcreve mensagens de áudio inbound/outbound via Whisper API                  |
-| - Formata texto para processamento downstream pelo AI Sales SDR                   |
+| - Transcreve mensagens de áudio inbound/outbound via Whisper API / Groq           |
+| - Formata texto para processamento downstream no Grafo do AI Sales SDR            |
 +-----------------------------------------------------------------------------------+
                                         |
                                         v
 +-----------------------------------------------------------------------------------+
 |                     6. Coach de Vendas e Analista Pós-Conversa                    |
-| - Roda ao encerrar conversa/chamada para avaliar desempenho do SDR                |
-| - Alimenta insights analíticos para os Brains Manager e Revenue                   |
+| - Grafo LangGraph de análise de encerramento para auditoria de performance SDR   |
+| - Alimenta insights analíticos para os Brains Manager e Revenue em Cold DW        |
 +-----------------------------------------------------------------------------------+
 ```
 
@@ -199,122 +152,67 @@ O sistema opera como um **ecossistema orquestrado de 6 Agentes de IA especializa
 
 | Nome do Agente | Função Principal | Gatilho de Execução | Tier de Modelo / Capacidade | Recursos Chave |
 |---|---|---|---|---|
-| **1. Agente AI Sales SDR** | Atendimento direto, qualificação e agendamento | Mensagem Inbound do Lead | Tier Raciocínio Avançado | Tool Calling, Busca vetorial RAG, Adaptação de Persona, Modo Copilot. |
-| **2. Extrator de Memória** | Extração de memória de longo prazo | Lote assíncrono pós-mensagem | Tier Rápido / JSON Estruturado | Saída JSON estruturada estrita, validação Pydantic. |
-| **3. Classificador de Intenção** | Scoring de intenção e definição de temperatura | Pós-turno assíncrono | Tier Rápido / Classificação | Classificação rápida, análise de sentimento, ajuste de DHS. |
-| **4. Agente de Cadência** | Reativação de leads frios ou dormentes | Timer agendado no ARQ | Tier Intermediário | Reentrada contextual, tom anti-spam, integração de memória. |
-| **5. Processador de Voz** | Transcrição e diarização de áudio | Áudio inbound recebido | Modelo de Transcrição Dedicado | Alta precisão em PT-BR, formatação texto-áudio. |
-| **6. Coach de Vendas** | Auditoria de performance e análise de perdas | Fim da conversa / Mudança de estágio | Tier Raciocínio Profundo | Raciocínio analítico, scoring de técnicas de vendas, relatórios. |
+| **1. Agente AI Sales SDR** | Atendimento direto, qualificação e agendamento | Taskiq Job via Webhook Inbound | Gemini 2.5 Flash / Claude 3.5 Sonnet (Fallback: GPT-4o-mini / Groq) | LangGraph `StateGraph`, `@tool` Calling, Human-in-the-Loop `interrupt()`, `with_fallbacks()`, Hot RAG (`sqlite-vec`), LangSmith Tracing. |
+| **2. Extrator de Memória** | Extração de memória de longo prazo | Taskiq Background Task | Tier Rápido / Instructor & Pydantic | Saída Pydantic estrita, validação de tipos, salvamento em `lead_memories`. |
+| **3. Classificador de Intenção** | Scoring de intenção e definição de temperatura | Taskiq Background Task | Tier Rápido / `with_structured_output` | Classificação de intenção, análise de sentimento, atualização de DHS. |
+| **4. Agente de Cadência** | Reativação de leads frios ou dormentes | Taskiq Cron Scheduler | LangChain Runnable / Tier Intermediário | Reentrada contextual, tom anti-spam, consulta ao histórico do grafo. |
+| **5. Processador de Voz** | Transcrição e diarização de áudio | Webhook de Mídia Inbound | Groq Whisper / OpenAI Whisper | Alta precisão em PT-BR, VAD, injeção no histórico de mensagens do LangGraph. |
+| **6. Coach de Vendas** | Auditoria de performance e análise de perdas | Encerramento de conversa | LangGraph Chain / Tier Raciocínio | Raciocínio analítico, scoring de técnicas de vendas em Cold DW. |
 
 ---
 
 ## 5. Arquitetura de Telemetria, Otimização de Contexto e FinOps Técnico
 
-Em substituição a estimativas comerciais voláteis, o controle de consumo da infraestrutura de IA é gerido via **engenharia de contexto, instrumentação de telemetria e padrões de roteamento técnico**.
-
-### 5.1 Instrumentação de Telemetria de Tokens
-
-Para garantir observabilidade total do consumo de LLMs por tenant:
-
-1. **Middleware de Rastreamento de Tokens**: Todas as chamadas para provedores de LLM são envelopadas por um decorator de telemetria que registra `input_tokens`, `output_tokens` e `cached_tokens`.
-2. **Isolamento de Métricas por Organização**: Toda métrica de consumo é etiquetada com o `organization_id` da ContextVar e exportada via Prometheus.
-3. **Budget Capping Operacional**: Limites de segurança por tenant configuráveis no banco para prevenir loops ou consumo descontrolado.
-
-### 5.2 Estratégias de Gestão e Compressão de Contexto
-
-Para manter a latência baixa e a estabilidade das chamadas de IA:
-
-* **Janela Deslizante (Sliding Window)**: O histórico de chat enviado ao modelo é limitado às últimas $N$ mensagens relevantes, evitando o crescimento exponencial da janela.
-* **Injeção de Memória Resumida**: Em vez de passar transcrições completas do passado, o sistema injeta os atributos de longo prazo extraídos pelo *Memory Brain*.
-* **Capping de RAG Top-K**: O número de chunks recuperados da base vetorial é estritamente limitado por orçamento de tokens por turno.
-
-### 5.3 Padrão Abstrato de Roteamento de Modelos (Multi-Tier LLM Router)
-
-O sistema utiliza a abstração `LLMProviderInterface` permitindo alterar ou alternar modelos sem alterar o código de domínio:
-
-```python
-class LLMProviderInterface(Protocol):
-    async def generate_response(
-        self,
-        prompt: str,
-        system_prompt: str,
-        tools: list[dict] | None = None,
-        temperature: float = 0.7,
-    ) -> LLMResponse: ...
-```
-
-* **Tier Rápido / Leve**: Utilizado para extração de dados estruturados, classificação de intenção e tarefas de segundo plano.
-* **Tier de Raciocínio Avançado**: Reservado para o diálogo ativo com o cliente, resolução de objeções complexas e coaching pós-venda.
-
-### 5.4 Mecanismos Tecnológicos de Eficiência
-
-1. **System Prompt Caching**: Utilização de cabeçalhos de cache nativos dos provedores para reaproveitar os prompts de sistema e bases de conhecimento RAG estáticas entre turnos.
-2. **Processamento Assíncrono em Lote**: Tarefas de extração de memória e análise de intenção são desacopladas do fluxo principal de resposta ao usuário via filas de background.
-3. **Truncamento Dinâmico de Ferramentas**: Envio apenas dos schemas de ferramentas estritamente necessários para a fase atual do diálogo.
+### 5.1 Instrumentação de Telemetria e Caching
+1. **Middleware de Rastreamento de Tokens**: Registra `input_tokens`, `output_tokens` e `cached_tokens` rotulados com a ContextVar `organization_id`.
+2. **Rate Limiting por Tenant**: Proteção contra abusos via `TenantRateLimiter` (ADR-025) com backend Valkey/Redis ou DiskCache local.
+3. **Multi-Tier Caching**: Cache LRU em memória para temas White-Label e traduções, mitigando consultas desnecessárias ao banco.
 
 ---
 
-## 6. Invariantes Técnicos e Governança
-
-Todos os desenvolvedores e agentes de IA devem seguir rigorosamente os seguintes invariantes estabelecidos desde a v0.2.0:
-
-### 6. Orçamentos de Latência e SLAs de Performance (Limites P95)
-
-Todos os componentes do sistema estão submetidos a SLAs rígidos de latência P95:
+## 6. SLAs de Performance e Orçamentos de Latência (P95)
 
 | Componente / Camada | Operação | Latência Máxima (P95) | Estratégia de Otimização |
 |---|---|---|---|
 | **Banco Turso (libSQL)** | Query / Insert no `.db` local | **$< 10\text{ ms}$** | Arquivo local embarcado, índice composto `(organization_id, id)` |
 | **API Core FastAPI** | Execução de rota HTTP | **$< 50\text{ ms}$** | Rotas finas assíncronas, camada de serviço, Jinja2 pré-compilado |
 | **Stream SSE Real-Time** | Notificação de evento live | **$< 100\text{ ms}$** | Broker assíncrono em memória, zero polling |
-| **Ingestão Webhook Z-API** | Recebimento de mensagem | **$< 300\text{ ms}$** | Retorno HTTP 200 imediato + delegação para fila ARQ |
+| **Ingestão Webhook Z-API** | Recebimento de mensagem | **$< 50\text{ ms}$** | Retorno HTTP 202 imediato + delegação para fila Taskiq |
+| **Hot RAG Vector Search** | Busca semântica local | **$< 15\text{ ms}$** | `sqlite-vec` / `libsql-vector` embarcado na VPS |
 | **API Transcrição Whisper** | Transcrição de nota de áudio | **$< 1,500\text{ ms}$** | Endpoint otimizado Groq / OpenAI Whisper |
-| **Agente AI Sales SDR** | Resposta conversacional | **$< 1,200\text{ ms}$** | System Prompt Caching + roteamento Gemini 1.5 Flash |
+| **Agente AI Sales SDR** | Resposta conversacional | **$< 1,200\text{ ms}$** | System Prompt Caching + Instructor + Gemini 2.5 Flash |
 
 ---
 
 ## 7. Invariantes Técnicos, Segurança Zero-Trust e Governança
 
-Todos os desenvolvedores e agentes de IA devem seguir rigorosamente os seguintes invariantes estabelecidos desde a v0.2.0 e ADRs arquiteturais:
-
 1. **Padrão App Factory**: Sem singletons globais de módulo. O estado vive estritamente em `app.state`.
 2. **Camadas Estritas**: Rota FastAPI -> `service.py` de domínio -> Tabelas SQLModel. Queries SQL NUNCA vivem nas rotas da API.
-3. **Defesa em Profundidade Multi-Tenant Zero-Trust**: Toda query DEVE filtrar por `organization_id`. Tentativas cross-tenant retornam `404 Not Found` genérico. O `organization_id` vem estritamente do contexto `ContextVar`, NUNCA do payload do usuário.
+3. **Defensa em Profundidade Multi-Tenant Zero-Trust**: Toda query DEVE filtrar por `organization_id`. Tentativas cross-tenant retornam `404 Not Found` genérico. O `organization_id` vem estritamente da `ContextVar`, NUNCA do payload do usuário.
 4. **Hardening de Autenticação**: Hashes de senha via **Argon2id** (`pwdlib`), JWTs de sessão (PyJWT HS256) com claims `jti` únicos, cookies HttpOnly SameSite=Lax.
 5. **Proteção de Dados & LGPD**: Soft deletes (`status='deletado'`), Anonimização de Dados Pessoais mediante solicitação, headers CSP (`script-src 'self'`).
 6. **Envelope de Erros Unificado**: Erros lançam subclasses de `AppError` resultando no envelope JSON padrão `{"error": {"code": ..., "message": ..., "details": ...}}`.
-7. **Versionamento Rígido com Alembic**: Modelos de tabela refletem o banco. Alterações de schema exigem script de migration (`alembic revision --autogenerate`) com validação round-trip obrigatória (`upgrade head -> downgrade -1 -> upgrade head`).
+7. **Versionamento Rígido com Alembic Batch**: Modelos de tabela refletem o banco. Alterações de schema exigem script de migration com `render_as_batch=True` e validação round-trip obrigatória (`upgrade head -> downgrade -1 -> upgrade head`).
 8. **Auto-Contenção On-Premise**: Zero dependência de CDNs ou assets externos. Todos os assets estão embarcados localmente.
-9. **Tempo Real via SSE**: Utilizar Server-Sent Events para atualizações unidirecionais do servidor para o cliente (sem complexidade de WebSockets).
-10. **Data Tiering (Hot/Cold Storage)**: Turso local mantém dados ativos; pipeline assíncrono ETL migra históricos para PostgreSQL/Supabase DW (`pgvector`).
-11. **Alinhamento aos Prototipos**: Integração total dos componentes visuais do `01_SDR_Prototype` (Command Center, Live Chat Inbox, Lead Drawer, Kanban/List/Merge, Theme Studio, Billing & Tradução) e `02_ZAP_Prototype` (Grid 3 colunas, Gráfico DHS, Sugestões RAG, Toggle Copilot, Player de Áudio, Auto-Sync Background Protocol).
-12. **Matriz de Testes & QA**: Mínimo de **> 85% de cobertura geral no backend** e **100% de cobertura nos testes de isolamento multi-tenant** (`tests/test_tenant_isolation.py`).
+9. **Tempo Real via SSE**: Utilizar Server-Sent Events para atualizações unidirecionais do servidor para o cliente.
+10. **Data & Vector Tiering (Hot/Cold Storage)**: Turso local com `sqlite-vec` mantém dados ativos; pipeline assíncrono Taskiq/ETL migra históricos para PostgreSQL/Supabase DW com `pgvector` HNSW.
+11. **Alinhamento aos Prototipos**: Integração total dos componentes visuais do `01_SDR_Prototype` e `02_ZAP_Prototype`.
+12. **Matriz de Qualidade & AI Coding Guardrails**: Cobertura geral backend $> 85\%$, isolamento multi-tenant 100%, e execução mandatória do script de verificação pré-commit pelos agentes de IA.
 
 ---
 
 ## 8. Matriz de Qualidade, Integração Contínua e Operações de Deploy
 
-### 8.1 Checklist de Validação Obrigatória (Pré-Commit / Pré-Merge)
-
-Antes de submeter qualquer Pull Request, o código deve passar 100% nos seguintes verificadores:
+### 8.1 Harness de Verificação Pré-Commit (Mandatório para Agentes de IA)
 
 ```bash
-pytest                                            # Suíte completa de testes isolados (>85% cobertura)
-ruff check app/ tests/ scripts/ alembic/          # Análise estática de código e segurança
-ruff format --check app/ tests/ scripts/          # Verificação de formatação de código
-alembic upgrade head && alembic downgrade -1 && alembic upgrade head # Validação round-trip de migration
-./start &                                         # Teste de inicialização e rotas de saúde
+pytest tests/ --cov=app --cov-report=term-missing --cov-fail-under=85  # Cobertura >85% + 100% isolamento
+ruff check app/ tests/ scripts/ alembic/                              # Lint de código e segurança
+ruff format --check app/ tests/ scripts/                              # Formatação estrita
+alembic upgrade head && alembic downgrade -1 && alembic upgrade head    # Round-trip de migration
+./start &                                                             # Teste de inicialização e saúde
 curl http://127.0.0.1:8000/api/v1/health/
 ```
-
-### 8.2 Arquitetura de Deploy On-Premise-as-a-Service
-
-O modelo de implantação em VPSs dedicadas é operado da seguinte forma:
-
-1. **Instalação Auto-Contida**: Cada nó de cliente executa a aplicação Python com Turso local em arquivo `.db`.
-2. **Update Agent via `systemd`**: Um serviço de segundo plano consulta o **MyraOS Platform Console** a cada 6 horas por novas versões de release.
-3. **Estratégia de Rollback Autônomo**: Durante o processo de atualização, o agente executa a migration do Alembic e os testes de healthcheck (`/api/v1/health/`). Caso o endpoint responda com erro ou falhe na inicialização, o agent executa automaticamente o rollback para a versão anterior e notifica o console central.
-4. **Probes de Liveness e Readiness**: Monitoramento contínuo da saúde dos processos de segundo plano e da integridade da conexão com a base de dados local.
 
 ---
 

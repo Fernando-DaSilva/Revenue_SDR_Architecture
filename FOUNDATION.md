@@ -1,4 +1,4 @@
-# FOUNDATION.md — Revenue SDR OS (v2.0)
+# FOUNDATION.md — Revenue SDR OS (v2.2)
 
 > **Documento fundador do produto.** O QUE estamos construindo e POR QUE.
 > O COMO detalhado vive em [ARCHITECTURE.md](ARCHITECTURE.md).
@@ -40,7 +40,7 @@ O cliente nao compra Zap, Instagram ou IA. **Ele compra agenda cheia.**
 | **Opportunity Brain** | Scoring baseado em eventos (respondeu rapido +5, perguntou preco +25...) | S3 |
 | **Omnichannel Engine** | Continuidade entre canais: IG -> Zap -> email -> ligacao | S3/S8 |
 | **Cadence Engine** | Maquina de estados da regua de relacionamento por temperatura do lead | S3 |
-| **AI Sales Brain** | Abstracao de LLMs (OpenAI/Anthropic) com RAG/Tools; age como vendedor senior, nao chatbot | S4 |
+| **AI Sales Brain** | Abstracao de LLMs com Instructor/Pydantic, RAG e Tool Calling; age como vendedor senior | S4 |
 | **Manager Brain** | Numeros do dono: funil, CAC, ROI, canal vencedor, melhor vendedor | S5-S7 |
 | **Revenue Brain** | Pensa dinheiro: por que perdemos leads, onde esta o gargalo, o que sugerir | S7 |
 
@@ -85,19 +85,23 @@ Consultoria. Para a engenharia isso significa:
   frontend
 - Foco 100% no core: orquestracao de conversas, eventos, IA e infra
 
-## 7. Tech stack (fixa)
+## 7. Tech stack (fixa e otimizada para Agentes de IA)
 
 | Camada | Escolha | Motivo |
 |---|---|---|
-| Backend | Python 3.12+ / FastAPI | Async nativo, OpenAPI, API-first |
-| ORM/DB | SQLModel sobre Turso (libSQL) / Embedded Replicas | Pydantic+SQLAlchemy; 100% compatível com .db local + backup nuvem opcional |
-| Schema | Alembic | Versionamento rigido desde o dia zero |
-| Auth | PyJWT (HS256) + pwdlib/Argon2id | python-jose/passlib abandonados (CVEs) |
-| Frontend | Jinja2 + HTMX + Alpine.js **vendored** | Hypermedia-driven; sem complexidade de SPA |
+| Backend | Python 3.12+ / FastAPI | Async nativo, OpenAPI 3.1, API-first estrito |
+| ORM/DB Hot Storage | SQLModel sobre Turso (libSQL) / `.db` local | Pydantic+SQLAlchemy; 100% compatível com .db local + backup nuvem (ADR-016) |
+| Cold Storage / DW | PostgreSQL / Supabase + `pgvector` | Storage tiering assíncrono para histórico e RAG profundo (ADR-015, ADR-022) |
+| Schema & Migrations | Alembic (Batch Mode `render_as_batch=True`) | Versionamento rígido desde o dia zero compatível com SQLite/libSQL (ADR-024) |
+| Auth | PyJWT (HS256) + pwdlib/Argon2id | python-jose/passlib abandonados (CVEs), claims `jti` para revogação |
+| Frontend | Jinja2 + HTMX + Alpine.js **vendored** | Hypermedia-driven; sem complexidade de SPA, Tailwind + DaisyUI (ADR-001) |
 | Tema | CSS variables por tenant | Trocar tenant = trocar CSS, zero JS |
-| Real-time | SSE (nao WebSocket) | Unidirecional server->client, simples |
-| Jobs | ARQ/APScheduler (Sprint 3+) | Cadencias e missoes agendadas, idempotentes |
-| Storage Tiering | Turso Local (Hot) + PostgreSQL/Supabase (Cold DW) | Hot storage leve (<10ms) + DW analítico e vetorial (ADR-015) |
+| Real-time | SSE (nao WebSocket) via `sse-starlette` | Unidirecional server->client com auto-reconnect nativo (ADR-005) |
+| Fila & Jobs | Taskiq + Redis / AioSQLite embarcado | Fila assíncrona desacoplada com idempotência via `job_key` e DLQ (ADR-021) |
+| LLM Orchestration | LangChain + LangGraph + Instructor + Pydantic v2 | Grafos de estado com checkpointer, Tool Calling, fallback router Gemini/Sonnet/GPT-4o (ADR-023, ADR-027, ADR-028) |
+| Observabilidade & Tracing | LangSmith + Structlog (JSON Lines) | Tracing visual de grafos LangGraph, telemetria de tokens por tenant e Evals (ADR-014, ADR-029) |
+| Vector & RAG Search | Hybrid RAG (`sqlite-vec` Hot + `pgvector` Cold + RRF) | Reciprocal Rank Fusion combinando FTS/BM25 + Cosine Similarity (ADR-022) |
+| Caching & Protection | In-Memory LRU + Valkey/Redis/DiskCache | Cache de temas/locales + Rate Limiting por tenant e IP (ADR-025) |
 | Localização | Presets de Cores + Tradução Granular por Usuário | White-Label real com 5 temas e locales `pt-BR`, `es-ES`, `en-GB`, `de-DE`, `lt-LT` (ADR-013) |
 | Standalone Micro-App | Zap Copilot Prototype (`02_ZAP_Prototype`) | Sub-produto de atendimento Zap Web leve com Auto-Sync Background (ADR-017) |
 
@@ -109,9 +113,10 @@ Consultoria. Para a engenharia isso significa:
 2. **Soft delete e LGPD** — deletar marca `status='deletado'`, nao remove. Suporte a anonimização irreversível sob demanda do titular.
 3. **Multi-tenant com defesa em profundidade Zero-Trust** — constraints no banco,
    filtro por ContextVar `organization_id` em toda query, 404 generico cross-tenant,
-   token JWT (Argon2id + PyJWT HS256 com `jti`) nao opera fora do tenant de origem, suíte de 100% de isolamento.
+   token JWT (Argon2id + PyJWT HS256 com `jti`) nao opera fora do tenant de origem, suíte de 100% de isolamento (ADR-018).
 4. **SLAs de Performance Rigorosos (P95)** — Turso local < 10ms, Core API < 50ms, SSE < 100ms, Z-API Webhook < 300ms, Whisper < 1.5s, SDR Agent LLM < 1.2s (ADR-019).
 5. **Garantia de Qualidade & Cobertura** — Cobertura geral backend > 85%, isolamento multi-tenant 100%, validação round-trip de Alembic migrations e Visual Quality Control (ADR-020).
+6. **Desenvolvimento Orientado a Agentes de IA** — Todo o repositório é construído sob guardiões de código estritos legíveis por IA, com contratos Pydantic e harness automático de teste pré-commit (ADR-026).
 
 ## 9. Onde vive o que
 
@@ -123,13 +128,12 @@ Consultoria. Para a engenharia isso significa:
 | **Zap Standalone Micro-App** | `~/AGENCIA/02_ZAP_Prototype/` (Micro-app Zap Copilot + Auto-Sync Background) |
 | Ideacao historica | `~/AGENCIA/SDR/docs/historico/` |
 
-
 ## 10. Estado atual (2026-08-10)
 
 **v0.2.0 (baseline, commit `4513a29`)**: fundacao profissional — multi-tenancy,
 auth dupla (cookie+Bearer), white-label, Alembic, 57 testes isolados, CI verde.
 
-O planejamento estratégico **(Sprint 00 e Specs de Arquitetura) está finalizado**, e todas as Sprints (01 a 10) contam com especificações arquiteturais alinhadas aos protótipos de alta fidelidade (`01_SDR_Prototype` e `02_ZAP_Prototype`), aos SLAs de Performance (ADR-019), à Segurança Zero-Trust (ADR-018) e à Matriz de Qualidade (ADR-020).
+O planejamento estratégico **(Sprint 00 e Specs de Arquitetura) está finalizado**, e todas as Sprints (01 a 10) contam com especificações arquiteturais alinhadas aos protótipos de alta fidelidade (`01_SDR_Prototype` e `02_ZAP_Prototype`), aos SLAs de Performance (ADR-019), à Segurança Zero-Trust (ADR-018), à Matriz de Qualidade (ADR-020) e aos Guardiões de Agentes de IA (ADR-026).
 
 **Proximo**: Execução técnica da Sprint 02 — Lead Brain + Memory Brain
 ([spec](Sprints/02_Sprint_02_Lead_Brain_Memory_Brain/README.md)).

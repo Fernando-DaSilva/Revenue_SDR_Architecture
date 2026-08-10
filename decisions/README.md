@@ -24,5 +24,12 @@ Este diretório contém os registros de decisões arquiteturais importantes do p
 * **ADR-018** — [Segurança Multi-Tenant Zero-Trust, Hardening de Auth e Conformidade LGPD](018-zero-trust-multi-tenant-security-and-compliance.md)
 * **ADR-019** — [SLAs de Performance, Orçamentos de Latência e Otimização FinOps](019-performance-sla-and-latency-budgets.md)
 * **ADR-020** — [Garantia de Qualidade (QA), Matriz de Testes e Controle de Qualidade Visual](020-quality-assurance-and-automated-testing-matrix.md)
-
-
+* **ADR-021** — [Processamento de Jobs Assíncronos, Filas de Tarefas e Resiliência (Taskiq / SAQ)](021-background-jobs-task-queues-resilience.md)
+* **ADR-022** — [Arquitetura Híbrida de RAG e Busca Vetorial (sqlite-vec + pgvector)](022-vector-search-and-rag-hybrid-architecture.md)
+* **ADR-023** — [Orquestração de LLMs, Saídas Estruturadas via Instructor e Cadeia de Fallbacks](023-llm-orchestration-structured-outputs-instructor.md)
+* **ADR-024** — [Migrações de Banco de Dados via Alembic em SQLite/libSQL (Batch Mode)](024-alembic-sqlite-libsql-batch-migrations.md)
+* **ADR-025** — [Estratégia de Caching em Camadas, Rate Limiting e Proteção de Ingestão (Valkey / Redis / In-Memory)](025-caching-rate-limiting-valkey-redis.md)
+* **ADR-026** — [Guardiões de Engenharia para Codificação via Agentes de IA (AI-Agent Driven Development)](026-ai-agent-driven-code-generation-guardrails.md)
+* **ADR-027** — [Orquestração de Agentes com Ecossistema LangChain e LangGraph](027-langchain-langgraph-multi-agent-orchestration.md)
+* **ADR-028** — [Workflows de Agentes Baseados em Estado com LangGraph e Human-in-the-Loop](028-langgraph-stateful-workflows-and-human-in-the-loop.md)
+* **ADR-029** — [Observabilidade, Tracing e Avaliação de Agentes com LangSmith](029-langsmith-observability-evals-and-prompt-management.md)
