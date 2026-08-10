@@ -67,6 +67,42 @@ CREATE TABLE daily_metrics (
 
 ---
 
-## Decisões Críticas
+---
 
-- As queries do Dashboard não podem travar a instância (especialmente usando SQLite no MVP). Avaliar se criamos jobs periódicos (CRON via Fila) que calculam e agregam os dados nas tabelas `daily_metrics` de madrugada, mantendo o App principal muito leve de leitura.
+## Alinhamento com Prototipos (`01_SDR_Prototype` e `02_ZAP_Prototype`)
+
+- **01_SDR_Prototype**:
+  - Command Center Overview (`commandCenterTab: 'overview'`): métricas de conversão de funil, ROI, CAC e métricas agregadas por período.
+  - Data Management & Storage Tiering (`dataTab: 'tiering_retention'`): rotina de arquivamento para DW, gerenciamento de Cold Storage e expurgo do SQLite local.
+- **02_ZAP_Prototype**:
+  - Auto-Push de métricas pós-conversa e fechamento de atendimento no Inspector de Transmissão.
+
+---
+
+## SLAs de Performance (P95), Tiering de Dados & Segurança
+
+- **Data Tiering & Arquivamento (ADR-015)**:
+  - Turso Local (Hot Storage) retém leads ativos e conversas recentes.
+  - Pipeline ETL/CDC diário (D-1) exporta históricos consolidados para PostgreSQL/Supabase (Cold Storage / DW com `pgvector`).
+  - Job de Archiving purga registros antigos do Turso local mantendo buscas analíticas transparentes no DW.
+- **Performance SLAs (ADR-019)**:
+  - Leitura de Dashboards Agregados: **$< 50\text{ ms}$** (lendo do `daily_metrics` ou DW)
+  - Execução do Sales Coach AI: **$< 2,500\text{ ms}$** (job assíncrono em background)
+- **Segurança Zero-Trust (ADR-018)**:
+  - Garantia de isolamento por `organization_id` nos dados agregados exportados para o Data Warehouse.
+- **Garantia de Qualidade (ADR-020)**:
+  - Cobertura de testes unitários do pipeline de métricas e ETL **> 85%**.
+  - **100% de cobertura nos testes de isolamento analítico** (`tests/test_analytics_isolation.py`).
+  - Migration Alembic das tabelas `conversation_reviews` e `daily_metrics` testadas via round-trip.
+
+---
+
+## Criterios de Aceitacao (Definition of Done)
+
+```
+[ ] Sales Coach AI gera relatório de avaliação da conversa (score, pontos fortes, fracas, dicas)
+[ ] Pipeline ETL expurta conversas consolidadas para DW mantendo Turso leve (<10ms)
+[ ] Dashboards gerenciais em GET /api/v1/analytics/funnel respondem em <50ms P95
+[ ] Expurgo seguro de dados frios executado sem perder histórico no DW
+[ ] Cross-tenant isolation 100% aprovado nos dados analíticos
+```

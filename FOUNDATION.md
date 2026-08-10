@@ -97,16 +97,21 @@ Consultoria. Para a engenharia isso significa:
 | Tema | CSS variables por tenant | Trocar tenant = trocar CSS, zero JS |
 | Real-time | SSE (nao WebSocket) | Unidirecional server->client, simples |
 | Jobs | ARQ/APScheduler (Sprint 3+) | Cadencias e missoes agendadas, idempotentes |
+| Storage Tiering | Turso Local (Hot) + PostgreSQL/Supabase (Cold DW) | Hot storage leve (<10ms) + DW analítico e vetorial (ADR-015) |
+| Localização | Presets de Cores + Tradução Granular por Usuário | White-Label real com 5 temas e locales `pt-BR`, `es-ES`, `en-GB`, `de-DE`, `lt-LT` (ADR-013) |
+| Standalone Micro-App | Zap Copilot Prototype (`02_ZAP_Prototype`) | Sub-produto de atendimento Zap Web leve com Auto-Sync Background (ADR-017) |
 
-## 8. Principios de dados
+## 8. Principios de dados, Segurança e Performance
 
 1. **Eventos append-only** — tabela central de eventos (timeline): tudo que
    importa vira registro imutavel (`score_changed`, `stage_changed`,
    `objection_detected`). Permite audit log, analytics e replay.
-2. **Soft delete** — LGPD: deletar marca `status='deletado'`, nao remove.
-3. **Multi-tenant com defesa em profundidade** — constraints no banco,
-   filtro por `organization_id` em toda query, 404 generico cross-tenant,
-   token JWT nao opera fora do tenant de origem, testes de isolamento.
+2. **Soft delete e LGPD** — deletar marca `status='deletado'`, nao remove. Suporte a anonimização irreversível sob demanda do titular.
+3. **Multi-tenant com defesa em profundidade Zero-Trust** — constraints no banco,
+   filtro por ContextVar `organization_id` em toda query, 404 generico cross-tenant,
+   token JWT (Argon2id + PyJWT HS256 com `jti`) nao opera fora do tenant de origem, suíte de 100% de isolamento.
+4. **SLAs de Performance Rigorosos (P95)** — Turso local < 10ms, Core API < 50ms, SSE < 100ms, Z-API Webhook < 300ms, Whisper < 1.5s, SDR Agent LLM < 1.2s (ADR-019).
+5. **Garantia de Qualidade & Cobertura** — Cobertura geral backend > 85%, isolamento multi-tenant 100%, validação round-trip de Alembic migrations e Visual Quality Control (ADR-020).
 
 ## 9. Onde vive o que
 
@@ -114,18 +119,19 @@ Consultoria. Para a engenharia isso significa:
 |---|---|
 | **Codigo do produto** | `~/AGENCIA/SDR/` -> [Revenue_SDR_OS](https://github.com/Fernando-DaSilva/Revenue_SDR_OS) |
 | **Arquitetura/docs (este repo)** | `~/AGENCIA/Revenue_SDR_Architecture/` -> [Revenue_SDR_Architecture](https://github.com/Fernando-DaSilva/Revenue_SDR_Architecture) |
+| **SDR Command Center UI Prototype** | `~/AGENCIA/01_SDR_Prototype/` (Wireframe de Alta Fidelidade + White-Label Theme Studio + Multi-Channel Inbox) |
 | **Zap Standalone Micro-App** | `~/AGENCIA/02_ZAP_Prototype/` (Micro-app Zap Copilot + Auto-Sync Background) |
 | Ideacao historica | `~/AGENCIA/SDR/docs/historico/` |
 
 
-## 10. Estado atual (2026-07-21)
+## 10. Estado atual (2026-08-10)
 
 **v0.2.0 (baseline, commit `4513a29`)**: fundacao profissional — multi-tenancy,
 auth dupla (cookie+Bearer), white-label, Alembic, 57 testes isolados, CI verde.
 
-O planejamento estratégico **(Sprint 00) está finalizado**, e todas as futuras Sprints (03 a 10) estão com especificações arquiteturais baseadas no `ROADMAP.md` e armazenadas na pasta `Sprints/`.
+O planejamento estratégico **(Sprint 00 e Specs de Arquitetura) está finalizado**, e todas as Sprints (01 a 10) contam com especificações arquiteturais alinhadas aos protótipos de alta fidelidade (`01_SDR_Prototype` e `02_ZAP_Prototype`), aos SLAs de Performance (ADR-019), à Segurança Zero-Trust (ADR-018) e à Matriz de Qualidade (ADR-020).
 
-**Proximo**: Sprint 02 — Lead Brain + Memory Brain
+**Proximo**: Execução técnica da Sprint 02 — Lead Brain + Memory Brain
 ([spec](Sprints/02_Sprint_02_Lead_Brain_Memory_Brain/README.md)).
 
 ---

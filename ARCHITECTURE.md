@@ -227,6 +227,21 @@ tabela central de eventos do dominio. Regras:
 - **Decisão**: Implementar a aplicação de atendimento Zap Web em arquitetura de **Standalone Micro-App**: layout grid de 3 colunas com controle independente de painéis (move/minimize/maximize), alternador de modo (`🤖 Copilot Active` vs `👤 SDR Humano`), player de áudio com transcrição Whisper, gráfico de saúde da negociação (**DHS Score** via Chart.js v4), sugestões RAG da base central e protocolo de **Auto-Sync em Background** (`dispatchAutoSyncEvent`) com fila offline em `localStorage`.
 - **Consequências**: Experiência ultra-leve para o operador de vendas com garantia de sincronia total de histórico, métricas DHS e feedback RAG com o backend do Core SDR OS.
 
+### ADR-018 — Segurança Multi-Tenant Zero-Trust, Hardening de Auth e Conformidade LGPD
+- **Contexto**: Garantia de isolamento absoluto entre organizações comerciais, proteção contra OWASP Top 10 e total adequação à LGPD.
+- **Decisão**: Aplicação do padrão **Zero-Trust Multi-Tenancy**. Injeção mandatória do `organization_id` via `ContextVar` no middleware ASGI, filtros imutáveis no `TenantMixin`, e retorno de **404 Not Found genérico** em qualquer tentativa cross-tenant. Uso exclusivo de **Argon2id** para senhas, **PyJWT (HS256)** com claim `jti` para sessões, cookies HttpOnly SameSite=Lax, e headers de segurança CSP `script-src 'self'`. Exclusões efetuadas via Soft Delete com opção de anonimização de dados pessoais sob demandas da LGPD.
+- **Consequências**: Isolamento completo a nível de dados e APIs; eliminação de vazamento de metadados em códigos de erro; plena conformidade regulatória.
+
+### ADR-019 — SLAs de Performance, Orçamentos de Latência (P95) e Otimização FinOps
+- **Contexto**: Atendimento de alta velocidade no Zap e na interface administrativa sem sobrecarregar a VPS dedicada ou extrapolar custos de LLM.
+- **Decisão**: Estabelecer SLAs rígidos de latência P95 (Turso Local $< 10\text{ ms}$, API Core $< 50\text{ ms}$, Eventos SSE $< 100\text{ ms}$, Ingestão Z-API $< 300\text{ ms}$, Transcrição Whisper $< 1.5\text{ s}$, Agente SDR $< 1.2\text{ s}$). Aplicar **Prompt Caching** em system prompts e bases RAG (75-90% de economia), janela deslizante de histórico de chat e **Roteamento Multi-Tier de LLMs** (Flash/Flash-Lite para tarefas de apoio e Sonnet/GPT-4o para casos complexos).
+- **Consequências**: Experiência de atendimento instantânea, estabilidade no uso de memória RAM/CPU na VPS local e previsibilidade financeira de consumo de tokens por tenant.
+
+### ADR-020 — Garantia de Qualidade (QA), Matriz de Testes e Controle de Qualidade Visual
+- **Contexto**: Necessidade de manter zero regressões funcionais, integridade de migrações de banco e fidelidade às telas e protótipos de alta qualidade.
+- **Decisão**: Instituir matriz de qualidade obrigatória: **100% de cobertura nos testes de isolamento multi-tenant** (`tests/test_tenant_isolation.py`), **> 85% de cobertura total nos serviços de backend**, validação round-trip de migrations (`alembic upgrade head && alembic downgrade -1 && alembic upgrade head`) e inspeção de qualidade visual baseada no prompt de Visual Quality Control (`prompts/16_...`).
+- **Consequências**: Confiabilidade extrema nas entregas de cada sprint, deploys seguros e fidelidade absoluta aos protótipos visuais (`01_SDR_Prototype` e `02_ZAP_Prototype`).
+
 ---
 
 *"Arquitetura e a arte de tomar decisoes faceis de reverter."*

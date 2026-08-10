@@ -64,7 +64,44 @@ ALTER TABLE conversations ADD COLUMN ai_mode BOOLEAN NOT NULL DEFAULT TRUE;
 
 ## Lógica Crítica de Negócio
 
-1. **Abstração Obrigatória**: O código não pode depender fortemente de Z-API em suas camadas de negócio. O payload de webhook Z-API deve ser normalizado para um formato de evento interno (`StandardMessageEvent`) no adapter.
-2. **Handoff Prevention & Copilot Sync**: Se `ai_mode` for false (SDR Humano no `02_ZAP_Prototype`), a IA ignora a mensagem recebida e atua apenas como copiloto de sugestões RAG. Se o humano envia uma mensagem, o sistema registra o papel `SDR_HUMAN_OPERATOR` e atualiza o estado para Handoff.
-3. **Resiliência Offline Standalone**: A API `/copilot/sync` aceita batched payloads da fila `pendingSyncQueue` provenientes do `localStorage` do `02_ZAP_Prototype` após a reconexão.
+---
+
+## Alinhamento com Prototipos (`01_SDR_Prototype` e `02_ZAP_Prototype`)
+
+- **01_SDR_Prototype**:
+  - Live Chat Inbox (`aiMode: 'Ativo (SDR-01)'` vs `'Handoff Solicitado'`): controle do modo autônomo da IA vs intervenção humana.
+  - Copilot Execution Confirmation Modal: modal de confirmação de execuções de ferramentas pela IA.
+- **02_ZAP_Prototype**:
+  - Central Chat Stream: alternador de modo IA Copilot (`🤖 Copilot Active` vs `👤 Human Mode`).
+  - Protocolo de Auto-Sync em Background: endpoint `/api/v1/copilot/sync` para ingestão de eventos e payloads do `02_ZAP_Prototype`.
+
+---
+
+## SLAs de Performance (P95) e Requisitos de Qualidade & Segurança
+
+- **Performance SLAs (ADR-019)**:
+  - Ingestão do Webhook Z-API (`POST /webhooks/zapi`): **$< 300\text{ ms}$** (Handshake HTTP 200 síncrono imediato)
+  - Resposta do Agente AI Sales SDR (LLM): **$< 1,200\text{ ms}$** (Prompt Caching + Roteamento Gemini 1.5 Flash)
+  - Ingestão do protocolo Auto-Sync (`POST /copilot/sync`): **$< 50\text{ ms}$**
+- **Segurança Zero-Trust (ADR-018)**:
+  - Validação estrita de assinatura token nos webhooks da Z-API.
+  - Criptografia das credenciais de provedor em `provider_credentials.credentials`.
+  - ContextVar `organization_id` obrigatório nas consultas do AI Brain.
+- **Garantia de Qualidade (ADR-020)**:
+  - Cobertura de testes unitários do AI Sales Brain e Tool Calling **> 85%**.
+  - **100% de cobertura nos testes de isolamento multi-tenant** (`tests/test_zapi_isolation.py`).
+  - Validação da migration Alembic round-trip.
+
+---
+
+## Criterios de Aceitacao (Definition of Done)
+
+```
+[ ] Ingestão de webhook Z-API convertendo para StandardMessageEvent
+[ ] Envio outbound via ZapProvider funcionando
+[ ] AI Sales Brain responde leads qualificando e executando tool calling (add_memory, schedule_meeting)
+[ ] Toggle ai_mode alterna com sucesso entre resposta IA automática e modo Copilot Humano
+[ ] Ingestão do protocolo Auto-Sync (/api/v1/copilot/sync) processa payloads offline do 02_ZAP_Prototype
+[ ] Cross-tenant isolation 100% aprovado em pytest
+```
 

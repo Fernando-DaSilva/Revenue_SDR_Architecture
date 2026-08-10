@@ -65,7 +65,38 @@ CREATE TABLE tenant_playbooks (
 
 ---
 
-## Decisões Críticas
+---
 
-- **Segurança de IP**: Playbooks podem ser caros (Propriedade Intelectual do criador). Como garantir que os prompts base e bases RAG não sejam facilmente extraídos pelos tenants compradores? (Ocultar prompt na UI, mostrando apenas variáveis customizáveis).
-- **Agnóstico de IA**: O playbook deve focar nas diretrizes comportamentais de vendas e contorno de objeções, e não em modelos específicos (OpenAI, Anthropic), permitindo que a infraestrutura subjacente troque o LLM se necessário.
+## Alinhamento com Prototipos (`01_SDR_Prototype` e `02_ZAP_Prototype`)
+
+- **01_SDR_Prototype**:
+  - Cadences & Agentes Engine (`activeTab: 'cadences'`): vitrine e seletor de playbooks por nicho comercial.
+  - Theme Studio & Color Presets: injeção de temas e identidades visuais adequadas ao nicho do playbook instalado.
+- **02_ZAP_Prototype**:
+  - Atualização dinâmica das sugestões RAG e persona do atendente IA no Standalone Zap Micro-App ao alternar playbooks.
+
+---
+
+## SLAs de Performance (P95) e Requisitos de Qualidade & Segurança
+
+- **Performance SLAs (ADR-019)**:
+  - Busca de Playbooks no Marketplace: **$< 50\text{ ms}$**
+  - Instalação e injeção de Playbook no AI Sales Brain: **$< 200\text{ ms}$**
+- **Segurança Zero-Trust (ADR-018)**:
+  - Proteção de Propriedade Intelectual (IP): ocultar prompts de sistema brutos na UI, expondo apenas variáveis parametrizáveis.
+  - Isolamento estrito por `organization_id` nos playbooks privados do tenant.
+- **Garantia de Qualidade (ADR-020)**:
+  - Cobertura de testes unitários do Marketplace e carregador de Playbooks **> 85%**.
+  - **100% de cobertura nos testes de isolamento de playbooks** (`tests/test_playbook_isolation.py`).
+  - Migration Alembic das tabelas `playbooks` e `tenant_playbooks` testadas via round-trip.
+
+---
+
+## Criterios de Aceitacao (Definition of Done)
+
+```
+[ ] Listagem de Playbooks públicos no Marketplace (GET /api/v1/marketplace/playbooks)
+[ ] Instalação de Playbook (POST /api/v1/marketplace/playbooks/{id}/install) injetando Persona e RAG no tenant
+[ ] Proteção de IP esconde o prompt base mantendo apenas parâmetros editáveis
+[ ] Cross-tenant isolation 100% aprovado em pytest
+```

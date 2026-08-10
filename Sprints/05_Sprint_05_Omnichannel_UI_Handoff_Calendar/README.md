@@ -70,7 +70,40 @@ CREATE TABLE meetings (
 
 ---
 
-## Decisões e Cuidados
+---
 
-- A segurança do Token do Google deve seguir as melhores práticas (criptografia em repouso no banco de dados se necessário, dependendo das políticas de compliance do SaaS).
-- O Handoff IA -> Humano deve disparar notificações imediatas (que serão implementadas de forma Real-time na Sprint 06).
+## Alinhamento com Prototipos (`01_SDR_Prototype` e `02_ZAP_Prototype`)
+
+- **01_SDR_Prototype**:
+  - Handoff Alerts (`sdrAgent: 'Alerta Handoff'`, `status: '🟡 Aguardando Operador'`): notificação visual de transbordo no Inbox.
+  - Handoff Tab no Command Center (`commandCenterTab: 'handoffs'`): painel de controle e atribuição de leads para operadores humanos.
+- **02_ZAP_Prototype**:
+  - Handoff Status Badge (`👤 Human Mode` + congelamento temporário do bot durante atendimento humano).
+
+---
+
+## SLAs de Performance (P95) e Requisitos de Qualidade & Segurança
+
+- **Performance SLAs (ADR-019)**:
+  - Execução de Handoff IA<->Humano: **$< 50\text{ ms}$**
+  - Agendamento de reunião via Tool Google Calendar: **$< 500\text{ ms}$**
+  - Endpoint de ingestão de logs do client (`POST /api/v1/logs/client`): **$< 30\text{ ms}$**
+- **Segurança Zero-Trust (ADR-018)**:
+  - Criptografia dos `access_token` e `refresh_token` do Google Calendar em repouso.
+  - Rate-limiting estrito em `/api/v1/logs/client` para prevenir ataques de negação de serviço.
+- **Garantia de Qualidade (ADR-020)**:
+  - Cobertura de testes unitários do serviço de Handoff e Calendar **> 85%**.
+  - **100% de cobertura nos testes de isolamento multi-tenant** (`tests/test_calendar_isolation.py`).
+  - Validation round-trip de migration Alembic.
+
+---
+
+## Criterios de Aceitacao (Definition of Done)
+
+```
+[ ] Handoff IA -> Humano solicitado por sentiment analysis ou botão UI atualiza ai_mode=false com resumo de contexto
+[ ] Integração Google Calendar permite autorização OAuth2 por tenant e agendamento de reuniões via AI Tool
+[ ] Endpoint /metrics exporta métricas Prometheus (latência, chamadas LLM, status de handoff)
+[ ] Endpoint /api/v1/logs/client ingere erros client-side com rate-limiting
+[ ] Cross-tenant isolation 100% aprovado em pytest
+```

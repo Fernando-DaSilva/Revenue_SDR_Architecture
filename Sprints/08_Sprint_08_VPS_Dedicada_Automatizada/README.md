@@ -61,7 +61,39 @@ CREATE TABLE channel_identities (
 
 ---
 
-## Decisões Críticas
+---
 
-- **Identity Resolution**: Definir estratégia conservadora de "Merge Automático". Se não houver certeza absoluta, cria um lead separado e oferece "Sugestão de Merge" para o operador.
-- **Compliance e Limites**: O envio massivo por e-mail ou Zap possui limitações de spam rigorosas. A infraestrutura deve tratar backpressure (Too Many Requests).
+## Alinhamento com Prototipos (`01_SDR_Prototype` e `02_ZAP_Prototype`)
+
+- **01_SDR_Prototype**:
+  - Multichannel Live Chat Inbox (`inboxTab: 'multichannel'`): alternância fluida entre Zap, Email e Voice com badges visuais de canal (`badge-success` Zap, `badge-info` E-mail, `badge-secondary` Voice).
+  - Identity Merge Drawer: fusão visual de identidades descobertas cross-channel (`channel_identities`).
+- **02_ZAP_Prototype**:
+  - Sincronização do stream de conversas omnichannel via protocolo Auto-Sync.
+
+---
+
+## SLAs de Performance (P95) e Requisitos de Qualidade & Segurança
+
+- **Performance SLAs (ADR-019)**:
+  - Ingestão de Webhooks Meta/Instagram: **$< 300\text{ ms}$**
+  - Resposta do Voice Agent (TTS / Twilio IVR): **$< 600\text{ ms}$**
+- **Segurança Zero-Trust (ADR-018)**:
+  - Validação estrita de Meta Signature (`X-Hub-Signature-256`) em webhooks de Instagram.
+  - ContextVar `organization_id` obrigatório nas consultas de `channel_identities`.
+- **Garantia de Qualidade (ADR-020)**:
+  - Cobertura de testes unitários do Omnichannel Engine **> 85%**.
+  - **100% de cobertura nos testes de isolamento multi-tenant** (`tests/test_omnichannel_isolation.py`).
+  - Migration Alembic da tabela `channel_identities` testada via round-trip.
+
+---
+
+## Criterios de Aceitacao (Definition of Done)
+
+```
+[ ] Recebimento de mensagens Instagram DM via Meta Webhook e envio de respostas outbound
+[ ] Envio e recepção de e-mails corporativos vinculados à timeline do lead
+[ ] Resposta a chamadas de Voz via AI Voice Agent (Twilio TwiML)
+[ ] Resolução de Identidade Cross-Channel une interações de IG, Zap e Email no mesmo Lead
+[ ] Cross-tenant isolation 100% aprovado em pytest
+```

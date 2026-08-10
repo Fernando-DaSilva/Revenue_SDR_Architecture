@@ -87,5 +87,39 @@ CREATE TABLE cadence_steps (
 
 ---
 
-## Decisões Pendentes
-- Qual fila leve adotaremos? (ARQ vs APScheduler vs BackgroundTasks nativo no MVP). *Sugestão inicial: Iniciar com ARQ por sua robustez usando Redis, caso Redis já seja aceito na arquitetura; ou APScheduler se mantivermos apenas in-memory/SQLite WAL restrito.*
+## Alinhamento com Prototipos (`01_SDR_Prototype` e `02_ZAP_Prototype`)
+
+- **01_SDR_Prototype**:
+  - Multichannel Live Chat Inbox (`inboxTab: 'multichannel'`): interface de listagem e filtro de conversas por canal (Zap, Email, Voice).
+  - Motor de Cadências (`cadences`): visualização de réguas ativas, passos executados e agendamentos.
+- **02_ZAP_Prototype**:
+  - Central Chat Stream: renderização de mensagens inbound e outbound com estados (`sent`, `delivered`, `read`).
+
+---
+
+## SLAs de Performance (P95) e Requisitos de Qualidade & Segurança
+
+- **Performance SLAs (ADR-019)**:
+  - Query de histórico de conversa no Turso Local: **$< 10\text{ ms}$**
+  - Criação de nova mensagem via API Core: **$< 50\text{ ms}$**
+  - Processamento de avanço de passo de cadência no ARQ/APScheduler: **$< 100\text{ ms}$**
+- **Segurança Zero-Trust (ADR-018)**:
+  - Filtro mandatório por `organization_id` em todas as buscas de `conversations` e `messages`.
+  - Acesso a conversas de outro tenant via `GET /api/v1/conversations/{id}` retorna **404 Not Found genérico**.
+- **Garantia de Qualidade (ADR-020)**:
+  - Cobertura de testes unitários/serviço **> 85%**.
+  - **100% de cobertura nos testes de isolamento multi-tenant** (`tests/test_conversations_isolation.py`).
+  - Migration Alembic testada via `upgrade head && downgrade -1 && upgrade head`.
+
+---
+
+## Criterios de Aceitacao (Definition of Done)
+
+```
+[ ] Criar conversa associada a um lead via POST /api/v1/conversations
+[ ] Listar conversas ativas filtradas por tenant via GET /api/v1/conversations
+[ ] Enviar mensagem inbound/outbound via POST /api/v1/conversations/{id}/messages
+[ ] Scoring de Oportunidade atualiza a pontuação do lead automaticamente em cada evento
+[ ] Cadence Engine processa steps agendados sem duplicar execuções (idempotência)
+[ ] Cross-tenant isolation 100% aprovado em pytest
+```

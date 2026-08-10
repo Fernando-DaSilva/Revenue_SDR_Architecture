@@ -263,21 +263,41 @@ We compare two architectural deployment strategies:
 
 ---
 
-## 6. Technical Invariants & Governance
+## 6. Performance SLAs & Latency Budgets (P95 Thresholds)
 
-All developers and automated agents contributing code MUST adhere strictly to the following invariants established in `v0.2.0` and architectural decisions:
+All system components are bound by strict P95 latency SLAs:
 
-1. **App Factory Pattern**: No module singletons. Global state resides strictly on `app.state`.
-2. **Strict Layering**: FastAPI route -> Domain `service.py` -> SQLModel tables. Database queries NEVER live in API routes.
-3. **Multi-Tenant Defense-in-Depth**: Every database query MUST filter by `organization_id`. Cross-tenant record access attempts return generic `404 Not Found`. `organization_id` is extracted strictly from request `ContextVar` context, NEVER from user payload.
-4. **Unified Error Envelopes**: Errors raise `AppError` subclasses resulting in standard JSON envelopes `{"error": {"code": ..., "message": ..., "details": ...}}`.
-5. **Database Migration Standard**: Table models strictly reflect database state. All schema modifications require Alembic migration scripts (`alembic revision --autogenerate`).
-6. **On-Premise Self-Containment**: Zero reliance on external CDNs or external static dependencies. Assets are vendored locally.
-7. **Real-Time via SSE**: Use Server-Sent Events for unidirection server-to-client updates (no complex WebSockets).
+| Component / Layer | Operation | Latency Budget (P95) | Optimization Strategy |
+|---|---|---|---|
+| **Turso (libSQL) DB** | Local `.db` Query / Insert | **$< 10\text{ ms}$** | Embedded local file, composite index `(organization_id, id)` |
+| **FastAPI Core API** | Route Request Execution | **$< 50\text{ ms}$** | Thin async routes, service layer pattern, Jinja2 pre-compiled |
+| **SSE Event Stream** | Live Event Notification | **$< 100\text{ ms}$** | Async memory broker, zero polling overhead |
+| **Z-API Ingest Webhook** | Inbound Message Processing | **$< 300\text{ ms}$** | Immediate HTTP 200 return + ARQ background queue dispatch |
+| **Whisper Audio API** | Audio Note Transcription | **$< 1,500\text{ ms}$** | Groq / OpenAI fast audio transcription endpoint |
+| **AI Sales SDR Agent** | Conversational Turn Response | **$< 1,200\text{ ms}$** | Prompt Caching + Gemini 1.5 Flash model routing |
 
 ---
 
-## 7. Sign-off & Execution Next Steps
+## 7. Zero-Trust Security, Quality Assurance & Technical Invariants
+
+All developers and automated agents contributing code MUST adhere strictly to the following invariants established in `v0.2.0` and architectural ADRs:
+
+1. **App Factory Pattern**: No module singletons. Global state resides strictly on `app.state`.
+2. **Strict Layering**: FastAPI route -> Domain `service.py` -> SQLModel tables. Database queries NEVER live in API routes.
+3. **Zero-Trust Multi-Tenant Defense**: Every database query MUST filter by `organization_id`. Cross-tenant record access attempts return generic `404 Not Found`. `organization_id` is extracted strictly from request `ContextVar` context, NEVER from user payload.
+4. **Auth Hardening**: Password hashing via **Argon2id** (`pwdlib`), session JWTs (PyJWT HS256) with unique `jti` claims, HttpOnly SameSite=Lax cookies.
+5. **Data Protection & LGPD**: Soft deletes (`status='deletado'`), Personal Data Anonymization on request, CSP headers (`script-src 'self'`).
+6. **Unified Error Envelopes**: Errors raise `AppError` subclasses resulting in standard JSON envelopes `{"error": {"code": ..., "message": ..., "details": ...}}`.
+7. **Database Migration Standard**: Table models strictly reflect database state. All schema modifications require Alembic migration scripts (`alembic revision --autogenerate`) with mandatory round-trip validation (`upgrade head -> downgrade -1 -> upgrade head`).
+8. **On-Premise Self-Containment**: Zero reliance on external CDNs or external static dependencies. Assets are vendored locally.
+9. **Real-Time via SSE**: Use Server-Sent Events for unidirection server-to-client updates (no complex WebSockets).
+10. **Storage Tiering (Hot/Cold DW)**: Turso local file maintains hot active data; ETL pipeline exports consolidated conversations to PostgreSQL/Supabase DW (`pgvector`).
+11. **Prototype Component Alignment**: Full integration of UI components from `01_SDR_Prototype` (Command Center, Live Chat Inbox, Lead Drawer, Kanban/List/Merge, Theme Studio, Billing & Localization) and `02_ZAP_Prototype` (3-column grid, DHS Score Chart, RAG Suggestions, Copilot toggle, Audio Player, Background Auto-Sync stream).
+12. **QA & Testing Matrix**: Minimum **> 85% overall backend coverage** and **100% tenant isolation test coverage** (`tests/test_tenant_isolation.py`).
+
+---
+
+## 8. Sign-off & Execution Next Steps
 
 - **Immediate Action**: Proceed with **Sprint 02 — Lead Brain + Memory Brain** implementation in `~/AGENCIA/SDR/`.
 - **Architectural Validation**: Verify cross-tenant isolation and Alembic migration scripts prior to pull request merge.

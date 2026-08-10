@@ -62,7 +62,42 @@ CREATE TABLE user_notifications (
 
 ## Lógica Crítica de Negócio
 
-- **Autenticação no SSE**: Como o SSE é invocado nativamente pelos navegadores através da interface `EventSource`, a autenticação preferencial deve ser feita pelo Cookie `rsdros_session`.
-- **Sincronia Bidirecional com `02_ZAP_Prototype`**: As pontuações DHS e transcrições de áudio geradas na API central são enviadas via SSE para o `02_ZAP_Prototype`, atualizando reativamente o gráfico Chart.js v4 e o stream de mensagens.
-- **Desconexão/Reconexão**: SSE já trata reconexão nativamente, e o protocolo de Auto-Sync descarrega a fila `pendingSyncQueue` ao reconectar.
+---
+
+## Alinhamento com Prototipos (`01_SDR_Prototype` e `02_ZAP_Prototype`)
+
+- **01_SDR_Prototype**:
+  - Live Feed no Command Center (`commandCenterTab: 'live_feed'`): feed em tempo real de eventos SSE disparados pelo sistema.
+- **02_ZAP_Prototype**:
+  - Gráfico de Saúde da Negociação (**DHS Score Chart** via Chart.js v4): renderização reativa das atualizações de humor do lead.
+  - Painel de Sugestões RAG: lista de sugestões de resposta com pontuação de confiança e botão "Usar esta resposta".
+  - Audio Player com Transcrição Whisper: reprodutor de notas de áudio com exibição de texto transcrito em tempo real.
+
+---
+
+## SLAs de Performance (P95) e Requisitos de Qualidade & Segurança
+
+- **Performance SLAs (ADR-019)**:
+  - Notificação via Server-Sent Events (SSE): **$< 100\text{ ms}$**
+  - Transcrição de áudio via Whisper API: **$< 1,500\text{ ms}$**
+  - Geração de sugestão RAG de resposta: **$< 800\text{ ms}$**
+- **Segurança Zero-Trust (ADR-018)**:
+  - Autenticação de conexões SSE através de Cookie HttpOnly `rsdros_session`.
+  - Isolamento de canais SSE por `organization_id` ContextVar (clientes de um tenant não recebem eventos de outros).
+- **Garantia de Qualidade (ADR-020)**:
+  - Cobertura de testes unitários do broker SSE e serviço Whisper **> 85%**.
+  - **100% de cobertura nos testes de isolamento de SSE multi-tenant** (`tests/test_sse_isolation.py`).
+  - Migration Alembic da tabela `user_notifications` validada via round-trip.
+
+---
+
+## Criterios de Aceitacao (Definition of Done)
+
+```
+[ ] Connection SSE (GET /api/v1/stream/events) estabelecida e mantida com reconexão automática
+[ ] Transcrição de áudio via Whisper gera evento AUDIO_TRANSCRIPTION_COMPLETED e dispara via SSE
+[ ] Ingestão de atualizações DHS (POST /api/v1/copilot/dhs) atualiza gráfico Chart.js v4 reativamente
+[ ] Sugestões RAG alimentadas via SSE no painel lateral do 02_ZAP_Prototype
+[ ] Cross-tenant isolation 100% aprovado (eventos SSE não vazam entre tenants)
+```
 

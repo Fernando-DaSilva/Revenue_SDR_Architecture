@@ -21,5 +21,8 @@ Este diretório contém os registros de decisões arquiteturais importantes do p
 * **ADR-015** — [Arquivamento de Dados e Exportação Analítica (ETL / DW)](015-data-archiving-and-analytics-export.md)
 * **ADR-016** — [Adoção do Turso (libSQL) com Suporte a Embedded Replicas e Fallback Local](016-turso-libsql-database-evolution.md)
 * **ADR-017** — [Standalone Zap SDR Micro-App, Grid de Painéis 3 Colunas e Protocolo de Auto-Sync em Background](017-standalone-zap-micro-app-sync-protocol.md)
+* **ADR-018** — [Segurança Multi-Tenant Zero-Trust, Hardening de Auth e Conformidade LGPD](018-zero-trust-multi-tenant-security-and-compliance.md)
+* **ADR-019** — [SLAs de Performance, Orçamentos de Latência e Otimização FinOps](019-performance-sla-and-latency-budgets.md)
+* **ADR-020** — [Garantia de Qualidade (QA), Matriz de Testes e Controle de Qualidade Visual](020-quality-assurance-and-automated-testing-matrix.md)
 
 

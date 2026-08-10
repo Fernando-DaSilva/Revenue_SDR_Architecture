@@ -258,25 +258,48 @@ class LLMProviderInterface(Protocol):
 
 Todos os desenvolvedores e agentes de IA devem seguir rigorosamente os seguintes invariantes estabelecidos desde a v0.2.0:
 
-1. **Padrão App Factory**: Sem singletons globais de módulo. O estado vive estritamente em `app.state`.
-2. **Camadas Estritas**: Rota FastAPI -> `service.py` de domínio -> Tabelas SQLModel. Queries SQL NUNCA vivem nas rotas da API.
-3. **Defesa em Profundidade Multi-Tenant**: Toda query DEVE filtrar por `organization_id`. Tentativas cross-tenant retornam `404 Not Found` genérico. O `organization_id` vem estritamente do contexto `ContextVar`, NUNCA do payload enviado pelo usuário.
-4. **Envelope de Erros Unificado**: Erros lançam subclasses de `AppError` resultando no envelope JSON padrão `{"error": {"code": ..., "message": ..., "details": ...}}`.
-5. **Versionamento Rígido com Alembic**: Modelos de tabela refletem o banco. Alterações de schema exigem script de migration (`alembic revision --autogenerate`).
-6. **Auto-Contenção On-Premise**: Zero dependência de CDNs ou assets externos. Todos os assets estão embarcados localmente.
-7. **Tempo Real via SSE**: Utilizar Server-Sent Events para atualizações unidirecionais do servidor para o cliente.
-8. **Data Tiering (Hot/Cold Storage)**: O banco local Turso (libSQL) mantém dados quentes do atendimento ativo; pipeline assíncrono ETL migra históricos consolidados para PostgreSQL/Supabase.
+### 6. Orçamentos de Latência e SLAs de Performance (Limites P95)
+
+Todos os componentes do sistema estão submetidos a SLAs rígidos de latência P95:
+
+| Componente / Camada | Operação | Latência Máxima (P95) | Estratégia de Otimização |
+|---|---|---|---|
+| **Banco Turso (libSQL)** | Query / Insert no `.db` local | **$< 10\text{ ms}$** | Arquivo local embarcado, índice composto `(organization_id, id)` |
+| **API Core FastAPI** | Execução de rota HTTP | **$< 50\text{ ms}$** | Rotas finas assíncronas, camada de serviço, Jinja2 pré-compilado |
+| **Stream SSE Real-Time** | Notificação de evento live | **$< 100\text{ ms}$** | Broker assíncrono em memória, zero polling |
+| **Ingestão Webhook Z-API** | Recebimento de mensagem | **$< 300\text{ ms}$** | Retorno HTTP 200 imediato + delegação para fila ARQ |
+| **API Transcrição Whisper** | Transcrição de nota de áudio | **$< 1,500\text{ ms}$** | Endpoint otimizado Groq / OpenAI Whisper |
+| **Agente AI Sales SDR** | Resposta conversacional | **$< 1,200\text{ ms}$** | System Prompt Caching + roteamento Gemini 1.5 Flash |
 
 ---
 
-## 7. Matriz de Qualidade, Integração Contínua e Operações de Deploy
+## 7. Invariantes Técnicos, Segurança Zero-Trust e Governança
 
-### 7.1 Checklist de Validação Obrigatória (Pré-Commit / Pré-Merge)
+Todos os desenvolvedores e agentes de IA devem seguir rigorosamente os seguintes invariantes estabelecidos desde a v0.2.0 e ADRs arquiteturais:
+
+1. **Padrão App Factory**: Sem singletons globais de módulo. O estado vive estritamente em `app.state`.
+2. **Camadas Estritas**: Rota FastAPI -> `service.py` de domínio -> Tabelas SQLModel. Queries SQL NUNCA vivem nas rotas da API.
+3. **Defesa em Profundidade Multi-Tenant Zero-Trust**: Toda query DEVE filtrar por `organization_id`. Tentativas cross-tenant retornam `404 Not Found` genérico. O `organization_id` vem estritamente do contexto `ContextVar`, NUNCA do payload do usuário.
+4. **Hardening de Autenticação**: Hashes de senha via **Argon2id** (`pwdlib`), JWTs de sessão (PyJWT HS256) com claims `jti` únicos, cookies HttpOnly SameSite=Lax.
+5. **Proteção de Dados & LGPD**: Soft deletes (`status='deletado'`), Anonimização de Dados Pessoais mediante solicitação, headers CSP (`script-src 'self'`).
+6. **Envelope de Erros Unificado**: Erros lançam subclasses de `AppError` resultando no envelope JSON padrão `{"error": {"code": ..., "message": ..., "details": ...}}`.
+7. **Versionamento Rígido com Alembic**: Modelos de tabela refletem o banco. Alterações de schema exigem script de migration (`alembic revision --autogenerate`) com validação round-trip obrigatória (`upgrade head -> downgrade -1 -> upgrade head`).
+8. **Auto-Contenção On-Premise**: Zero dependência de CDNs ou assets externos. Todos os assets estão embarcados localmente.
+9. **Tempo Real via SSE**: Utilizar Server-Sent Events para atualizações unidirecionais do servidor para o cliente (sem complexidade de WebSockets).
+10. **Data Tiering (Hot/Cold Storage)**: Turso local mantém dados ativos; pipeline assíncrono ETL migra históricos para PostgreSQL/Supabase DW (`pgvector`).
+11. **Alinhamento aos Prototipos**: Integração total dos componentes visuais do `01_SDR_Prototype` (Command Center, Live Chat Inbox, Lead Drawer, Kanban/List/Merge, Theme Studio, Billing & Tradução) e `02_ZAP_Prototype` (Grid 3 colunas, Gráfico DHS, Sugestões RAG, Toggle Copilot, Player de Áudio, Auto-Sync Background Protocol).
+12. **Matriz de Testes & QA**: Mínimo de **> 85% de cobertura geral no backend** e **100% de cobertura nos testes de isolamento multi-tenant** (`tests/test_tenant_isolation.py`).
+
+---
+
+## 8. Matriz de Qualidade, Integração Contínua e Operações de Deploy
+
+### 8.1 Checklist de Validação Obrigatória (Pré-Commit / Pré-Merge)
 
 Antes de submeter qualquer Pull Request, o código deve passar 100% nos seguintes verificadores:
 
 ```bash
-pytest                                            # Suíte completa de testes isolados
+pytest                                            # Suíte completa de testes isolados (>85% cobertura)
 ruff check app/ tests/ scripts/ alembic/          # Análise estática de código e segurança
 ruff format --check app/ tests/ scripts/          # Verificação de formatação de código
 alembic upgrade head && alembic downgrade -1 && alembic upgrade head # Validação round-trip de migration
@@ -284,7 +307,7 @@ alembic upgrade head && alembic downgrade -1 && alembic upgrade head # Validaç�
 curl http://127.0.0.1:8000/api/v1/health/
 ```
 
-### 7.2 Arquitetura de Deploy On-Premise-as-a-Service
+### 8.2 Arquitetura de Deploy On-Premise-as-a-Service
 
 O modelo de implantação em VPSs dedicadas é operado da seguinte forma:
 
@@ -295,7 +318,7 @@ O modelo de implantação em VPSs dedicadas é operado da seguinte forma:
 
 ---
 
-## 8. Próximos Passos de Execução
+## 9. Próximos Passos de Execução
 
 - **Ação Imediata**: Continuar a implementação técnica da **Sprint 02 — Lead Brain + Memory Brain** no repositório `~/AGENCIA/SDR/`.
 - **Validação Arquitetural**: Garantir a cobertura de testes de isolamento cross-tenant para as tabelas `leads`, `lead_identities` e `memories`.

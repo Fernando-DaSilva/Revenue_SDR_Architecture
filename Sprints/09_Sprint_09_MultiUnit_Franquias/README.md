@@ -53,5 +53,34 @@ CREATE TABLE tenant_instances (
 
 ## Lógica Crítica de Negócio
 
-1. **Alembic e SQLite**: Como o app usa SQLite local, o Update Agent simplesmente copia o banco antes do `alembic upgrade`. Se der erro na migração ou o healthcheck falhar (ex: `GET /health/` retornar 500), ele deleta o banco corrompido, restaura o backup e reinicia o serviço.
-2. **Self-Contained**: Para isso dar certo, o frontend **não pode** depender de CDN dinâmico. Todas as libs Javascript e CSS devem continuar *vendored* dentro do pacote (ADR-011).
+---
+
+## Alinhamento com Prototipos (`01_SDR_Prototype` e `02_ZAP_Prototype`)
+
+- **01_SDR_Prototype**:
+  - Theme Studio & Multi-Unit Configuration (`brandConfig`, `themeActiveTab: 'identidade_visual'`): sincronização de temas e branding por VPS cliente.
+  - Painel de Gestão de Dados (`dataTab: 'backup_restore'`): status de backups locais e réplicas de sincronia.
+
+---
+
+## SLAs de Performance (P95) e Requisitos de Qualidade & Segurança
+
+- **Performance SLAs (ADR-019)**:
+  - Healthcheck de liveness da VPS (`GET /api/v1/health/`): **$< 10\text{ ms}$**
+  - Checagem de updates pelo Update Agent: **$< 200\text{ ms}$**
+- **Segurança Zero-Trust (ADR-018)**:
+  - Autenticação mTLS ou API Key assinada entre o Update Agent (`systemd`) e o MyraOS Platform Console.
+  - Verificação de integridade do pacote de release via Hash SHA-256 antes da execução.
+- **Garantia de Qualidade (ADR-020)**:
+  - Testes automatizados da rotina de Rollback e Migração Alembic em ambiente isolado.
+
+---
+
+## Criterios de Aceitacao (Definition of Done)
+
+```
+[ ] MyraOS Console lista e monitora saúde das VPSs clientes em tempo real
+[ ] Update Agent via systemd consulta releases a cada 6h e executa pull de novas versões
+[ ] Rollback automático funciona em 100% dos testes de falha simulada (banco corrompido ou app crash)
+[ ] Healthcheck (/api/v1/health/) responde 200 OK pós-update autorizando o encerramento do deploy
+```
