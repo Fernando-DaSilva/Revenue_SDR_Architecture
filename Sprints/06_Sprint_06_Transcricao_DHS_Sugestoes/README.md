@@ -4,9 +4,9 @@
 +----------------------------------------------------------------------+
 |                                                                      |
 |   SPRINT 06 — TRANSCRIÇÃO + GRAFICO DHS + SUGESTOES (SSE)            |
-|   Status:  DOCUMENTADA                                              |
+|   Status:  PRONTA PARA EXECUCAO (Hyper-Accelerated Hourly Micro-Sprints)|
+|   Cadencia:Semana 5 (8 Micro-Sprints Horarias de 1h a 4h)             |
 |   Owner:   Agente de codificacao                                     |
-|   Quando:  Apos conclusao da Sprint 05                               |
 |   Repo:    ~/AGENCIA/SDR/                                            |
 |   Branch:  feature/sprint-06-realtime-sse                            |
 |                                                                      |

@@ -4,9 +4,9 @@
 +----------------------------------------------------------------------+
 |                                                                      |
 |   SPRINT 10 — PLAYBOOKS VERTICAIS + MARKETPLACE                     |
-|   Status:  DOCUMENTADA                                              |
+|   Status:  PRONTA PARA EXECUCAO (Hyper-Accelerated Hourly Micro-Sprints)|
+|   Cadencia:Semana 8 (Parte B - Micro-Sprints Horarias de 1h a 4h)     |
 |   Owner:   Agente de codificacao / Tribo de Negócios                 |
-|   Quando:  Apos conclusao da Sprint 09                               |
 |   Repo:    ~/AGENCIA/SDR/                                            |
 |   Branch:  feature/sprint-10-marketplace                             |
 |                                                                      |

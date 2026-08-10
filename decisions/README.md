@@ -36,3 +36,7 @@ Este diretório contém os registros de decisões arquiteturais importantes do p
 * **ADR-030** — [Middleware de Propagação Automática de ContextVar de Tenancy no Taskiq (TenantTaskiqMiddleware)](030-taskiq-contextvar-tenant-propagation.md)
 * **ADR-031** — [Protocolo de Reidratação de Leads Inativos do Cold Storage (Supabase/PostgreSQL) para o Hot Storage (Turso/libSQL)](031-cold-storage-rehydration-protocol.md)
 * **ADR-032** — [Rate Limiting Anti-Ban no WhatsApp e Imposição Rígida da Janela de 24 Horas da Meta](032-whatsapp-anti-ban-and-rate-limiting.md)
+* **ADR-033** — [Engenharia de Micro-Sprints Horárias e Entrega Contínua Hyper-Acelerada](033-hourly-micro-sprints-engineering.md)
+* **ADR-034** — [Harness de Execução Autônoma de Agentes de IA e Gating de Segurança no CI/CD](034-ai-agent-autonomous-execution-harness.md)
+* **ADR-035** — [Topologia de Engenharia em Streams Paralelas para Desenvolvimento em 2 Meses](035-parallel-stream-engineering-topology.md)
+

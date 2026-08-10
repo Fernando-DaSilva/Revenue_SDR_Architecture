@@ -1,8 +1,8 @@
 # MASTER PLAN — Revenue SDR OS & AI Conversational Architecture
 
 > **Executive & Technical Blueprint for End-to-End Solution Development**  
-> **Prepared by**: Engineering Taskforce (Software Architects, AI Engineers, Systems Developers & FinOps Engineers)  
-> **Version**: 3.0.0 (Post Quality Audit — Sprint Execution & Multi-Agent Architecture Blueprint)  
+> **Prepared by**: Multidisciplinary Engineering Leadership Team (Enterprise Architect, Principal AI Engineer, Lead Backend/DevOps, Zero-Trust Security Architect & QA Director)  
+> **Version**: 4.0.0 (Hyper-Accelerated Master Blueprint — Hourly Micro-Sprints & 5-Stream Topology in 2 Months)  
 > **Date**: August 2026  
 
 ---
@@ -22,7 +22,7 @@ The **Revenue SDR OS** is an **Autonomous Conversational Sales Operating System*
 5. **Self-Contained Tech Stack**: FastAPI backend (`app/main.py`) + SQLModel over Turso (libSQL) embedded databases + Jinja2/HTMX/Alpine.js hypermedia frontend + SSE real-time streaming + Taskiq job queue with `TenantTaskiqMiddleware` + Instructor/Pydantic v2 orchestration.
 6. **Dual-Tier RAG Storage & Re-hydration**: Turso (libSQL) + `sqlite-vec` local hot storage ($< 15\text{ ms}$) with automatic Cold Storage Re-hydration protocol (PostgreSQL `pgvector` DW) for returning leads (> 30d inactive) (ADR-015, ADR-031).
 7. **WhatsApp Integration & Meta Compliance**: Strict enforcement of Meta's 24-hour Customer Service Window using approved HSM templates for active outreach, protected by Token-Bucket rate limiters (3–5s jitter) against anti-ban flags (ADR-032).
-8. **AI-Agent Driven Development Protocol**: Machine-readable OpenAPI 3.1 contracts, strict Pydantic schemas, and automated test harnesses for autonomous AI coding agents (ADR-026).
+8. **AI-Agent Driven Development & Hourly Micro-Sprints**: Repository engineered for machine-readable OpenAPI 3.1 contracts, Pydantic v2 schemas, sub-minute test harness verification, and autonomous execution in **Hourly Micro-Sprints (1h to 4h)** in a record **2-Month (60-Day)** window (ADR-026, ADR-033, ADR-034, ADR-035).
 
 ---
 
@@ -32,30 +32,29 @@ Executing this solution requires a disciplined, multi-disciplinary engineering t
 
 | Role | Core Responsibilities |
 |---|---|
-| **Principal Software Architect** | System topology, Zero-Trust multi-tenancy invariants, Alembic Batch schema evolution, VPS orchestration. |
+| **Principal Enterprise & Software Architect** | 5-stream parallel system topology (ADR-035), Zero-Trust multi-tenancy invariants, Alembic Batch schema evolution, VPS orchestration. |
 | **Lead AI Systems Engineer** | Multi-agent framework design, prompt engineering, Hybrid RAG pipelines (sqlite-vec + pgvector), Instructor Pydantic schemas, LLM fallback Router with 900ms strict timeout budget. |
 | **Senior Backend & Data Engineer** | FastAPI domain services, Turso/libSQL local DB + PostgreSQL DW, Taskiq background jobs with `TenantTaskiqMiddleware`, SSE broker. |
 | **Senior Frontend & UX Engineer** | Jinja2 + HTMX + Alpine.js implementation (deconstructing monolithic 1.1MB prototype HTML into Jinja2 templates), white-label color preset translation system, ZAP Copilot Chart.js memory leak fixes. |
-| **FinOps & Cost Optimization Specialist** | Token consumption forecasting, multi-tier LLM routing, System Prompt Caching, Tenant Rate Limiting. |
-| **QA & AI Coding Guardrails Engineer** | Pytest cross-tenant isolation test suite, ruff linting, Alembic migration verification, automated AI agent pre-commit harness (ADR-026). |
+| **Zero-Trust Security & DevSecOps Lead** | Automated SAST/DAST, Secret Scanning, Zero-Trust multi-tenancy enforcement, OWASP Top 10 API Security, Argon2id & PyJWT token management. |
+| **QA Director & AI Guardrails Engineer** | Pytest cross-tenant isolation test suite (>90% coverage), ruff linting, Alembic migration verification, automated AI agent sub-minute test harness (<60s) (ADR-026, ADR-034). |
 
 ---
 
-## 3. Comprehensive Phased Roadmap & Timeframe Estimation
+## 3. Comprehensive Phased Roadmap & 2-Month Timeframe Estimation (8 Weeks / 60 Days)
 
 ```
-Sprint 00 [DONE] Architecture & Governance
-Sprint 01 [DONE] Foundation + Auth + White-Label (v0.2.0 Baseline)
-Sprint 01.5 [DONE] Standalone ZAP Copilot Prototype (02_ZAP_Prototype)
-Sprint 02 [W1-W2] Lead Brain + Memory Brain + Taskiq Tenant Context Propagation (ADR-030)
-Sprint 03 [W3-W4] Conversations + Opportunity Brain + Cadence Engine + Meta 24h HSM (ADR-032)
-Sprint 04 [W5-W7] AI Sales Brain + Persistent AsyncSqliteSaver + Z-API WhatsApp Anti-Ban
-Sprint 05 [W8-W9] Human-AI Handoff + Deconstruct Monolith HTML + Google Calendar + Escalation
-Sprint 06 [W10-W11] Audio Whisper Transcription + Zap Chart.js Memory Leak Fix + SSE Stream
-Sprint 07 [W12-W14] Post-Call Analysis + Data Warehouse ETL/CDC + Cold DW Re-hydration (ADR-031)
-Sprint 08 [W15-W17] Omnichannel Engine (Instagram DM, Email, Voice Agent)
-Sprint 09 [W18-W19] Single-Tenant VPS Automation + MyraOS Update Orchestrator
-Sprint 10 [W20-W22] Vertical Playbooks + Tribo Agent Marketplace
+MONTH 1 (WEEKS 1 TO 4 / DAYS 1 TO 28) — CORE ENGINE & AI MULTI-AGENT
+Week 1 [Micro-Sprints 02.1 - 02.8] Lead Brain + Memory Brain + Taskiq Tenant Context Propagation (ADR-030)
+Week 2 [Micro-Sprints 03.1 - 03.8] Conversations + Opportunity Brain + Cadence Engine + Meta 24h HSM (ADR-032)
+Week 3 [Micro-Sprints 04.1 - 04.8] AI Sales Brain + Persistent AsyncSqliteSaver + Z-API WhatsApp Anti-Ban
+Week 4 [Micro-Sprints 05.1 - 05.8] Human-AI Handoff + Deconstruct Monolith HTML + Google Calendar
+
+MONTH 2 (WEEKS 5 TO 8 / DAYS 29 TO 60) — REALTIME, OMNICHANNEL & SCALE
+Week 5 [Micro-Sprints 06.1 - 06.8] Audio Whisper Transcription + Zap Chart.js Memory Leak Fix + SSE Stream
+Week 6 [Micro-Sprints 07.1 - 07.8] Post-Call Analysis + Data Warehouse ETL/CDC + Cold DW Re-hydration (ADR-031)
+Week 7 [Micro-Sprints 08.1 - 08.8] Full Omnichannel Engine (Instagram DM, Email, Voice Agent)
+Week 8 [Micro-Sprints 09.1 - 10.8] Single-Tenant VPS Automation + MyraOS Console + Vertical Playbooks & Marketplace
 ```
 
 ---

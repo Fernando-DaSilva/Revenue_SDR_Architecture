@@ -75,26 +75,29 @@ Todas as tarefas do backlog e códigos produzidos pela equipe de desenvolvimento
 
 ---
 
-## 3. Matriz de Execução Ágil por Sprint (Sprints 02 a 10)
+## 3. Matriz de Execução Ágil por Micro-Sprints Horárias (8 Semanas / 60 Dias)
 
 ```mermaid
 gantt
-    title Cronograma do Plano de Execução (Sprints 02 a 10)
+    title Cronograma Mestre de Execução (8 Semanas / 60 Dias / Micro-Sprints Horárias)
     dateFormat  YYYY-MM-DD
-    section Fase 1: Core Intelligence
-    Sprint 02 (Lead, Memory Brain & Taskiq Tenant)  :s2, 2026-08-11, 14d
-    Sprint 03 (Conversations, Cadence & Meta 24h)   :s3, after s2, 14d
-    section Fase 2: AI & Messaging Engine
-    Sprint 04 (AI Sales Brain & Zap Anti-Ban)       :s4, after s3, 14d
-    Sprint 05 (Omnichannel UI, Deconstruct & Cal)   :s5, after s4, 14d
-    section Fase 3: Realtime & Analytics
-    Sprint 06 (Whisper, DHS Leak Fix & SSE Stream)  :s6, after s5, 14d
-    Sprint 07 (Post-Conv, Cold DW RAG & Refactor)   :s7, after s6, 14d
-    section Fase 4: Expansion & Scale
-    Sprint 08 (Full Omnichannel & Voice)            :s8, after s7, 14d
-    Sprint 09 (VPS Automation & Console)            :s9, after s8, 14d
-    Sprint 10 (Playbooks & Marketplace)             :s10, after s9, 14d
+    section Mês 1: Core Engine & AI Agent Brain
+    Sprint 02 (Lead, Memory Brain & Taskiq Tenant)  :s2, 2026-08-11, 7d
+    Sprint 03 (Conversations, Cadence & Meta 24h)   :s3, after s2, 7d
+    Sprint 04 (AI Sales Brain & Zap Anti-Ban)       :s4, after s3, 7d
+    Sprint 05 (Omnichannel UI, Deconstruct & Cal)   :s5, after s4, 7d
+    section Mês 2: Realtime, Omnichannel & Scale
+    Sprint 06 (Whisper, DHS Leak Fix & SSE Stream)  :s6, after s5, 7d
+    Sprint 07 (Post-Conv, Cold DW RAG & Refactor)   :s7, after s6, 7d
+    Sprint 08 (Full Omnichannel & Voice)            :s8, after s7, 7d
+    Sprint 09-10 (VPS Automation, Console & Tribo)  :s9, after s8, 7d
 ```
+
+### Metodologia de Micro-Sprints Horárias (1h a 4h por Entrega) (ADR-033, ADR-034):
+Cada Sprint semanal é composta por **8 Micro-Sprints Horárias** (ex: `MS-02.1` a `MS-02.8`).
+- **Duração por Micro-Sprint**: 1 a 4 horas com objetivo único e focado.
+- **Entrada**: Prompt Spec padronizado + Schema Pydantic v2.
+- **Saída**: Pull Request / Commit individual validado no CI em $< 60\text{ segundos}$.
 
 ---
 

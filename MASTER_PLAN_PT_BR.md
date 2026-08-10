@@ -1,8 +1,8 @@
 # MASTER PLAN — Revenue SDR OS & Arquitetura Conversacional de IA
 
 > **Plano Mestre Técnico de Engenharia para Desenvolvimento da Solução End-to-End**  
-> **Elaborado por**: Equipe de Engenharia (Arquitetos de Software, Engenheiros de IA, Desenvolvedores Backend/Frontend e DevOps/SRE)  
-> **Versão**: 3.0.0 (Pós-Auditoria de Qualidade — Execução de Sprints e Grafo Multi-Agente)  
+> **Elaborado por**: Equipe Multidisciplinar de Engenharia (Arquiteto de Enterprise, Líder de Sistemas de IA, Engenheiro Principal Backend/DevOps, Arquiteto de Segurança Zero-Trust e Diretor de QA)  
+> **Versão**: 4.0.0 (Hyper-Accelerated Master Blueprint — Execução de Micro-Sprints Horárias & Topologia de 5 Streams em 2 Meses)  
 > **Data**: Agosto de 2026  
 
 ---
@@ -22,7 +22,7 @@ O **Revenue SDR OS** é um **Sistema Operacional de Vendas Conversacional Autôn
 5. **Stack Auto-Contida**: Backend FastAPI (`app/main.py`) + SQLModel sobre banco embarcado Turso (libSQL) + Frontend hypermedia Jinja2/HTMX/Alpine.js (vendored) + streaming em tempo real SSE + Fila de Jobs Taskiq com `TenantTaskiqMiddleware` + Orquestração Instructor/Pydantic v2.
 6. **Armazenamento de RAG em Duas Camadas & Re-hidratação**: Armazenamento local Turso (libSQL) + `sqlite-vec` ($< 15\text{ ms}$) com protocolo automático de Re-hidratação de Cold Storage (PostgreSQL `pgvector` DW) para leads recorrentes inativos (> 30d) (ADR-015, ADR-031).
 7. **Integração WhatsApp & Conformidade Meta**: Enforcement rigoroso da Janela de Atendimento de 24 Horas do Meta via Templates HSM aprovados, com rate limiters por Token-Bucket (jitter de 3–5s) contra banimentos (ADR-032).
-8. **Desenvolvimento Orientado a Agentes de IA**: Repositório projetado com contratos estritos, schemas OpenAPI 3.1 legíveis por máquina e guardiões de código para execução autônoma por LLMs de codificação (ADR-026).
+8. **Desenvolvimento Orientado a Agentes de IA & Micro-Sprints Horárias**: Repositório projetado com contratos estritos OpenAPI 3.1, schemas Pydantic v2, harness de verificação sub-minuto e execução autônoma em **Micro-Sprints Horárias (1h a 4h)** em tempo recorde de **2 Meses (60 Dias)** (ADR-026, ADR-033, ADR-034, ADR-035).
 
 ---
 
@@ -34,20 +34,20 @@ A execução desta solução exige uma equipe de engenharia multidisciplinar ope
 
 | Papel | Responsabilidades Principais |
 |---|---|
-| **Arquiteto Principal de Software** | Topologia do sistema, invariantes de multi-tenancy Zero-Trust, evolução de schema Alembic Batch, orquestração de VPS. |
-| **Engenheiro Líder de Sistemas de IA** | Arquitetura do sistema multi-agente, engenharia de prompt, pipelines RAG híbridos (sqlite-vec + pgvector), Instructor/Pydantic schemas, fallback LLM Router com orçamento estrito de 900ms. |
+| **Arquiteto Principal de Enterprise & Software** | Topologia do sistema em 5 streams paralelas (ADR-035), invariantes de multi-tenancy Zero-Trust, evolução de schema Alembic Batch, orquestração de VPS. |
+| **Engenheiro Líder de Sistemas de IA** | Arquitetura do sistema multi-agente LangGraph, engenharia de prompt, RAG híbrido (`sqlite-vec` + `pgvector`), Instructor/Pydantic schemas, fallback LLM Router com orçamento estrito de 900ms. |
 | **Engenheiro Sênior de Backend e Dados** | Serviços de domínio FastAPI, integração Turso/libSQL local + Cold DW PostgreSQL, jobs assíncronos Taskiq com `TenantTaskiqMiddleware`, broker SSE. |
 | **Engenheiro Sênior de Frontend e UX** | Implementação hypermedia Jinja2 + HTMX + Alpine.js (desconstruindo o HTML monolítico de 1.1MB do protótipo em templates Jinja2), sistema de presets de cores white-label, correção de memory leaks do Chart.js no Zap Copilot. |
-| **Especialista em Telemetria e FinOps Técnico** | Contabilidade de tokens por tenant, instrumentação Prometheus, otimização de janelas de contexto, System Prompt Caching e Rate Limiting. |
-| **Engenheiro de QA, Segurança e IA Code Guardrails** | Suíte de testes isolados cross-tenant com Pytest, linting ruff, validação de migrations Alembic, automação do harness de teste para agentes de IA (ADR-026). |
+| **Arquiteto de Segurança Zero-Trust & DevSecOps** | Automação de SAST/DAST, Secret Scanning, Zero-Trust multi-tenancy enforcement, conformidade OWASP Top 10 API Security, rotação de tokens Argon2id & PyJWT. |
+| **Diretor de QA e Harness de IA** | Suíte de testes isolados cross-tenant com Pytest (>90% de cobertura), linting ruff, validação de migrations Alembic batch round-trip em $< 60\text{s}$ no CI/CD. |
 
-### 2.2 Workflow Oficial do Agente de Codificação / Desenvolvedor
+### 2.2 Workflow Oficial do Agente de Codificação / Desenvolvedor em Micro-Sprints Horárias (ADR-033, ADR-034)
 
-Para garantir consistência e evitar regressões, todo agente de codificação ou desenvolvedor deve seguir o workflow em 6 camadas:
+Para garantir consistência e evitar regressões no ciclo acelerado de 60 dias, todo agente de codificação ou desenvolvedor deve seguir o workflow em 6 camadas:
 
 ```
 +-----------------------------------------------------------------------------------+
-| 1. Leitura de Especificações & ADRs (FOUNDATION.md, ARCHITECTURE.md, Sprint Spec) |
+| 1. Leitura de Especificações & ADRs (FOUNDATION.md, ARCHITECTURE.md, Micro-Sprint Spec)|
 +-----------------------------------------+-----------------------------------------+
                                           |
                                           v
@@ -72,29 +72,28 @@ Para garantir consistência e evitar regressões, todo agente de codificação o
                                           |
                                           v
 +-----------------------------------------------------------------------------------+
-| 6. Harness de Qualidade (pytest >85% + cross-tenant 100% + ruff + alembic round-trip)|
+| 6. Harness Sub-Minuto (< 60s) (pytest >90% + tenant 100% + ruff + alembic round-trip)|
 +-----------------------------------------------------------------------------------+
 ```
 
 ---
 
-## 3. Roadmap Técnico de Execução e Detalhamento das Sprints
+## 3. Roadmap Técnico de Execução Hyper-Acelerado (8 Semanas / 60 Dias)
 
-O plano de desenvolvimento é estruturado em **10 Sprints de execução**, divididas em três fases estratégicas.
+O plano de desenvolvimento é estruturado em **8 Semanas (60 Dias / 2 Meses)** divididas em **5 Streams Paralelas Independentes (ADR-035)** executando **Micro-Sprints Horárias de 1h a 4h (ADR-033)**.
 
 ```
-Sprint 00 [CONCLUÍDA] Arquitetura e Gestão
-Sprint 01 [CONCLUÍDA] Foundation + Auth + White-Label (Baseline v0.2.0)
-Sprint 01.5 [CONCLUÍDA] Prototype Standalone ZAP Copilot (02_ZAP_Prototype)
-Sprint 02 [W1-W2] Lead Brain + Memory Brain + Propagação ContextVar Taskiq Tenant (ADR-030)
-Sprint 03 [W3-W4] Conversations + Opportunity Brain + Cadence Engine + Meta 24h HSM (ADR-032)
-Sprint 04 [W5-W7] AI Sales Brain + Persistent AsyncSqliteSaver + Z-API WhatsApp Anti-Ban
-Sprint 05 [W8-W9] Handoff Humano-IA + Desconstrução HTML Monólito + Google Calendar + Escalation
-Sprint 06 [W10-W11] Transcrição Whisper + Fix Memory Leak Chart.js Zap + Stream SSE Real-Time
-Sprint 07 [W12-W14] Análise Pós-Conversa + Data Warehouse ETL/CDC + Reidratação Cold DW (ADR-031)
-Sprint 08 [W15-W17] Engine Omnichannel (Instagram DM, E-mail, Agente de Voz)
-Sprint 09 [W18-W19] Automação de VPS Dedicada + Orquestrador de Updates MyraOS
-Sprint 10 [W20-W22] Playbooks Verticais + Marketplace de Agentes Tribo
+MÊS 1 (SEMANAS 1 A 4 / DIAS 1 A 28) — CORE ENGINE & IA MULTI-AGENTE
+Semana 1 [Micro-Sprints 02.1 - 02.8] Lead Brain + Memory Brain + Taskiq Tenant (ADR-030)
+Semana 2 [Micro-Sprints 03.1 - 03.8] Conversations + Opportunity Brain + Cadence Engine + Meta 24h HSM (ADR-032)
+Semana 3 [Micro-Sprints 04.1 - 04.8] AI Sales Brain + Persistent AsyncSqliteSaver + Z-API WhatsApp Anti-Ban
+Semana 4 [Micro-Sprints 05.1 - 05.8] Handoff Humano-IA + Desconstrução HTML Monólito + Google Calendar
+
+MÊS 2 (SEMANAS 5 A 8 / DIAS 29 A 60) — REALTIME, OMNICHANNEL & SCALE
+Semana 5 [Micro-Sprints 06.1 - 06.8] Transcrição Whisper + Fix Memory Leak Chart.js Zap + Stream SSE Real-Time
+Semana 6 [Micro-Sprints 07.1 - 07.8] Análise Pós-Conversa + Data Warehouse ETL/CDC + Reidratação Cold DW (ADR-031)
+Semana 7 [Micro-Sprints 08.1 - 08.8] Engine Omnichannel Completo (Instagram DM, E-mail, Agente de Voz)
+Semana 8 [Micro-Sprints 09.1 - 10.8] Automação VPS Single-Tenant + MyraOS Console + Playbooks Verticais & Marketplace
 ```
 
 ---

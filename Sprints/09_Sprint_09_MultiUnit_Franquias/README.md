@@ -4,9 +4,9 @@
 +----------------------------------------------------------------------+
 |                                                                      |
 |   SPRINT 09 — VPS DEDICADA + UPDATE ORCHESTRATOR                    |
-|   Status:  DOCUMENTADA                                              |
+|   Status:  PRONTA PARA EXECUCAO (Hyper-Accelerated Hourly Micro-Sprints)|
+|   Cadencia:Semana 8 (Parte A - Micro-Sprints Horarias de 1h a 4h)     |
 |   Owner:   Agente de codificacao / DevOps                            |
-|   Quando:  Apos conclusao da Sprint 08                               |
 |   Repo:    ~/AGENCIA/SDR/ (App) e MyraOS (Console)                   |
 |   Branch:  feature/sprint-09-vps-orchestrator                        |
 |                                                                      |

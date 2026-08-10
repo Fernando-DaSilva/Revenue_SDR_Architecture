@@ -11,22 +11,20 @@
 
 ---
 
-## Mapa geral
+## Mapa Geral de Execução Hyper-Acelerado (8 Semanas / 60 Dias / Micro-Sprints Horárias)
 
 ```
-Sprint 00 [OK] Arquitetura e Gestao                  (Fundacao & Specs)
-Sprint 01 [OK] Foundation + Auth + White-Label        (reescrita v0.2.0 — Fundacao Tecnica)
-Sprint 01.5 [OK] Standalone Zap Micro-App Prototype   (02_ZAP_Prototype — UI/UX Wireframe em Codigo)
-Sprint 02 [DOC] Lead Brain + Memory Brain             (INICIO DO PRODUTO REAL)
-Sprint 03 [DOC] Conversations + Opportunity + Cadence
-Sprint 04 [DOC] AI Sales Brain + Z-API Zap + Copilot Mode (02_ZAP_Prototype Integration)
-Sprint 05 [DOC] Monitoramento + Handoff IA<->Humano + Google Calendar
-Sprint 06 [DOC] Transcricao Whisper + Grafico DHS + Sugestoes RAG (SSE & Auto-Sync Stream)
-Sprint 07 [DOC] Pos-conversa, Dashboards e Pipeline de Dados Analíticos
-Sprint 08 [DOC] Omnichannel completo (IG, email, voice)
-Sprint 09 [DOC] VPS dedicada automatizada + Update orchestrator
-Sprint 10 [DOC] Playbooks verticais + Marketplace
+MÊS 1 (SEMANAS 1-4 / DIAS 1-28): CORE ENGINE, IA MULTI-AGENTE & MESSAGING
+Semana 1 [MICRO-SPRINTS 02.1-02.8] Lead Brain + Memory Brain + Taskiq Tenant Propagation (ADR-030)
+Semana 2 [MICRO-SPRINTS 03.1-03.8] Conversations + Opportunity Brain + Cadence Engine + Meta 24h HSM (ADR-032)
+Semana 3 [MICRO-SPRINTS 04.1-04.8] AI Sales Brain + AsyncSqliteSaver + Z-API WhatsApp Anti-Ban
+Semana 4 [MICRO-SPRINTS 05.1-05.8] Human-AI Handoff + Desconstrução HTML Monólito + Google Calendar Sync
 
+MÊS 2 (SEMANAS 5-8 / DIAS 29-60): REALTIME, OMNICHANNEL & SCALE
+Semana 5 [MICRO-SPRINTS 06.1-06.8] Transcrição Whisper + Fix Memory Leak Chart.js + Stream SSE Real-Time
+Semana 6 [MICRO-SPRINTS 07.1-07.8] Pós-Conversa Sales Coach + DW ETL/CDC + Reidratação Cold Storage (ADR-031)
+Semana 7 [MICRO-SPRINTS 08.1-08.8] Omnichannel Engine (Instagram DM, Email, Voice Agent)
+Semana 8 [MICRO-SPRINTS 09.1-10.8] VPS Single-Tenant Automation + MyraOS Console + Playbooks & Marketplace
 ```
 
 ---

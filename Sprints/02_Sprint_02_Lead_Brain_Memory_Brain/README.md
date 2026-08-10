@@ -4,9 +4,9 @@
 +----------------------------------------------------------------------+
 |                                                                      |
 |   SPRINT 02 — LEAD BRAIN + MEMORY BRAIN                             |
-|   Status:  PRONTA PARA EXECUCAO (spec alinhada a v0.2.0)            |
+|   Status:  PRONTA PARA EXECUCAO (Hyper-Accelerated Hourly Micro-Sprints)|
+|   Cadencia:Semana 1 (8 Micro-Sprints Horarias de 1h a 4h)             |
 |   Owner:   Agente de codificacao                                     |
-|   Quando:  1-2 semanas                                               |
 |   Repo:    ~/AGENCIA/SDR/                                            |
 |   Branch:  feature/sprint-02-lead-brain                              |
 |                                                                      |

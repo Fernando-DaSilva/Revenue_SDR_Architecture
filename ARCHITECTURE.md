@@ -310,6 +310,21 @@ tabela central de eventos do dominio. Regras:
 - **Decisão**: Bloquear mensagens em texto livre (*freeform*) após 24 horas no `CadenceEngine` e `ZapService`, forçando a seleção de HSM Templates aprovados ou alertando o operador humano. Aplicar rate limiter token bucket (max 1 msg/3-5s), jitter dinâmico (2.0s-6.0s) e status `composing`. Baixar mídias/áudios imediatamente no worker Taskiq para evitar expiração de URLs.
 - **Consequências**: Redução drástica de banimentos no WhatsApp, 100% de conformidade com as diretrizes da Meta e preservação de mídias inbound.
 
+### ADR-033 — Engenharia de Micro-Sprints Horárias e Entrega Contínua Hyper-Acelerada
+- **Contexto**: O desenvolvimento acelerado exige eliminar gargalos de sprints longas (semanais/quinzenais) para permitir construção em tempo recorde de 2 meses (60 dias).
+- **Decisão**: Restruturar a cadência de entrega em **Micro-Sprints Horárias (1h a 4h por entrega)** com escopo atômico, contratos estritos de entrada/saída Pydantic v2 e verificação contínua.
+- **Consequências**: Ciclo de feedback instantâneo, entrega contínua sub-horária e viabilidade total do cronograma de 60 dias.
+
+### ADR-034 — Harness de Execução Autônoma de Agentes de IA e Gating de Segurança no CI/CD
+- **Contexto**: Garantir que Agentes de IA codifiquem com alta velocidade sem violar regras Zero-Trust, especificações Pydantic ou criar regressões.
+- **Decisão**: Impor o **Loop de Validação Triplo** (Prompt Spec Input $\rightarrow$ Code Generation Layering $\rightarrow$ Sub-minute Test Harness Verification). Validação obrigatória de `pytest -k tenant` e `alembic` batch round-trip em $< 60\text{s}$.
+- **Consequências**: Autonomia total para agentes produzirem PRs seguros e funcionais a cada hora.
+
+### ADR-035 — Topologia de Engenharia em Streams Paralelas para Desenvolvimento em 2 Meses
+- **Contexto**: Dependências sequenciais inviabilizam a entrega do Revenue SDR OS em 60 dias.
+- **Decisão**: Desacoplar o projeto em **5 Streams Paralelas Independentes** (Core Engine & Data, AI Multi-Agent Systems, Messaging & Omnichannel, Frontend & UX, DevSecOps & Platform) operando sob contratos de interface OpenAPI 3.1 / Pydantic v2.
+- **Consequências**: Desenvolvimento simultâneo de todas as camadas do sistema sem bloqueios inter-agentes.
+
 ---
 
-*"Arquitetura e a arte de tomar decisoes faceis de reverter e previsiveis para serem executadas por Agentes de IA."*
+*"Arquitetura é a arte de transformar decisões complexas em Micro-Sprints previsíveis e executáveis por Agentes de IA em tempo recorde."*
