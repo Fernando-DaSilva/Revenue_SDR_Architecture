@@ -1,0 +1,208 @@
+{
+  "board": {
+    "name": "Revenue SDR OS — Agile Product Backlog & Execution Plan",
+    "url": "https://trello.com/b/OH7UtbIQ/revenue-sdr-os",
+    "description": "Quadro Kanban de Gestão Ágil do Produto Revenue SDR OS. Contém todas as User Stories, critérios de aceite, estimativas de Story Points (Fibonacci) e ADRs referentes às Sprints 00 até 10."
+  },
+  "lists": [
+    {
+      "id": "list_adrs",
+      "name": "📚 Visão Geral & ADRs (Referências de Arquitetura)",
+      "cards": [
+        {
+          "name": "🏛️ Referência de Arquitetura & ADRs 001-029",
+          "desc": "**Revenue SDR OS Architecture Guidelines**\n\n- Multi-Tenancy Zero-Trust via ASGI Middleware + ContextVar\n- FastAPI + SQLModel + Turso libSQL Hot Storage\n- Taskiq Async Task Queue com idempotência (job_key)\n- LangChain + LangGraph Multi-Agent Engine\n- Storage Tiering para Supabase/PostgreSQL Cold Storage",
+          "labels": ["Multi-Tenant Zero-Trust", "Backend / FastAPI"]
+        },
+        {
+          "name": "🎨 Protótipos UI/UX Standalone Reference",
+          "desc": "**Protótipos em Código de Alta Fidelidade**\n\n1. `01_SDR_Prototype`: SDR Command Center (Manager Dashboard, Theme Studio, 5 Themes, Pipeline 5 Stages)\n2. `02_ZAP_Prototype`: Standalone Zap Micro-App (3-column grid, Chart.js DHS Score, Copilot vs Human mode, RAG Suggestions)",
+          "labels": ["Frontend / HTMX / Alpine"]
+        }
+      ]
+    },
+    {
+      "id": "list_done",
+      "name": "✅ Concluído (Sprints Delivered & v0.2.0 Baseline)",
+      "cards": [
+        {
+          "name": "S00.1 — Planejamento Estratégico & Arquitetural [Sprint 00]",
+          "desc": "**Sprint 00 Concluída**\nVisão de Produto, 8 Brains, Fundação Técnica, Specs de Sprints 01-10 e 29 ADRs revisadas.",
+          "story_points": 8,
+          "labels": ["[P0] Crítico / Must Have", "Multi-Tenant Zero-Trust"]
+        },
+        {
+          "name": "S01.1 — Fundação Técnica Multi-Tenant Zero-Trust v0.2.0 [Sprint 01]",
+          "desc": "**Sprint 01 Concluída (v0.2.0)**\n57 testes automatizados de isolamento tenant, Auth Argon2id + PyJWT, Cookie HttpOnly + Bearer, Alembic Batch Migrations.",
+          "story_points": 13,
+          "labels": ["[P0] Crítico / Must Have", "Backend / FastAPI", "Database / Alembic / Turso"]
+        },
+        {
+          "name": "S01.5 — Standalone Zap SDR Micro-App Prototype (`02_ZAP_Prototype`)",
+          "desc": "**Sprint 01.5 Concluída**\nUI/UX Wireframe em código com Grid 3 colunas, Chart.js DHS, 5 Temas White-Label e Auto-Sync Background Protocol.",
+          "story_points": 8,
+          "labels": ["[P1] Importante / Should Have", "Frontend / HTMX / Alpine"]
+        }
+      ]
+    },
+    {
+      "id": "list_sprint_02",
+      "name": "🎯 Sprint Backlog (Sprint 02 — Lead & Memory Brain)",
+      "cards": [
+        {
+          "name": "[T1] Model & Service do Lead Brain (CRUD & Validation)",
+          "desc": "**User Story:** Como SDR ou sistema de ingestão, quero cadastrar e atualizar leads associados estritamente à minha organização.\n\n**Critérios de Aceite:**\n- Tabela `leads` com `organization_id` FK NOT NULL, `email`, `phone`, `document`, `score`\n- Índice único `uq_leads_org_phone` e `uq_leads_org_email`\n- Queries com filtro por ContextVar org_id\n- Retorno 404 para busca cross-tenant",
+          "story_points": 5,
+          "labels": ["[P0] Crítico / Must Have", "Backend / FastAPI", "Multi-Tenant Zero-Trust"]
+        },
+        {
+          "name": "[T2] Resolução e Merge de Identidades Cross-Channel",
+          "desc": "**User Story:** Como sistema, quero identificar se um contato vindo do Zap ou Instagram já possui cadastro por e-mail ou telefone, mesclando suas identidades.\n\n**Critérios de Aceite:**\n- Função `resolve_or_create_lead` verifica correspondência em `phone`, `email` ou `document`\n- Dispara evento `lead.merged` na timeline append-only",
+          "story_points": 5,
+          "labels": ["[P0] Crítico / Must Have", "Backend / FastAPI"]
+        },
+        {
+          "name": "[T3] Memory Brain — Tabela e Extrator de Memórias Estruturadas",
+          "desc": "**User Story:** Como IA Sales SDR, quero armazenar e consultar fatos de longo prazo sobre o lead (orçamento, objeções prévias, datas).\n\n**Critérios de Aceite:**\n- Tabela `lead_memories` com `organization_id`, `key`, `value`, `confidence_score`\n- Suporte a busca vetorial leve via `sqlite-vec` local (Hot RAG < 15ms)",
+          "story_points": 8,
+          "labels": ["[P0] Crítico / Must Have", "Database / Alembic / Turso", "LangGraph / AI Agent"]
+        },
+        {
+          "name": "[T4] Lead Timeline Events Append-Only",
+          "desc": "**User Story:** Como gestor comercial, quero uma linha do tempo imutável de todas as interações do lead.\n\n**Critérios de Aceite:**\n- Tabela `lead_timeline_events` append-only (sem UPDATE/DELETE)\n- Emite eventos: `lead.created`, `lead.stage_changed`, `lead.score_updated`, `memory.added`",
+          "story_points": 5,
+          "labels": ["[P0] Crítico / Must Have", "Backend / FastAPI"]
+        },
+        {
+          "name": "[T5] UI de Pipeline Kanban & Detalhe do Lead (`01_SDR_Prototype` Integration)",
+          "desc": "**User Story:** Como gestor de vendas, quero visualizar o Kanban de leads em 5 estágios com filtragem dinâmica por tag e score.\n\n**Critérios de Aceite:**\n- Renderização Jinja2 + HTMX da lista de leads e modal de detalhe com timeline imutável\n- Fidelidade visual total com o protótipo `01_SDR_Prototype`",
+          "story_points": 8,
+          "labels": ["[P1] Importante / Should Have", "Frontend / HTMX / Alpine"]
+        }
+      ]
+    },
+    {
+      "id": "list_product_backlog",
+      "name": "📋 Product Backlog (Sprints 03 a 10)",
+      "cards": [
+        {
+          "name": "[T6] Aggregate Root de Conversas e Mensagens (Sprint 03)",
+          "desc": "**User Story:** Como sistema, quero registrar conversas como agregados raiz onde o lead é participante.\n\n**Critérios de Aceite:** Tabelas `conversations` e `messages` vinculadas a `organization_id` com status (`active`, `waiting_human`, `closed`).",
+          "story_points": 8,
+          "labels": ["[P0] Crítico / Must Have", "Backend / FastAPI"]
+        },
+        {
+          "name": "[T7] Opportunity Brain — Scoring Baseado em Eventos (Sprint 03)",
+          "desc": "**User Story:** Como SDR, quero que cada ação do lead altere seu score automaticamente.\n\n**Critérios de Aceite:** Motor de regras avalia eventos e recalcula `lead.score`, movendo para `SQL` quando score >= 80.",
+          "story_points": 5,
+          "labels": ["[P1] Importante / Should Have", "Backend / FastAPI"]
+        },
+        {
+          "name": "[T8] Cadence Engine — Máquina de Estados e Agendador Taskiq (Sprint 03)",
+          "desc": "**User Story:** Como gestor, quero definir réguas de relacionamento automáticas por temperatura do lead.\n\n**Critérios de Aceite:** JSON de cadência com passos agendados via worker Taskiq idempotente.",
+          "story_points": 8,
+          "labels": ["[P0] Crítico / Must Have", "Taskiq / Async Worker"]
+        },
+        {
+          "name": "[T9] Z-API WhatsApp Webhook & Outbound Queue (Sprint 04)",
+          "desc": "**User Story:** Como sistema, quero receber mensagens do WhatsApp via Z-API em < 50ms e enfileirar o processamento.\n\n**Critérios de Aceite:** Endpoint responde HTTP 202 instantaneamente e enfileira tarefa no Taskiq.",
+          "story_points": 8,
+          "labels": ["[P0] Crítico / Must Have", "Taskiq / Async Worker", "Backend / FastAPI"]
+        },
+        {
+          "name": "[T10] LangGraph StateGraph SDR Agent & Tool Calling (Sprint 04)",
+          "desc": "**User Story:** Como SDR Virtual de IA, quero dialogar no WhatsApp consultando RAG, salvando memórias e agendando reuniões.\n\n**Critérios de Aceite:** Orquestrador `langgraph.StateGraph` com checkpointer de memória e fallback `with_fallbacks()` Gemini/Sonnet -> GPT-4o-mini.",
+          "story_points": 13,
+          "labels": ["[P0] Crítico / Must Have", "LangGraph / AI Agent"]
+        },
+        {
+          "name": "[T11] Integração do Standalone Zap Micro-App (`02_ZAP_Prototype`) (Sprint 04)",
+          "desc": "**User Story:** Como vendedor humano, quero alternar entre o modo Copilot Active e Human Mode na interface do Zap.\n\n**Critérios de Aceite:** Conexão do backend FastAPI aos endpoints consumidos pelo protótipo `02_ZAP_Prototype` com suporte a `interrupt()`.",
+          "story_points": 8,
+          "labels": ["[P0] Crítico / Must Have", "Frontend / HTMX / Alpine", "LangGraph / AI Agent"]
+        },
+        {
+          "name": "[T12] Protocolo de Handoff com Resumo de Contexto por IA (Sprint 05)",
+          "desc": "**User Story:** Como vendedor assumindo atendimento, quero um resumo instantâneo da conversa gerado pela IA.\n\n**Critérios de Aceite:** Gera card de briefing sintético ao mudar para `waiting_human`.",
+          "story_points": 5,
+          "labels": ["[P1] Importante / Should Have", "LangGraph / AI Agent"]
+        },
+        {
+          "name": "[T13] Google Calendar Integration via LangChain Tool (Sprint 05)",
+          "desc": "**User Story:** Como SDR Virtual, quero consultar horários livres e criar eventos no Google Calendar.\n\n**Critérios de Aceite:** Ferramenta `@tool` acoplada ao grafo LangGraph com auth OAuth2 por tenant.",
+          "story_points": 8,
+          "labels": ["[P1] Importante / Should Have", "LangGraph / AI Agent"]
+        },
+        {
+          "name": "[T14] Engine de Server-Sent Events (SSE) Multi-Tenant (Sprint 06)",
+          "desc": "**User Story:** Como operador, quero ver novas mensagens, alertas DHS e IA em tempo real.\n\n**Critérios de Aceite:** Broker SSE in-memory via `sse-starlette` transmitindo eventos por `organization_id`.",
+          "story_points": 8,
+          "labels": ["[P0] Crítico / Must Have", "Backend / FastAPI"]
+        },
+        {
+          "name": "[T15] Transcrição de Áudio com OpenAI Whisper & Ingestão RAG (Sprint 06)",
+          "desc": "**User Story:** Como sistema, quero transcrever notas de áudio do Zap em < 1.5s.\n\n**Critérios de Aceite:** Worker Taskiq executa Whisper, injeta texto na timeline e atualiza extrator de memórias.",
+          "story_points": 8,
+          "labels": ["[P0] Crítico / Must Have", "Taskiq / Async Worker"]
+        },
+        {
+          "name": "[T16] Cálculo Dinâmico do DHS Score (Health of Deal Chart.js) (Sprint 06)",
+          "desc": "**User Story:** Como gestor, quero acompanhar a evolução da saúde da negociação no gráfico Chart.js.\n\n**Critérios de Aceite:** Cálculo de sentimento gera eventos DHS via SSE.",
+          "story_points": 5,
+          "labels": ["[P1] Importante / Should Have", "Frontend / HTMX / Alpine"]
+        },
+        {
+          "name": "[T17] Pipeline de Storage Tiering (Hot Turso Local -> Cold Postgres DW) (Sprint 07)",
+          "desc": "**User Story:** Como engenheiro de dados, quero mover conversas consolidadas com mais de 30 dias do Turso local para o Postgres DW.\n\n**Critérios de Aceite:** Cron job assíncrono (D-1) copia histórico para o DW e limpa o Turso local.",
+          "story_points": 8,
+          "labels": ["[P0] Crítico / Must Have", "Database / Alembic / Turso"]
+        },
+        {
+          "name": "[T18] Dashboards Analíticos do Manager Brain (`01_SDR_Prototype` Integration) (Sprint 07)",
+          "desc": "**User Story:** Como dono do negócio, quero visualizar indicadores de Funil, CAC, ROI e Canal Vencedor.\n\n**Critérios de Aceite:** Endpoints de agregados lendo dados quentes/frios para alimentar a UI.",
+          "story_points": 8,
+          "labels": ["[P1] Importante / Should Have", "Frontend / HTMX / Alpine"]
+        },
+        {
+          "name": "[T19] AI Coach SDR Pós-Conversa (Sprint 07)",
+          "desc": "**User Story:** Como coordenador, quero que a IA analise atendimentos concluídos por humanos e gere feedback.\n\n**Critérios de Aceite:** Batch job com Instructor/Pydantic gera relatório estruturado.",
+          "story_points": 5,
+          "labels": ["[P2] Desejável / Could Have", "LangGraph / AI Agent"]
+        },
+        {
+          "name": "[T20] Ingestão de Instagram Direct Messages & E-mail Inbox (Sprint 08)",
+          "desc": "**User Story:** Como cliente, quero iniciar conversa no IG DM e continuá-la no Zap sem perder contexto.\n\n**Critérios de Aceite:** Drivers de canal para Instagram API e IMAP/SMTP.",
+          "story_points": 13,
+          "labels": ["[P1] Importante / Should Have", "Backend / FastAPI"]
+        },
+        {
+          "name": "[T21] Systemd Update Agent com Rollback Automático (Sprint 09)",
+          "desc": "**User Story:** Como operador, quero que cada VPS cliente faça pull de updates a cada 6h com rollback automático.\n\n**Critérios de Aceite:** Script systemd valida healthcheck e reverte versão se houver erro HTTP 5xx.",
+          "story_points": 13,
+          "labels": ["[P0] Crítico / Must Have", "Backend / FastAPI"]
+        },
+        {
+          "name": "[T22] Mecanismo de Importação de Playbooks Verticais & Marketplace (Sprint 10)",
+          "desc": "**User Story:** Como parceiro white-label, quero instalar pacotes de playbooks pré-configurados por nicho.\n\n**Critérios de Aceite:** Parser JSON/YAML contendo prompts, ferramentas RAG e cadências.",
+          "story_points": 8,
+          "labels": ["[P2] Desejável / Could Have", "LangGraph / AI Agent"]
+        }
+      ]
+    },
+    {
+      "id": "list_in_progress",
+      "name": "🚧 Em Desenvolvimento (WIP Limit: 3)",
+      "cards": []
+    },
+    {
+      "id": "list_review",
+      "name": "👀 Review & Validação Zero-Trust (QA)",
+      "cards": []
+    },
+    {
+      "id": "list_testing",
+      "name": "🧪 Testes Automatizados & Test Harness",
+      "cards": []
+    }
+  ]
+}
