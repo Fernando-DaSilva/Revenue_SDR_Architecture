@@ -33,3 +33,6 @@ Este diretório contém os registros de decisões arquiteturais importantes do p
 * **ADR-027** — [Orquestração de Agentes com Ecossistema LangChain e LangGraph](027-langchain-langgraph-multi-agent-orchestration.md)
 * **ADR-028** — [Workflows de Agentes Baseados em Estado com LangGraph e Human-in-the-Loop](028-langgraph-stateful-workflows-and-human-in-the-loop.md)
 * **ADR-029** — [Observabilidade, Tracing e Avaliação de Agentes com LangSmith](029-langsmith-observability-evals-and-prompt-management.md)
+* **ADR-030** — [Middleware de Propagação Automática de ContextVar de Tenancy no Taskiq (TenantTaskiqMiddleware)](030-taskiq-contextvar-tenant-propagation.md)
+* **ADR-031** — [Protocolo de Reidratação de Leads Inativos do Cold Storage (Supabase/PostgreSQL) para o Hot Storage (Turso/libSQL)](031-cold-storage-rehydration-protocol.md)
+* **ADR-032** — [Rate Limiting Anti-Ban no WhatsApp e Imposição Rígida da Janela de 24 Horas da Meta](032-whatsapp-anti-ban-and-rate-limiting.md)

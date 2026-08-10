@@ -1,4 +1,4 @@
-# ARCHITECTURE.md — Decisoes Tecnicas e ADRs (v2.2)
+# ARCHITECTURE.md — Decisoes Tecnicas e ADRs (v2.3)
 
 > **COMO o produto e construido.** Decisoes arquiteturais vigentes, com
 > contexto, decisao e consequencias. Reflete o estado real do codigo
@@ -35,9 +35,11 @@ Request
   |
   v
 SecurityHeadersMiddleware  (headers de endurecimento + CSP)
+  |
   v
-TenantResolutionMiddleware (ASGI puro: custom_domain/subdominio -> header
-  |                         -> query param (dev) -> default; seta
+TenantResolutionMiddleware (ASGI puro: custom_domain/subdominio -> JWT claim 'org'
+  |                         -> header X-Tenant-Slug [desabilitado/validado em Prod]
+  |                         -> query param (dev apenas) -> default; seta
   |                         request.state.organization + ContextVar)
   v
 RateLimitingMiddleware     (Rate limit por tenant/IP via Valkey/Redis/DiskCache)
@@ -69,6 +71,9 @@ Model (SQLModel)           TenantMixin (organization_id obrigatorio) +
 6. **Templates via `app/web/templating.py::render()`** — injeta tema/branding
    do tenant automaticamente.
 7. **Agentes de IA Codificadores**: Devem obrigatoriamente se submeter ao harness de teste e linting (`pytest`, `ruff`, `alembic` round-trip) antes de concluir qualquer pull request ou commit (ADR-026).
+8. **Propagação de ContextVar de Tenancy no Taskiq**: Workers de background DEVEM utilizar `TenantTaskiqMiddleware` para garantir que `organization_id` seja serializado no despachador e hidratado na thread do worker (ADR-030).
+9. **Persistent LangGraph Checkpointers**: Proibido o uso de `MemorySaver` em produção. Grafos de estado DEVEM utilizar checkpointers persistentes em banco (`AsyncSqliteSaver` / Turso `.db` local) (ADR-028, ADR-030).
+10. **Proteção WhatsApp & Janela Meta 24h**: Cadências e respostas de IA DEVEM verificar `last_inbound_timestamp`. Mensagens em texto livre são BLOQUEADAS após 24h (exigindo HSM Templates). Envios outbound usam rate limiter com jitter dinâmico (2.0s-6.0s) e status `composing` (ADR-032).
 
 ## 3. Multi-tenancy — defesa em profundidade Zero-Trust
 
@@ -78,11 +83,18 @@ Model (SQLModel)           TenantMixin (organization_id obrigatorio) +
 | Middleware | Resolve tenant por request; seta `request.state.organization` + ContextVar `current_organization` |
 | JWT | Claim `org` precisa bater com o tenant do request — token nao opera fora do tenant de origem |
 | Services | Toda query filtra `organization_id`; acesso por ID retorna **404 generico** cross-tenant (nao vaza existencia) |
+| Async Workers | `TenantTaskiqMiddleware` serializa e hidrata ContextVar em 100% dos jobs em segundo plano (ADR-030) |
 | Testes | Suite de isolamento cross-tenant obrigatoria por feature (57+ testes) |
 
-Resolucao de tenant (precedencia): `custom_domain` exato (Host) ou
-subdominio -> header `X-Tenant-Slug` -> query param (so dev) ->
-`DEFAULT_TENANT_SLUG` (se configurado; vazio em producao = 404).
+### Precedência Rígida de Resolução de Tenant (Hardened Precedence)
+
+1. `custom_domain` exato (cabeçalho `Host`) ou subdomínio.
+2. Claim `org` do token JWT (para requisições autenticadas de API/Browser).
+3. Header `X-Tenant-Slug` (**ESTRITAMENTE DESABILITADO em Produção para requisições não autenticadas**; em staging, deve obrigatoriamente coincidir com `JWT.org`).
+4. Query param `?tenant=` (permitido **apenas em ambiente de desenvolvimento local `dev`**).
+5. `DEFAULT_TENANT_SLUG` (se configurado; vazio em produção = HTTP 404 Not Found).
+
+> **Hardening de Segurança (Audit Section I.2):** Substituições não autenticadas via header `X-Tenant-Slug` são bloqueadas em produção para evitar que usuários mal-intencionados façam probing ou contornem a ContextVar de tenant.
 
 ## 4. Autenticacao
 
@@ -103,10 +115,13 @@ tabela central de eventos do dominio. Regras:
   `merged`, `memory_added`, `score_changed`, `cadence_step_advanced`...
 - Eventos alimentam: timeline do lead, scoring, analytics e replay.
 
-## 6. Jobs assincronos e Fila de Tarefas (ADR-021)
+## 6. Jobs assincronos e Fila de Tarefas (ADR-021, ADR-030)
 
-- Fila resiliente via **Taskiq** (com backend Redis/Valkey ou AioSQLite embarcado para standalone VPS).
+- Fila resiliente via **Taskiq** com suporte a brokers Redis/Valkey (nuvem) ou SQLite embarcado em modo Standalone VPS.
+- **Separação de Bancos SQLite em Modo Standalone**: Para evitar contenção e travamentos de gravação (`database is locked`) em arquivos WAL, o app principal utiliza `app_data.db` e o broker Taskiq utiliza um arquivo isolado `taskiq_queue.db` (ADR-030).
+- **Propagação Automática de Tenancy**: O `TenantTaskiqMiddleware` serializa o `organization_id` no payload da tarefa e o hidrata na ContextVar do worker antes da execução (ADR-030).
 - Webhooks do WhatsApp/Instagram respondem `HTTP 202 Accepted` em `< 50ms` e delegam o processamento da LLM para os workers do Taskiq.
+- Download binário imediato de notas de voz/mídias em workers antes de URLs temporários expirarem (ADR-032).
 - Jobs **idempotentes** por construcao (chaves de dedup `job_key` + checagem de estado antes de agir).
 - Retentativas com **Exponential Backoff + Jitter** e salvamento de falhas em **Dead Letter Queue (DLQ)**.
 
@@ -114,14 +129,20 @@ tabela central de eventos do dominio. Regras:
 
 - **Hot Storage (Turso / libSQL local)**: Armazena dados de atendimento ativo, leads, conversas recentes e vetores ultraleves via `sqlite-vec` com resposta em $< 10\text{ ms}$ (ADR-002, ADR-016, ADR-022).
 - **Cold Storage / DW (PostgreSQL / Supabase)**: Recebe réplicas D-1 de conversas históricas, relatórios do Manager Brain e índices semânticos `pgvector` HNSW (ADR-015, ADR-022).
+- **Protocolo de Reidratação de Leads Inativos (ADR-031)**: Leads inativos (> 30 dias) arquivados no Cold Storage que voltam a entrar em contato são reidratados automaticamente no Turso Hot Storage local, buscando o perfil, memórias essenciais e as últimas 10 mensagens.
+- **Consistência de Modelos de Embedding**: Tanto o `sqlite-vec` (Hot RAG) quanto o `pgvector` (Cold RAG) usam obrigatoriamente o mesmo modelo de embedding (ex: `text-embedding-3-small` em 1536d) para evitar distorção em buscas por Cosseno.
 - **Alembic Batch Migrations**: Todas as migrações exigem `render_as_batch=True` para garantir compatibilidade perfeita com SQLite/libSQL (ADR-024).
 
 ## 8. Orquestração de LLMs e Sistema Multi-Agente (LangChain, LangGraph & Instructor)
 
 - **LangChain Core (`langchain-core`)**: Padrão oficial para abstração de LLMs, Prompts (`ChatPromptTemplate`), Ferramentas (`@tool`) e composição de fluxos LCEL (ADR-027).
 - **LangGraph (`langgraph`)**: Orquestração de agentes baseados em estado (`StateGraph`), ciclos conversacionais, controle de histórico e interrupções para aprovação humana (*Human-in-the-Loop*) (ADR-028).
+- **Checkpointers Persistentes de Estado**: Obrigatoriedade de utilizar checkpointers persistentes (`AsyncSqliteSaver` no Turso `.db` local ou tabela SQLModel) para manter estados de grafos e interrupções `interrupt()` ativas contra restarts de processos. O uso de `MemorySaver` in-memory é proibido em produção (ADR-028).
 - **Instructor + Pydantic v2**: Utilizado para extrações de saída estruturada estrita em jobs de background (ADR-023).
-- **Cadeia de Fallback Declarativa (`with_fallbacks`)**: Roteamento automático: Gemini 2.5 Flash / Claude 3.5 Sonnet -> GPT-4o-mini / Groq Llama-3.3 em caso de timeout ($> 2.5\text{s}$) ou erro 5xx (ADR-023, ADR-027).
+- **Cadeia de Fallback Ajustada para SLA P95 (< 1.2s)**:
+  - Modelo Primário: `gemini-2.5-flash` / `claude-3-5-sonnet` com timeout estrito de **900ms** (`request_timeout=0.9`).
+  - Modelo Fallback: `gpt-4o-mini` / `groq llama-3.3` com timeout de **900ms** (`request_timeout=0.9`).
+  - Orçamento cumulativo de execução cravado em **máximo 1.8s**, garantindo que mesmo com fallback a latência P95 permaneça estritamente controlada sem estourar o orçamento do agente SDR (ADR-019, ADR-023).
 - **Observabilidade & Tracing via LangSmith**: Telemetria visual de grafos, contabilidade de tokens por tenant e suite de Evals (ADR-029).
 - **System Prompt Caching & Streaming**: Caching nativo de prompts para economia de 75-90% de tokens e streaming em tempo real SSE via `astream_events` (ADR-005, ADR-019).
 
@@ -266,13 +287,28 @@ tabela central de eventos do dominio. Regras:
 
 ### ADR-028 — Workflows de Agentes Baseados em Estado com LangGraph e Human-in-the-Loop
 - **Contexto**: Processos comerciais exigem manutenção de estado conversacional persistente e pausa para aprovação humana em ações sensíveis.
-- **Decisão**: Modelagem de agentes como **Grafos Dirigidos de Estado (`StateGraph`)** com checkpointers (`MemorySaver` / SQLite / Turso) e suporte a interrupções `interrupt()` para handoff ao vendedor no Zap Copilot (`02_ZAP_Prototype`).
-- **Consequências**: Determinismo, prevenção de ações indesejadas por IA e rastreabilidade total do estado conversacional.
+- **Decisão**: Modelagem de agentes como **Grafos Dirigidos de Estado (`StateGraph`)** com checkpointers persistentes (`AsyncSqliteSaver` / Turso / libSQL local) e suporte a interrupções `interrupt()` para handoff ao vendedor no Zap Copilot (`02_ZAP_Prototype`). Uso de checkpointers in-memory (`MemorySaver`) é estritamente vedado em produção.
+- **Consequências**: Determinismo, prevenção de perda de estado em restarts e rastreabilidade total do estado conversacional.
 
 ### ADR-029 — Observabilidade, Tracing e Avaliação de Agentes com LangSmith
 - **Contexto**: Diagnóstico de latência, contabilidade de tokens por tenant e validação de qualidade de prompts em produção.
 - **Decisão**: Ingestão unificada via **LangSmith (`LANGCHAIN_TRACING_V2=true`)** integrada aos metadados de tenancy (`organization_id`), aliada a suítes de Evals automatizadas no CI/CD.
 - **Consequências**: Visibilidade total de cada nó de execução dos agentes e contabilidade precisa FinOps por tenant.
+
+### ADR-030 — Middleware de Propagação Automática de ContextVar de Tenancy no Taskiq (TenantTaskiqMiddleware)
+- **Contexto**: Variavéis de contexto do Python (`ContextVar`) não são propagadas automaticamente para workers assíncronos do Taskiq, arriscando perda de tenant context ou vazamento cross-tenant.
+- **Decisão**: Implementar `TenantTaskiqMiddleware` para serializar `organization_id` nos rótulos da mensagem no despachador e hidratar `current_organization` no worker antes da execução. Adicionalmente, separar os arquivos SQLite em modo standalone (`app_data.db` vs `taskiq_queue.db`) para evitar locks de gravação (`database is locked`).
+- **Consequências**: Garantia absoluta de isolamento Zero-Trust em background workers e fim dos travamentos de concorrência em SQLite WAL.
+
+### ADR-031 — Protocolo de Reidratação de Leads Inativos do Cold Storage (Supabase/PostgreSQL) para o Hot Storage (Turso/libSQL)
+- **Contexto**: Leads inativos há mais de 30 dias cujos dados foram arquivados no Cold Storage DW perderiam o histórico recente ao entrar em contato novamente.
+- **Decisão**: Implementar o `RehydrationService` no `LeadService` para restaurar o perfil do lead, memórias essenciais e as últimas 10 mensagens do Supabase DW para o Turso Hot Storage local na VPS no momento da mensagem inbound. Padronizar dimensões de vetores em 1536d (`text-embedding-3-small`) em ambas as camadas.
+- **Consequências**: Atendimento personalizado para leads que retornam após longos períodos, mantendo a VPS leve sem inflar o Hot Storage local.
+
+### ADR-032 — Rate Limiting Anti-Ban no WhatsApp e Imposição Rígida da Janela de 24 Horas da Meta
+- **Contexto**: Rajadas de envio em provedores não oficiais (Z-API/Evolution) causam banimento de números; envios após 24h da última interação do lead violam a política da Meta Cloud API.
+- **Decisão**: Bloquear mensagens em texto livre (*freeform*) após 24 horas no `CadenceEngine` e `ZapService`, forçando a seleção de HSM Templates aprovados ou alertando o operador humano. Aplicar rate limiter token bucket (max 1 msg/3-5s), jitter dinâmico (2.0s-6.0s) e status `composing`. Baixar mídias/áudios imediatamente no worker Taskiq para evitar expiração de URLs.
+- **Consequências**: Redução drástica de banimentos no WhatsApp, 100% de conformidade com as diretrizes da Meta e preservação de mídias inbound.
 
 ---
 
