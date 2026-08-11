@@ -17,12 +17,12 @@
 MÊS 1 (SEMANAS 1-4 / DIAS 1-28): CORE ENGINE, IA MULTI-AGENTE & MESSAGING
 Semana 1 [MICRO-SPRINTS 02.1-02.8] Lead Brain + Memory Brain + Taskiq Tenant Propagation (ADR-030)
 Semana 2 [MICRO-SPRINTS 03.1-03.8] Conversations + Opportunity Brain + Cadence Engine + Meta 24h HSM (ADR-032)
-Semana 3 [MICRO-SPRINTS 04.1-04.8] AI Sales Brain + AsyncSqliteSaver + Z-API WhatsApp Anti-Ban
+Semana 3 [MICRO-SPRINTS 04.1-04.8] AI Sales Brain + AsyncPostgresSaver + Z-API WhatsApp Anti-Ban (ADR-036, ADR-037)
 Semana 4 [MICRO-SPRINTS 05.1-05.8] Human-AI Handoff + Desconstrução HTML Monólito + Google Calendar Sync
 
 MÊS 2 (SEMANAS 5-8 / DIAS 29-60): REALTIME, OMNICHANNEL & SCALE
 Semana 5 [MICRO-SPRINTS 06.1-06.8] Transcrição Whisper + Fix Memory Leak Chart.js + Stream SSE Real-Time
-Semana 6 [MICRO-SPRINTS 07.1-07.8] Pós-Conversa Sales Coach + DW ETL/CDC + Reidratação Cold Storage (ADR-031)
+Semana 6 [MICRO-SPRINTS 07.1-07.8] Pós-Conversa Sales Coach + Unified Supabase PostgreSQL RAG & Analytics (ADR-036, ADR-037)
 Semana 7 [MICRO-SPRINTS 08.1-08.8] Omnichannel Engine (Instagram DM, Email, Voice Agent)
 Semana 8 [MICRO-SPRINTS 09.1-10.8] VPS Single-Tenant Automation + MyraOS Console + Playbooks & Marketplace
 ```

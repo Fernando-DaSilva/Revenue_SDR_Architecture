@@ -108,8 +108,7 @@ lead.custom_fields["orcamento_max"] = 5000
 ```
 
 **Convencao**: default `list`/`dict` via `default_factory` (nunca `None`).
-No SQLite o JSON vira TEXT gerenciado pelo SQLAlchemy; em Postgres vira
-JSON/JSONB na migracao — transparente.
+No PostgreSQL (Supabase) o JSON vira `JSONB` de alta performance com indexação GIN nativa (ADR-036, ADR-037).
 
 ---
 

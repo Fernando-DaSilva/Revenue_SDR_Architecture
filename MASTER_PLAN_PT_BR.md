@@ -19,8 +19,8 @@ O **Revenue SDR OS** é um **Sistema Operacional de Vendas Conversacional Autôn
 2. **Ecossistema Multi-Agente de IA**: Agentes autônomos especializados atuando como SDRs seniores, extratores de memória em background, qualificadores de oportunidade, agendadores de cadência e coaches de vendas pós-conversa.
 3. **Engine Omnichannel**: Continuidade fluida de conversa entre WhatsApp (Z-API), Instagram DM, E-mail e Voz.
 4. **Arquitetura On-Premise-as-a-Service**: VPSs dedicadas single-tenant por organização, gerenciadas centralmente pelo **MyraOS Platform Console**, garantindo conformidade LGPD, zero compartilhamento de dados entre empresas e resiliência de execução local.
-5. **Stack Auto-Contida**: Backend FastAPI (`app/main.py`) + SQLModel sobre banco embarcado Turso (libSQL) + Frontend hypermedia Jinja2/HTMX/Alpine.js (vendored) + streaming em tempo real SSE + Fila de Jobs Taskiq com `TenantTaskiqMiddleware` + Orquestração Instructor/Pydantic v2.
-6. **Armazenamento de RAG em Duas Camadas & Re-hidratação**: Armazenamento local Turso (libSQL) + `sqlite-vec` ($< 15\text{ ms}$) com protocolo automático de Re-hidratação de Cold Storage (PostgreSQL `pgvector` DW) para leads recorrentes inativos (> 30d) (ADR-015, ADR-031).
+5. **Stack Unificada no Supabase**: Backend FastAPI (`app/main.py`) + SQLModel sobre Supabase Managed PostgreSQL 16+ (Supavisor pooler) + Frontend hypermedia Jinja2/HTMX/Alpine.js (vendored) + streaming em tempo real SSE + Fila de Jobs Taskiq com `TenantTaskiqMiddleware` + Orquestração Instructor/Pydantic v2 (ADR-036, ADR-037).
+6. **Armazenamento de RAG Unificado em PostgreSQL**: Supabase `pgvector` com índice HNSW ($< 15\text{ ms}$) combinado com busca textual `tsvector` (BM25) via Reciprocal Rank Fusion (RRF), eliminando duplicidades e re-hidratação de dados (ADR-022, ADR-036, ADR-037).
 7. **Integração WhatsApp & Conformidade Meta**: Enforcement rigoroso da Janela de Atendimento de 24 Horas do Meta via Templates HSM aprovados, com rate limiters por Token-Bucket (jitter de 3–5s) contra banimentos (ADR-032).
 8. **Desenvolvimento Orientado a Agentes de IA & Micro-Sprints Horárias**: Repositório projetado com contratos estritos OpenAPI 3.1, schemas Pydantic v2, harness de verificação sub-minuto e execução autônoma em **Micro-Sprints Horárias (1h a 4h)** em tempo recorde de **2 Meses (60 Dias)** (ADR-026, ADR-033, ADR-034, ADR-035).
 
@@ -34,12 +34,12 @@ A execução desta solução exige uma equipe de engenharia multidisciplinar ope
 
 | Papel | Responsabilidades Principais |
 |---|---|
-| **Arquiteto Principal de Enterprise & Software** | Topologia do sistema em 5 streams paralelas (ADR-035), invariantes de multi-tenancy Zero-Trust, evolução de schema Alembic Batch, orquestração de VPS. |
-| **Engenheiro Líder de Sistemas de IA** | Arquitetura do sistema multi-agente LangGraph, engenharia de prompt, RAG híbrido (`sqlite-vec` + `pgvector`), Instructor/Pydantic schemas, fallback LLM Router com orçamento estrito de 900ms. |
-| **Engenheiro Sênior de Backend e Dados** | Serviços de domínio FastAPI, integração Turso/libSQL local + Cold DW PostgreSQL, jobs assíncronos Taskiq com `TenantTaskiqMiddleware`, broker SSE. |
+| **Arquiteto Principal de Enterprise & Software** | Topologia do sistema em 5 streams paralelas (ADR-035), invariantes de multi-tenancy Zero-Trust, evolução de schema Alembic PostgreSQL, integração com a plataforma Supabase (ADR-037). |
+| **Engenheiro Líder de Sistemas de IA** | Arquitetura do sistema multi-agente LangGraph, engenharia de prompt, RAG híbrido (Supabase `pgvector` + `tsvector`), Instructor/Pydantic schemas, fallback LLM Router com orçamento estrito de 900ms. |
+| **Engenheiro Sênior de Backend e Dados** | Serviços de domínio FastAPI, integração Supabase PostgreSQL + pooler Supavisor, jobs assíncronos Taskiq com `TenantTaskiqMiddleware`, broker SSE. |
 | **Engenheiro Sênior de Frontend e UX** | Implementação hypermedia Jinja2 + HTMX + Alpine.js (desconstruindo o HTML monolítico de 1.1MB do protótipo em templates Jinja2), sistema de presets de cores white-label, correção de memory leaks do Chart.js no Zap Copilot. |
-| **Arquiteto de Segurança Zero-Trust & DevSecOps** | Automação de SAST/DAST, Secret Scanning, Zero-Trust multi-tenancy enforcement, conformidade OWASP Top 10 API Security, rotação de tokens Argon2id & PyJWT. |
-| **Diretor de QA e Harness de IA** | Suíte de testes isolados cross-tenant com Pytest (>90% de cobertura), linting ruff, validação de migrations Alembic batch round-trip em $< 60\text{s}$ no CI/CD. |
+| **Arquiteto de Segurança Zero-Trust & DevSecOps** | Automação de SAST/DAST, Secret Scanning, Zero-Trust multi-tenancy enforcement (PostgreSQL RLS no Supabase), conformidade OWASP Top 10 API Security, rotação de tokens Argon2id & PyJWT. |
+| **Diretor de QA e Harness de IA** | Suíte de testes isolados cross-tenant com Pytest (>90% de cobertura), linting ruff, validação de migrations Alembic round-trip em $< 60\text{s}$ no CI/CD. |
 
 ### 2.2 Workflow Oficial do Agente de Codificação / Desenvolvedor em Micro-Sprints Horárias (ADR-033, ADR-034)
 

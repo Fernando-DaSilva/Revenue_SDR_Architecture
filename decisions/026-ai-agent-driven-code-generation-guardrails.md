@@ -61,7 +61,7 @@ Instituir o **Framework de Guardiões para Agentes de Codificação de IA (AI Co
 | 3 | **Retorno 404 em Cross-Tenant** | Tentativas de acessar dados de outro tenant devem retornar `404 Not Found` genérico (NUNCA 403 Forbidden). |
 | 4 | **Rotas Finas / Services Robustos** | Regras de negócio e chamadas ORM vivem no `service.py`. A rota FastAPI apenas desempacota o request e chama o serviço. |
 | 5 | **Envelope Padrão de Erro** | Todo erro deve lançar subclasses de `AppError` para retornar o envelope `{"error": {"code": ..., "message": ..., "details": ...}}`. |
-| 6 | **Schema via Alembic Batch** | NENHUMA alteração de tabela ocorre sem script Alembic testado com `render_as_batch=True`. |
+| 6 | **Schema via Alembic PostgreSQL** | NENHUMA alteração de tabela ocorre sem script Alembic relacional nativo do PostgreSQL (ADR-010, ADR-037). |
 | 7 | **Prefixos Obrigatórios nos IDs** | Todo ID deve usar a função `prefixed_id("lead")`, `prefixed_id("conv")`, etc. |
 | 8 | **Sem Dependências Não Aprovadas** | Não instalar libs sem verificar o `pyproject.toml`. Usar a stack fixa da ADR-001/002/006. |
 | 9 | **Validação em Schemas, Não no Model** | `SQLModel table=True` não valida entrada. A validação fica nos schemas Pydantic. |

@@ -19,8 +19,8 @@ The **Revenue SDR OS** is an **Autonomous Conversational Sales Operating System*
 2. **Multi-Agent Conversational AI Engine**: Specialized autonomous agents acting as senior SDRs, background memory extractors, lead qualifiers, cadence schedulers, and post-call sales coaches.
 3. **Omnichannel Engine**: Seamless conversation continuity across WhatsApp (Z-API), Instagram DM, Email, and Voice.
 4. **On-Premise-as-a-Service Deployment**: Dedicated single-tenant VPS nodes per organization managed centrally via the **MyraOS Platform Console**, guaranteeing LGPD compliance, zero data co-mingling, and local execution resilience.
-5. **Self-Contained Tech Stack**: FastAPI backend (`app/main.py`) + SQLModel over Turso (libSQL) embedded databases + Jinja2/HTMX/Alpine.js hypermedia frontend + SSE real-time streaming + Taskiq job queue with `TenantTaskiqMiddleware` + Instructor/Pydantic v2 orchestration.
-6. **Dual-Tier RAG Storage & Re-hydration**: Turso (libSQL) + `sqlite-vec` local hot storage ($< 15\text{ ms}$) with automatic Cold Storage Re-hydration protocol (PostgreSQL `pgvector` DW) for returning leads (> 30d inactive) (ADR-015, ADR-031).
+5. **Unified Tech Stack on Supabase**: FastAPI backend (`app/main.py`) + SQLModel over Supabase Managed PostgreSQL 16+ (Supavisor pooler) + Jinja2/HTMX/Alpine.js hypermedia frontend + SSE real-time streaming + Taskiq job queue with `TenantTaskiqMiddleware` + Instructor/Pydantic v2 orchestration (ADR-036, ADR-037).
+6. **Unified PostgreSQL RAG Storage**: Supabase `pgvector` HNSW index ($< 15\text{ ms}$) combined with PostgreSQL `tsvector` full-text search (BM25) via Reciprocal Rank Fusion (RRF), eliminating dual-tier re-hydration protocols (ADR-022, ADR-036, ADR-037).
 7. **WhatsApp Integration & Meta Compliance**: Strict enforcement of Meta's 24-hour Customer Service Window using approved HSM templates for active outreach, protected by Token-Bucket rate limiters (3–5s jitter) against anti-ban flags (ADR-032).
 8. **AI-Agent Driven Development & Hourly Micro-Sprints**: Repository engineered for machine-readable OpenAPI 3.1 contracts, Pydantic v2 schemas, sub-minute test harness verification, and autonomous execution in **Hourly Micro-Sprints (1h to 4h)** in a record **2-Month (60-Day)** window (ADR-026, ADR-033, ADR-034, ADR-035).
 
@@ -32,11 +32,11 @@ Executing this solution requires a disciplined, multi-disciplinary engineering t
 
 | Role | Core Responsibilities |
 |---|---|
-| **Principal Enterprise & Software Architect** | 5-stream parallel system topology (ADR-035), Zero-Trust multi-tenancy invariants, Alembic Batch schema evolution, VPS orchestration. |
-| **Lead AI Systems Engineer** | Multi-agent framework design, prompt engineering, Hybrid RAG pipelines (sqlite-vec + pgvector), Instructor Pydantic schemas, LLM fallback Router with 900ms strict timeout budget. |
-| **Senior Backend & Data Engineer** | FastAPI domain services, Turso/libSQL local DB + PostgreSQL DW, Taskiq background jobs with `TenantTaskiqMiddleware`, SSE broker. |
+| **Principal Enterprise & Software Architect** | 5-stream parallel system topology (ADR-035), Zero-Trust multi-tenancy invariants, PostgreSQL Alembic schema evolution, Supabase platform integration (ADR-037). |
+| **Lead AI Systems Engineer** | Multi-agent framework design, prompt engineering, Hybrid RAG pipelines (Supabase pgvector + tsvector), Instructor Pydantic schemas, LLM fallback Router with 900ms strict timeout budget. |
+| **Senior Backend & Data Engineer** | FastAPI domain services, Supabase PostgreSQL database + Supavisor pooler, Taskiq background jobs with `TenantTaskiqMiddleware`, SSE broker. |
 | **Senior Frontend & UX Engineer** | Jinja2 + HTMX + Alpine.js implementation (deconstructing monolithic 1.1MB prototype HTML into Jinja2 templates), white-label color preset translation system, ZAP Copilot Chart.js memory leak fixes. |
-| **Zero-Trust Security & DevSecOps Lead** | Automated SAST/DAST, Secret Scanning, Zero-Trust multi-tenancy enforcement, OWASP Top 10 API Security, Argon2id & PyJWT token management. |
+| **Zero-Trust Security & DevSecOps Lead** | Automated SAST/DAST, Secret Scanning, Zero-Trust multi-tenancy enforcement (PostgreSQL RLS), OWASP Top 10 API Security, Argon2id & PyJWT token management. |
 | **QA Director & AI Guardrails Engineer** | Pytest cross-tenant isolation test suite (>90% coverage), ruff linting, Alembic migration verification, automated AI agent sub-minute test harness (<60s) (ADR-026, ADR-034). |
 
 ---
@@ -47,12 +47,12 @@ Executing this solution requires a disciplined, multi-disciplinary engineering t
 MONTH 1 (WEEKS 1 TO 4 / DAYS 1 TO 28) — CORE ENGINE & AI MULTI-AGENT
 Week 1 [Micro-Sprints 02.1 - 02.8] Lead Brain + Memory Brain + Taskiq Tenant Context Propagation (ADR-030)
 Week 2 [Micro-Sprints 03.1 - 03.8] Conversations + Opportunity Brain + Cadence Engine + Meta 24h HSM (ADR-032)
-Week 3 [Micro-Sprints 04.1 - 04.8] AI Sales Brain + Persistent AsyncSqliteSaver + Z-API WhatsApp Anti-Ban
+Week 3 [Micro-Sprints 04.1 - 04.8] AI Sales Brain + Persistent AsyncPostgresSaver + Z-API WhatsApp Anti-Ban
 Week 4 [Micro-Sprints 05.1 - 05.8] Human-AI Handoff + Deconstruct Monolith HTML + Google Calendar
 
 MONTH 2 (WEEKS 5 TO 8 / DAYS 29 TO 60) — REALTIME, OMNICHANNEL & SCALE
 Week 5 [Micro-Sprints 06.1 - 06.8] Audio Whisper Transcription + Zap Chart.js Memory Leak Fix + SSE Stream
-Week 6 [Micro-Sprints 07.1 - 07.8] Post-Call Analysis + Data Warehouse ETL/CDC + Cold DW Re-hydration (ADR-031)
+Week 6 [Micro-Sprints 07.1 - 07.8] Post-Call Analysis + Unified Supabase PostgreSQL RAG & Analytics (ADR-036, ADR-037)
 Week 7 [Micro-Sprints 08.1 - 08.8] Full Omnichannel Engine (Instagram DM, Email, Voice Agent)
 Week 8 [Micro-Sprints 09.1 - 10.8] Single-Tenant VPS Automation + MyraOS Console + Vertical Playbooks & Marketplace
 ```
@@ -61,7 +61,7 @@ Week 8 [Micro-Sprints 09.1 - 10.8] Single-Tenant VPS Automation + MyraOS Console
 
 ## 4. Multi-AI Agent System Architecture (LangChain & LangGraph)
 
-The solution operates as an **orchestrated ecosystem of 6 specialized AI Agents**, built on **LangChain (`langchain-core`)** and **LangGraph (`langgraph`)**, ensuring stateful graph workflows (`StateGraph`), persistent database checkpointers (`AsyncSqliteSaver`), multi-tier model fallbacks (`with_fallbacks`), and full trace visibility in LangSmith (ADR-027, ADR-028, ADR-029):
+The solution operates as an **orchestrated ecosystem of 6 specialized AI Agents**, built on **LangChain (`langchain-core`)** and **LangGraph (`langgraph`)**, ensuring stateful graph workflows (`StateGraph`), persistent database checkpointers (`AsyncPostgresSaver`), multi-tier model fallbacks (`with_fallbacks`), and full trace visibility in LangSmith (ADR-027, ADR-028, ADR-029, ADR-036, ADR-037):
 
 ```
                           +-----------------------------------+
@@ -71,8 +71,8 @@ The solution operates as an **orchestrated ecosystem of 6 specialized AI Agents*
                                             v (Taskiq Queue - Immediate HTTP 202)
 +-----------------------------------------------------------------------------------+
 |                              1. AI Sales SDR Agent                                |
-|  - LangGraph StateGraph with AsyncSqliteSaver Checkpointer & Thread ID (Org:Lead) |
-|  - Accesses Hot RAG (sqlite-vec), System Prompt Persona, and Lead Memories        |
+|  - LangGraph StateGraph with AsyncPostgresSaver Checkpointer & Thread ID          |
+|  - Accesses Supabase pgvector RAG, System Prompt Persona, and Lead Memories       |
 |  - Invokes @tool functions: schedule_meeting(), update_stage(), add_memory()      |
 |  - Pauses via interrupt() for Human-in-the-Loop; 15-min background escalation     |
 |  - Resilient model routing: Gemini 2.5 Flash (900ms) -> Sonnet 3.5 -> GPT-4o-mini  |

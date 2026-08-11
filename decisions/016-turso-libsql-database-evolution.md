@@ -1,7 +1,8 @@
 # ADR-016 — Adoção do Turso (libSQL) com Suporte a Embedded Replicas e Fallback Local
 
-- **Status:** Aceito
-- **Data:** 2026-07-27
+- **Status:** Substituído (Superseded por ADR-036 e ADR-037)
+- **Data:** 2026-07-27 (Atualizado em 2026-08-11)
+- **Nota de Depreciação:** Esta decisão de arquitetura foi substituída pela adoção do PostgreSQL Unificado no Supabase (ADR-036 e ADR-037).
 
 ## Contexto e Problema
 

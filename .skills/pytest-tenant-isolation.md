@@ -17,27 +17,24 @@ Toda feature nova TEM teste de isolamento cross-tenant.
 pytest 100% verde antes de qualquer commit.
 
 REGRA DE OURO: testes NUNCA tocam o banco de desenvolvimento.
-Cada teste sobe uma app nova com SQLite EM MEMORIA (StaticPool).
+Cada teste sobe uma app nova com PostgreSQL isolado por schema ou banco de testes (AsyncPG / Testcontainers).
 ```
 
 ---
 
-## Por que este padrao (licao da v0.1.0)
+## Por que este padrao
 
-A v0.1.0 fazia `os.environ["DATABASE_URL"] = "...revenue_sdr_os.db"` no
-conftest e `drop_all/create_all` no engine global — **apagava o banco de
-dev a cada run** e ainda mascarava bugs de auth. O padrao abaixo elimina
-isso: a engine e injetada na app factory, isolada por teste.
+O padrao garante que o banco de dados utilizado nos testes execute com o mesmo dialeto **PostgreSQL 16+** do Supabase em produção, suportando a extensão `pgvector`, tipos `JSONB`, `UUID` e políticas de Row-Level Security (RLS). A engine e o schema de teste são injetados na app factory, isolados por teste.
 
 ## conftest.py (padrao vigente — tests/conftest.py)
 
 ```python
-"""Fixtures: app isolada por teste, banco SQLite em memoria."""
+"""Fixtures: app isolada por teste, banco PostgreSQL de teste."""
 from types import SimpleNamespace
 
 import pytest
 from fastapi.testclient import TestClient
-from sqlmodel import SQLModel, Session
+from sqlmodel import SQLModel, Session, create_engine
 
 from app.core.config import Settings
 from app.core.security import hash_password
@@ -48,24 +45,26 @@ from app.users.models import Role, User
 
 TEST_SECRET_KEY = "test-secret-key-with-at-least-32-characters"
 TEST_PASSWORD = "senha123"
+TEST_POSTGRES_URL = "postgresql+asyncpg://postgres:postgres@localhost:54322/postgres_test"
 
 
 @pytest.fixture(scope="session")
 def settings() -> Settings:
     return Settings(
         secret_key=TEST_SECRET_KEY,
-        database_url="sqlite://",
-        app_env="development",
+        database_url=TEST_POSTGRES_URL,
+        app_env="testing",
         default_tenant_slug=None,
     )
 
 
 @pytest.fixture()
-def db_engine():
-    """SQLite em memoria (StaticPool), fresco por teste."""
-    engine = create_db_engine("sqlite://")
+def db_engine(settings):
+    """PostgreSQL test database engine com schema isolado por teste."""
+    engine = create_db_engine(settings.database_url)
     SQLModel.metadata.create_all(engine)
     yield engine
+    SQLModel.metadata.drop_all(engine)
     engine.dispose()
 
 

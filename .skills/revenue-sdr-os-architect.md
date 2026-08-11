@@ -38,13 +38,14 @@ metadata:
 |          | + Tailwind/DaisyUI  | Cada tenant injeta seu proprio CSS (white-label)|
 | Backend  | FastAPI async       | SSE nativo, async I/O, OpenAPI 3.1             |
 | ORM      | SQLModel            | Pydantic + SQLAlchemy, tipagem fullstack       |
-| Hot DB   | Turso (libSQL)      | .db local (custo zero) + backup nuvem opcional  |
-| Cold DW  | PostgreSQL/Supabase | Storage tiering assíncrono para histórico/DW   |
-| Schema   | Alembic Batch Mode  | Versionamento com op.batch_alter_table         |
-| Real-time| SSE (NÃO WebSocket) | Unidirecional server→client via sse-starlette   |
-| Fila     | Taskiq + Redis/SQLite| Jobs assíncronos desacoplados (<50ms webhook)  |
+| Database | Supabase PostgreSQL | PostgreSQL 16+ gerenciado unificado (ADR-037)  |
+| Pooler   | Supavisor           | Transaction pooler (6543) / Session DDL (5432) |
+| Schema   | Alembic PostgreSQL  | DDL transacional nativo PostgreSQL             |
+| Real-time| SSE / Supabase RT   | Unidirecional server→client / WebSockets CDC    |
+| Fila     | Taskiq + Postgres   | Jobs assíncronos desacoplados com ContextVar   |
 | IA Engine| Instructor/Pydantic | Saídas estruturadas estritas sem exceções JSON |
-| RAG      | Hybrid (sqlite-vec) | sqlite-vec local (<15ms) + pgvector Cold DW    |
+| RAG      | Supabase pgvector   | pgvector HNSW 1536d + tsvector BM25 (RRF)      |
+| Checkpoint| AsyncPostgresSaver  | Persistência de grafos LangGraph no Supabase   |
 | Caching  | In-Memory + Redis   | LRU para temas/traduções + Rate Limiter por IP |
 | Reverse  | Caddy               | Auto-SSL via Let's Encrypt                      |
 +----------+---------------------+------------------------------------------------+
