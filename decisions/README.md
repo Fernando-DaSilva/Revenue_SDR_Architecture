@@ -41,5 +41,7 @@ Este diretório contém os registros de decisões arquiteturais importantes do p
 * **ADR-035** — [Topologia de Engenharia em Streams Paralelas para Desenvolvimento em 2 Meses](035-parallel-stream-engineering-topology.md)
 * **ADR-036** — [Adoção do PostgreSQL Unificado como Banco de Dados Único (Option A)](036-unified-postgresql-architecture.md)
 * **ADR-037** — [Integração com a Plataforma Supabase PostgreSQL Gerenciado](037-supabase-managed-database-platform-integration.md)
+* **ADR-038** — [Arquitetura Híbrida de Autenticação e Autorização Multi-Tenant (Supabase Auth + Zero-Trust RBAC no FastAPI)](038-hybrid-multi-tenant-auth-and-authorization-architecture.md)
+
 
 

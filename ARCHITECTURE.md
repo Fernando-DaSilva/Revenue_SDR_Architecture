@@ -330,6 +330,12 @@ tabela central de eventos do dominio. Regras:
 - **Decisão**: Desacoplar o projeto em **5 Streams Paralelas Independentes** (Core Engine & Data, AI Multi-Agent Systems, Messaging & Omnichannel, Frontend & UX, DevSecOps & Platform) operando sob contratos de interface OpenAPI 3.1 / Pydantic v2.
 - **Consequências**: Desenvolvimento simultâneo de todas as camadas do sistema sem bloqueios inter-agentes.
 
+### ADR-038 — Arquitetura Híbrida de Autenticação e Autorização Multi-Tenant (Supabase Auth + Zero-Trust RBAC no FastAPI)
+- **Contexto**: Necessidade de padronizar Autenticação e Autorização nos protótipos Admin OS (`01_SDR_Prototype`) e Zap Copilot (`02_ZAP_Prototype`), avaliando Supabase Auth vs. Clerk.
+- **Decisão**: Adotar a arquitetura híbrida com **Supabase Auth** como Identity Provider (IdP) e gerador de JWTs com RLS nativo no PostgreSQL (ADR-037), combinado com o **FastAPI Zero-Trust Gateway** para transporte duplo (Cookie HttpOnly `rsdros_session` + Bearer Token) e matriz RBAC/ABAC granular. Rejeitado uso de Clerk devido a atrito com Jinja2/HTMX, descompasso com RLS nativo e custos por MAU.
+- **Consequências**: Segurança unificada para dados, Supabase Storage e Realtime, zero custo extra de licença, e experiência fluida em hipermídia HTMX e micro-apps JS.
+
 ---
 
 *"Arquitetura é a arte de transformar decisões complexas em Micro-Sprints previsíveis e executáveis por Agentes de IA em tempo recorde."*
+
