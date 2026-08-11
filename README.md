@@ -25,7 +25,7 @@
 | [MASTER_PLAN_PT_BR.md](MASTER_PLAN_PT_BR.md) | Plano Mestre de Execução (PT-BR), Arquitetura Multi-Agente, Prazos (2 Meses) e Micro-Sprints Horárias | v4.0.0 |
 | [MASTER_PLAN.md](MASTER_PLAN.md) | Master Execution Plan (EN), Multi-Agent Architecture, Timelines (2 Months) & Hourly Micro-Sprints | v4.0.0 |
 | [FOUNDATION.md](FOUNDATION.md) | Visao do produto, 8 Brains, modelo de negocio/deploy, stack | v2.1.0 |
-| [ARCHITECTURE.md](ARCHITECTURE.md) | Arquitetura vigente + 35 ADRs (incluindo SLAs, Zero-Trust, QA Matrix e Micro-Sprints Horárias ADRs 033-035) | v4.0.0 |
+| [ARCHITECTURE.md](ARCHITECTURE.md) | Arquitetura vigente + 37 ADRs (incluindo Supabase Managed PostgreSQL ADR-036 e ADR-037) | v4.1.0 |
 | [ROADMAP.md](ROADMAP.md) | Roadmap 8 Semanas / 60 Dias / Micro-Sprints Horárias por Stream Paralela | v4.0.0 |
 | [AGENTS.md](AGENTS.md) | Manual para agentes de codificacao em Micro-Sprints Horarias | v4.0.0 |
 

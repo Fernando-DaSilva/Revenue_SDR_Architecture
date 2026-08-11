@@ -117,27 +117,28 @@ tabela central de eventos do dominio. Regras:
 
 ## 6. Jobs assincronos e Fila de Tarefas (ADR-021, ADR-030)
 
-- Fila resiliente via **Taskiq** com suporte a brokers Redis/Valkey (nuvem) ou SQLite embarcado em modo Standalone VPS.
-- **Separação de Bancos SQLite em Modo Standalone**: Para evitar contenção e travamentos de gravação (`database is locked`) em arquivos WAL, o app principal utiliza `app_data.db` e o broker Taskiq utiliza um arquivo isolado `taskiq_queue.db` (ADR-030).
+- Fila resiliente via **Taskiq** com suporte a brokers Redis/Valkey ou PostgreSQL (`taskiq-pg`).
+- **Eliminação de Bancos SQLite**: O Taskiq utiliza PostgreSQL ou Redis via `TenantTaskiqMiddleware`, sem arquivos `.db` de fila local.
 - **Propagação Automática de Tenancy**: O `TenantTaskiqMiddleware` serializa o `organization_id` no payload da tarefa e o hidrata na ContextVar do worker antes da execução (ADR-030).
 - Webhooks do WhatsApp/Instagram respondem `HTTP 202 Accepted` em `< 50ms` e delegam o processamento da LLM para os workers do Taskiq.
-- Download binário imediato de notas de voz/mídias em workers antes de URLs temporários expirarem (ADR-032).
+- Download binário imediato de notas de voz/mídias em workers antes de URLs temporários expirarem, armazenando no **Supabase Storage** (ADR-032, ADR-037).
 - Jobs **idempotentes** por construcao (chaves de dedup `job_key` + checagem de estado antes de agir).
 - Retentativas com **Exponential Backoff + Jitter** e salvamento de falhas em **Dead Letter Queue (DLQ)**.
 
-## 7. Estratégia de Banco de Dados, Armazenamento e Vetores (RAG Híbrido)
+## 7. Estratégia de Banco de Dados Unificado (Supabase PostgreSQL + pgvector)
 
-- **Hot Storage (Turso / libSQL local)**: Armazena dados de atendimento ativo, leads, conversas recentes e vetores ultraleves via `sqlite-vec` com resposta em $< 10\text{ ms}$ (ADR-002, ADR-016, ADR-022).
-- **Cold Storage / DW (PostgreSQL / Supabase)**: Recebe réplicas D-1 de conversas históricas, relatórios do Manager Brain e índices semânticos `pgvector` HNSW (ADR-015, ADR-022).
-- **Protocolo de Reidratação de Leads Inativos (ADR-031)**: Leads inativos (> 30 dias) arquivados no Cold Storage que voltam a entrar em contato são reidratados automaticamente no Turso Hot Storage local, buscando o perfil, memórias essenciais e as últimas 10 mensagens.
-- **Consistência de Modelos de Embedding**: Tanto o `sqlite-vec` (Hot RAG) quanto o `pgvector` (Cold RAG) usam obrigatoriamente o mesmo modelo de embedding (ex: `text-embedding-3-small` em 1536d) para evitar distorção em buscas por Cosseno.
-- **Alembic Batch Migrations**: Todas as migrações exigem `render_as_batch=True` para garantir compatibilidade perfeita com SQLite/libSQL (ADR-024).
+- **Engine Único Unificado & Plataforma Gerenciada**: Utiliza **Supabase Managed PostgreSQL 16+** com a extensão **`pgvector`** e pooler de conexões **Supavisor** para transações operacionais, histórico conversacional longo, memórias contextuais, trilhas de auditoria e busca vetorial RAG (ADR-036, ADR-037).
+- **Gerenciamento de Pooler Supavisor**: Conexões da API FastAPI e Taskiq usam o modo Transação no Supavisor (porta `6543`), enquanto migrações DDL do Alembic usam o modo Sessão / conexão direta (porta `5432`).
+- **Sem Lock Contention**: Concorrência nativa MVCC do PostgreSQL elimina travamentos de escrita (`database is locked`) sob picos simultâneos de webhooks Z-API/Meta API.
+- **RAG Híbrido Nativo (`pgvector` HNSW + `tsvector`)**: Busca semântica por similaridade de cosseno com índice HNSW para embeddings de 1536 dimensões combinada com busca textual por palavra-chave (`tsvector`/BM25) via Reciprocal Rank Fusion (RRF) (ADR-022, ADR-036, ADR-037). Zero dependência de `sqlite-vec`.
+- **Sem Necessidade de Reidratação**: Como todo o histórico reside no banco PostgreSQL unificado no Supabase, o antigo protocolo de reidratação (ADR-031) é totalmente obsoleto.
+- **Alembic PostgreSQL Migrations**: Versionamento estrito de esquemas utilizando migrações relacionais ACID nativas do PostgreSQL (`alembic/env.py`) compatíveis com a Supabase CLI (`supabase migration` / `supabase db push`) (ADR-010, ADR-037).
 
 ## 8. Orquestração de LLMs e Sistema Multi-Agente (LangChain, LangGraph & Instructor)
 
 - **LangChain Core (`langchain-core`)**: Padrão oficial para abstração de LLMs, Prompts (`ChatPromptTemplate`), Ferramentas (`@tool`) e composição de fluxos LCEL (ADR-027).
 - **LangGraph (`langgraph`)**: Orquestração de agentes baseados em estado (`StateGraph`), ciclos conversacionais, controle de histórico e interrupções para aprovação humana (*Human-in-the-Loop*) (ADR-028).
-- **Checkpointers Persistentes de Estado**: Obrigatoriedade de utilizar checkpointers persistentes (`AsyncSqliteSaver` no Turso `.db` local ou tabela SQLModel) para manter estados de grafos e interrupções `interrupt()` ativas contra restarts de processos. O uso de `MemorySaver` in-memory é proibido em produção (ADR-028).
+- **Checkpointers Persistentes de Estado**: Obrigatoriedade de utilizar checkpointers persistentes (`AsyncPostgresSaver` em tabela PostgreSQL no Supabase) para manter estados de grafos e interrupções `interrupt()` ativas contra restarts de processos. O uso de `MemorySaver` in-memory é proibido em produção (ADR-028, ADR-036, ADR-037).
 - **Instructor + Pydantic v2**: Utilizado para extrações de saída estruturada estrita em jobs de background (ADR-023).
 - **Cadeia de Fallback Ajustada para SLA P95 (< 1.2s)**:
   - Modelo Primário: `gemini-2.5-flash` / `claude-3-5-sonnet` com timeout estrito de **900ms** (`request_timeout=0.9`).
@@ -297,13 +298,17 @@ tabela central de eventos do dominio. Regras:
 
 ### ADR-030 — Middleware de Propagação Automática de ContextVar de Tenancy no Taskiq (TenantTaskiqMiddleware)
 - **Contexto**: Variavéis de contexto do Python (`ContextVar`) não são propagadas automaticamente para workers assíncronos do Taskiq, arriscando perda de tenant context ou vazamento cross-tenant.
-- **Decisão**: Implementar `TenantTaskiqMiddleware` para serializar `organization_id` nos rótulos da mensagem no despachador e hidratar `current_organization` no worker antes da execução. Adicionalmente, separar os arquivos SQLite em modo standalone (`app_data.db` vs `taskiq_queue.db`) para evitar locks de gravação (`database is locked`).
-- **Consequências**: Garantia absoluta de isolamento Zero-Trust em background workers e fim dos travamentos de concorrência em SQLite WAL.
+- **Decisão**: Implementar `TenantTaskiqMiddleware` para serializar `organization_id` nos rótulos da mensagem no despachador e hidratar `current_organization` no worker antes da execução. Utilizar broker PostgreSQL ou Redis para filas assíncronas.
+- **Consequências**: Garantia absoluta de isolamento Zero-Trust em background workers.
 
-### ADR-031 — Protocolo de Reidratação de Leads Inativos do Cold Storage (Supabase/PostgreSQL) para o Hot Storage (Turso/libSQL)
-- **Contexto**: Leads inativos há mais de 30 dias cujos dados foram arquivados no Cold Storage DW perderiam o histórico recente ao entrar em contato novamente.
-- **Decisão**: Implementar o `RehydrationService` no `LeadService` para restaurar o perfil do lead, memórias essenciais e as últimas 10 mensagens do Supabase DW para o Turso Hot Storage local na VPS no momento da mensagem inbound. Padronizar dimensões de vetores em 1536d (`text-embedding-3-small`) em ambas as camadas.
-- **Consequências**: Atendimento personalizado para leads que retornam após longos períodos, mantendo a VPS leve sem inflar o Hot Storage local.
+### ADR-031 — ⚠️ [SUPERSEDED] Protocolo de Reidratação de Leads Inativos (Depreciado)
+- **Contexto**: Antigo modelo de armazenamento em camadas (*Hot Turso + Cold DW*) exigia reidratação de histórico conversacional de leads inativos.
+- **Decisão**: Depreciado com a aprovação do ADR-036 (PostgreSQL Unificado). Todo o histórico de leads reside permanentemente no mesmo banco de dados PostgreSQL.
+
+### ADR-036 — Adoção do PostgreSQL Unificado como Banco de Dados Único (Option A)
+- **Contexto**: O uso de Turso/SQLite introduzia riscos de *write lock contention* (`database is locked`) sob rajadas de webhooks do WhatsApp e fragmentava análises de qualidade.
+- **Decisão**: Unificar todo o ecossistema no **PostgreSQL 16+ com `pgvector`** (transações quentes, histórico, checkpointer LangGraph `AsyncPostgresSaver` e busca semântica RAG).
+- **Consequências**: Zero contenção de gravação, latência P95 $< 15\text{ ms}$, análises de qualidade em tempo real e eliminação completa do protocolo de reidratação.
 
 ### ADR-032 — Rate Limiting Anti-Ban no WhatsApp e Imposição Rígida da Janela de 24 Horas da Meta
 - **Contexto**: Rajadas de envio em provedores não oficiais (Z-API/Evolution) causam banimento de números; envios após 24h da última interação do lead violam a política da Meta Cloud API.

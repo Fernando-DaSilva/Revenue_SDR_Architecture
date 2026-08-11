@@ -1,7 +1,7 @@
 # ADR-022: Arquitetura Híbrida de RAG e Busca Vetorial (sqlite-vec + pgvector)
 
-* **Status**: Aprovado
-* **Data**: Agosto 2026
+* **Status**: Atualizado (Unificado no Supabase `pgvector` por [ADR-036](036-unified-postgresql-architecture.md) e [ADR-037](037-supabase-managed-database-platform-integration.md))
+* **Data**: Agosto 2026 (Atualizado em 2026-08-11)
 * **Autores**: Equipe de Inteligência de IA e Arquitetura de Dados (Revenue SDR OS)
 
 ---

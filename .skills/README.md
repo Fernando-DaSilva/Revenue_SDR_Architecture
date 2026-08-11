@@ -52,13 +52,12 @@ Padroes de API FastAPI para o projeto:
 ### `.skills/sqlmodel-migration.md` e `.skills/alembic-sqlite-batch-migrations.md`
 
 ```
-Padroes de SQLModel + Alembic em Modo Batch (SQLite/libSQL):
-  - Tenant model (organization_id FK NOT NULL)
+Padroes de SQLModel + Alembic em PostgreSQL (Supabase):
+  - Tenant model (organization_id FK NOT NULL) + PostgreSQL RLS
   - ID factory (prefixed: user_xxx, lead_xxx)
-  - JSON fields (tags, custom_fields)
+  - JSONB fields nativos no PostgreSQL (tags, custom_fields)
   - Soft delete (status='deletado')
-  - Alembic setup + autogenerate com render_as_batch=True
-  - Migrations reversiveis com op.batch_alter_table (upgrade + downgrade)
+  - Alembic setup + autogenerate com DDL transactional PostgreSQL (ADR-037)
 ```
 
 **Quando carregar**: criar/alterar model, criar migration Alembic.
@@ -81,7 +80,7 @@ Orquestração de LLMs e Saídas Estruturadas via Instructor:
 Orquestração de Agentes Conversacionais e Grafos de Estado via LangChain & LangGraph:
   - Models com fallbacks nativos (with_fallbacks)
   - Definition de ferramentas @tool com Pydantic args_schema
-  - Grafos de estado (StateGraph) com MemorySaver Checkpointer
+  - Grafos de estado (StateGraph) com AsyncPostgresSaver Checkpointer
   - Human-in-the-Loop interrupts (interrupt()) para aprovação no Zap Copilot
   - Streaming SSE via astream_events
   - Observabilidade e Tracing no LangSmith (LANGCHAIN_TRACING_V2=true)
@@ -96,7 +95,7 @@ Processamento de Jobs Assíncronos e Fila de Tarefas (Taskiq / SAQ):
   - Retorno HTTP 202 em webhooks (<50ms)
   - Idempotência com job_key e cache deduplication
   - Configuração de retentativas com Exponential Backoff e DLQ
-  - Configuração de workers standalone (AioSQLite) ou nuvem (Redis)
+  - Propagação de ContextVar com TenantTaskiqMiddleware e PostgreSQL/Redis broker
 ```
 
 **Quando carregar**: criar tarefas em segundo plano, webhooks ou cadências.
@@ -104,10 +103,9 @@ Processamento de Jobs Assíncronos e Fila de Tarefas (Taskiq / SAQ):
 ### `.skills/vector-search-rag-pgvector.md`
 
 ```
-Busca Vetorial Híbrida e RAG (sqlite-vec + pgvector):
-  - Hot RAG local (<15ms) na VPS via sqlite-vec com pré-filtragem por tenant
-  - Cold RAG no Data Warehouse via pgvector com índice HNSW
-  - Algoritmo Reciprocal Rank Fusion (RRF) combinando BM25/FTS + Cosine Similarity
+Busca Vetorial Híbrida e RAG (Supabase pgvector + tsvector):
+  - Supabase pgvector com índice HNSW 1536d (<15ms) e pré-filtragem por tenant
+  - Full-Text Search (tsvector/BM25) combinado via Reciprocal Rank Fusion (RRF)
   - Deduplicação de embeddings via hash MD5
 ```
 

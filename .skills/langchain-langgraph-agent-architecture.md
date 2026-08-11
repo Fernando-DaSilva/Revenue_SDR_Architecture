@@ -14,7 +14,7 @@ description: Padrões de engenharia para desenvolvimento de Agentes de IA usando
 1. **Separação de Preocupações**:
    - Prompts vivem em `ChatPromptTemplate` declarativos (nunca formatação manual de strings).
    - Ferramentas (`@tool`) utilizam schemas Pydantic `BaseModel` estritos em `args_schema`.
-   - Agentes são construídos como **Grafos Dirigidos de Estado (`StateGraph`)** com checkpointers (`MemorySaver` / SQLite).
+   - Agentes são construídos como **Grafos Dirigidos de Estado (`StateGraph`)** com checkpointers persistentes em banco (`AsyncPostgresSaver` no Supabase Postgres).
 2. **Resiliência Multi-Provedor (`with_fallbacks`)**:
    - Todo modelo instanciado para produção DEVE envolver uma cadeia de fallback: Primário (Gemini 2.5 Flash / Claude 3.5 Sonnet) -> Secundário (GPT-4o-mini / Groq Llama-3.3).
 3. **Isolamento de Tenant Zero-Trust**:

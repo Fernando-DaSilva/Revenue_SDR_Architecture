@@ -73,8 +73,7 @@ propria VPS dedicada** — isolamento absoluto e adequacao nativa a LGPD.
   cada 6h com rollback automatico.
 
 Consequencia direta de engenharia: **o app precisa ser self-contained** —
-assets vendored (sem CDN), Turso (libSQL) com .db local embarcado, zero dependencia de servicos
-externos obrigatorios. (Decidido na v0.2.0 e evoluido no ADR-016.)
+assets vendored (sem CDN), Supabase Managed PostgreSQL unificado com pooler Supavisor, zero dependencia de servicos externos nao homologados (Decidido na v0.2.0, evoluido nos ADR-036 e ADR-037).
 
 ## 6. Modelo de operacao: consultivo (estilo SAP)
 
@@ -90,17 +89,16 @@ Consultoria. Para a engenharia isso significa:
 | Camada | Escolha | Motivo |
 |---|---|---|
 | Backend | Python 3.12+ / FastAPI | Async nativo, OpenAPI 3.1, API-first estrito |
-| ORM/DB Hot Storage | SQLModel sobre Turso (libSQL) / `.db` local | Pydantic+SQLAlchemy; 100% compatível com .db local + backup nuvem (ADR-016) |
-| Cold Storage / DW | PostgreSQL / Supabase + `pgvector` | Storage tiering assíncrono para histórico, RAG profundo e Reidratação de Leads inativos (ADR-015, ADR-022, ADR-031) |
-| Schema & Migrations | Alembic (Batch Mode `render_as_batch=True`) | Versionamento rígido desde o dia zero compatível com SQLite/libSQL (ADR-024) |
-| Auth | PyJWT (HS256) + pwdlib/Argon2id | python-jose/passlib abandonados (CVEs), claims `jti` para revogação |
+| ORM / Database Unificado | SQLModel (AsyncPG) sobre Supabase Managed PostgreSQL 16+ com `pgvector` | Engine único unificado com pooler Supavisor (Porta 6543/5432) para transações, histórico, RAG e RLS (ADR-036, ADR-037) |
+| Schema & Migrations | Alembic (PostgreSQL Dialect) | Versionamento rígido com DDL transactional nativo compatível com Supabase CLI desde o dia zero (ADR-010, ADR-037) |
+| Auth | PyJWT (HS256) + pwdlib/Argon2id | python-jose/passlib abandonados (CVEs), claims `jti` para revogação + RLS no Supabase |
 | Frontend | Jinja2 + HTMX + Alpine.js **vendored** | Hypermedia-driven; sem complexidade de SPA, Tailwind + DaisyUI (ADR-001) |
 | Tema | CSS variables por tenant | Trocar tenant = trocar CSS, zero JS |
-| Real-time | SSE (nao WebSocket) via `sse-starlette` | Unidirecional server->client com auto-reconnect nativo (ADR-005) |
-| Fila & Jobs | Taskiq + TenantTaskiqMiddleware | Fila assíncrona com ContextVar tenant propagation, `taskiq_queue.db` separado em standalone, idempotência via `job_key` e DLQ (ADR-021, ADR-030) |
-| LLM Orchestration | LangChain + LangGraph + Instructor + Pydantic v2 | Grafos de estado com checkpointer persistente (`AsyncSqliteSaver`), Tool Calling, fallback router Gemini/Sonnet (900ms primary) (ADR-023, ADR-027, ADR-028) |
+| Real-time | SSE / Supabase Realtime | Server-sent events / WebSockets CDC para atualizações instantâneas no cliente (ADR-005, ADR-037) |
+| Fila & Jobs | Taskiq + Redis/Postgres Broker | Fila assíncrona com ContextVar tenant propagation via `TenantTaskiqMiddleware`, idempotência via `job_key` e DLQ (ADR-021, ADR-030) |
+| LLM Orchestration | LangChain + LangGraph + Instructor + Pydantic v2 | Grafos de estado com checkpointer persistente no Supabase (`AsyncPostgresSaver`), Tool Calling, fallback router Gemini/Sonnet (900ms primary) (ADR-023, ADR-027, ADR-028, ADR-036, ADR-037) |
 | Observabilidade & Tracing | LangSmith + Structlog (JSON Lines) | Tracing visual de grafos LangGraph, telemetria de tokens por tenant e Evals (ADR-014, ADR-029) |
-| Vector & RAG Search | Hybrid RAG (`sqlite-vec` Hot + `pgvector` Cold + RRF) | Reciprocal Rank Fusion combinando FTS/BM25 + Cosine Similarity (1536d) (ADR-022, ADR-031) |
+| Vector & RAG Search | Supabase Hybrid RAG (`pgvector` HNSW 1536d + Postgres `tsvector`/BM25 + RRF) | Reciprocal Rank Fusion combinando FTS/BM25 + Cosine Similarity sem `sqlite-vec` (ADR-022, ADR-036, ADR-037) |
 | Caching & Protection | In-Memory LRU + Valkey/Redis/DiskCache | Cache de temas/locales + Rate Limiting por tenant e IP (ADR-025) |
 | Localização | Presets de Cores + Tradução Granular por Usuário | White-Label real com 5 temas e locales `pt-BR`, `es-ES`, `en-GB`, `de-DE`, `lt-LT` (ADR-013) |
 | Standalone Micro-App | Zap Copilot Prototype (`02_ZAP_Prototype`) | Sub-produto de atendimento Zap Web leve com Auto-Sync Background (ADR-017) |
@@ -115,10 +113,10 @@ Consultoria. Para a engenharia isso significa:
 3. **Multi-tenant com defesa em profundidade Zero-Trust** — constraints no banco,
    filtro por ContextVar `organization_id` em toda query, 404 generico cross-tenant,
    token JWT (Argon2id + PyJWT HS256 com `jti`) nao opera fora do tenant de origem, precedência rígida de tenant com bloqueio de overrides `X-Tenant-Slug` não autenticados em produção, propagação de `ContextVar` para workers via `TenantTaskiqMiddleware` e suíte de 100% de isolamento (ADR-018, ADR-030).
-4. **SLAs de Performance Rigorosos (P95)** — Turso local < 10ms, Core API < 50ms, SSE < 100ms, Z-API Webhook < 300ms, Whisper < 1.5s, SDR Agent LLM < 1.2s (com timeout primário de 900ms e limite acumulado de 1.8s) (ADR-019, ADR-023).
+4. **SLAs de Performance Rigorosos (P95)** — PostgreSQL local/pooled < 15ms, Core API < 50ms, SSE < 100ms, Z-API Webhook < 300ms, Whisper < 1.5s, SDR Agent LLM < 1.2s (com timeout primário de 900ms e limite acumulado de 1.8s) (ADR-019, ADR-023).
 5. **Garantia de Qualidade & Cobertura** — Cobertura geral backend > 85%, isolamento multi-tenant 100%, validação round-trip de Alembic migrations e Visual Quality Control (ADR-020).
 6. **Desenvolvimento Orientado a Agentes de IA** — Todo o repositório é construído sob guardiões de código estritos legíveis por IA, com contratos Pydantic e harness automático de teste pré-commit (ADR-026).
-7. **Protocolo de Reidratação do Cold Storage** — Restauração automática de histórico conversacional e memórias para leads inativos (>30d) ao retornarem, alinhando dimensões de vetores (1536d) para busca híbrida RAG (ADR-015, ADR-031).
+7. **Arquitetura PostgreSQL Unificada & Continuidade de Dados** — Banco de dados PostgreSQL 16+ único para transações operacionais, histórico de conversas, memórias e vetores `pgvector`, eliminando latência de movimentação e reidratação entre bancos (ADR-036).
 8. **Resiliência no WhatsApp & Compliance Meta** — Bloqueio estrito de mensagens em texto livre após a janela de 24h da Meta (forçando HSM Templates), rate limiter token bucket, jitter randômico (2.0s-6.0s), status `composing` e download imediato de áudios no Taskiq (ADR-032).
 
 ## 9. Onde vive o que

@@ -56,30 +56,29 @@ app/
 +-- themes/                  # CSS variables + branding (ADR-013)
 +-- health/                  # liveness/readiness
 +-- web/                     # templating Jinja2, pages/, templates/, static/
-alembic/                     # env.py (render_as_batch=True) + versions/ (ADR-024)
-tests/                       # pytest isolado (SQLite em memoria por teste)
+alembic/                     # env.py (PostgreSQL Dialect) + versions/ (ADR-010, ADR-037)
+tests/                       # pytest isolado (PostgreSQL schema isolado por teste)
 ```
 
 ### Invariantes que NUNCA se quebram
 
 1. **App factory** — sem singletons de modulo; estado em `app.state`.
 2. **Camadas** — rota fina -> `*/service.py` -> model. Query NUNCA na rota.
-3. **Tenancy Zero-Trust** — toda query filtra `organization_id`; cross-tenant = 404 generico; claim `org` do JWT bate com o tenant do request; desabilitado o override não autenticado de `X-Tenant-Slug` em produção (ADR-018).
+3. **Tenancy Zero-Trust & RLS** — toda query filtra `organization_id`; RLS habilitado no Supabase; cross-tenant = 404 generico; claim `org` do JWT bate com o tenant do request (ADR-018, ADR-037).
 4. **Erros** — `AppError` + envelope `{"error": {code, message, details}}`. NAO usar HTTPException solta.
 5. **Validacao nos schemas** — table models SQLModel NAO validam entrada.
-6. **Schema via Alembic Batch Mode** — `create_all` so em testes; migrations obrigatoriamente testadas via round-trip com `op.batch_alter_table` (ADR-024).
+6. **Schema via Alembic PostgreSQL** — `create_all` so em testes; migrations obrigatoriamente testadas via round-trip com DDL transactional nativo do PostgreSQL (ADR-010, ADR-037).
 7. **Auth dupla** — cookie (precedencia) + Bearer; senhas via Argon2id (`pwdlib`), JWT HS256 com `jti` (ADR-006 / ADR-018).
 8. **Validacao de entrada de tenant** — `organization_id` SEMPRE do contexto ContextVar, NUNCA do payload.
-9. **Fila e Jobs Assíncronos com TenantTaskiqMiddleware** — Webhooks respondem HTTP 202 em $< 50\text{ ms}$ e delegam para o Taskiq. O `TenantTaskiqMiddleware` serializa e hidrata o `organization_id` no worker. Em modo standalone, utilizar `taskiq_queue.db` separado do `app_data.db` (ADR-021, ADR-030).
-10. **Orquestração de LLMs e Agentes** — Agentes conversacionais e multi-agentes usam obrigatoriamente **LangChain (`langchain-core`)** e **LangGraph (`StateGraph`)** com fallbacks `with_fallbacks()` e checkpointers persistentes de estado (`AsyncSqliteSaver` / Turso `.db` local; uso de `MemorySaver` in-memory é vedado em produção). Chamadas 1-shot de extração usam Instructor + Pydantic v2 (ADR-023, ADR-027, ADR-028).
-11. **SLAs de Performance (P95)** — Turso local < 10ms, Core API < 50ms, SSE < 100ms, Webhook < 50ms, Whisper < 1.5s, SDR Agent < 1.2s. Roteador LLM configurado com timeout primário estrito de 900ms e limite acumulado de fallback de 1.8s (ADR-019, ADR-023).
-12. **Matriz de Testes & Guardiões de IA** — Cobertura geral > 90%, isolamento multi-tenant 100% (ADR-020, ADR-026).
-13. **Observabilidade & Tracing** — Grafos de agente repassam obrigatoriamente `tags` e `metadata` com `organization_id` e `lead_id` para o **LangSmith** (`LANGCHAIN_TRACING_V2=true`) (ADR-029).
-14. **Human-in-the-Loop** — Ações sensíveis disparam `interrupt()` no LangGraph para confirmação no Zap Copilot (`02_ZAP_Prototype`). Jobs sem resposta humana após 15 minutos devem escalar notificação no Manager Brain (ADR-028).
-15. **Protocolo de Reidratação de Cold Storage** — Ingressos de leads inativos (>30d arquivados no Supabase DW) acionam busca automática no `LeadService` para reidratar perfil, memórias e últimas 10 mensagens no Turso Hot Storage local na VPS. Modelo de embedding fixado em 1536d (`text-embedding-3-small`) em ambos os bancos (ADR-015, ADR-031).
-16. **Proteção WhatsApp Anti-Ban & Meta 24h** — Mensagens ativas ou de IA após 24h da última interação do lead são BLOQUEADAS de enviar texto livre (*freeform*), exigindo aprovação/envio de HSM Templates. Envios usam rate limiter (max 1 msg/3-5s), jitter dinâmico (2.0s-6.0s), status `composing` e download assíncrono de áudios no Taskiq (ADR-032).
-17. **Execução Autônoma em Micro-Sprints Horárias (1h-4h)** — Agentes devem executar tarefas descompostas em escopos atômicos de 1h a 4h, com contratos estritos Pydantic v2 e verificação sub-minuto no CI/CD em $< 60\text{s}$ (ADR-033, ADR-034).
-18. **Respeito à Topologia em 5 Streams Paralelas** — Desenvolver conforme contratos OpenAPI 3.1 sem bloquear outros fluxos (ADR-035).
+9. **Fila e Jobs Assíncronos com TenantTaskiqMiddleware** — Webhooks respondem HTTP 202 em $< 50\text{ ms}$ e delegam para o Taskiq. O `TenantTaskiqMiddleware` serializa e hidrata o `organization_id` no worker com broker PostgreSQL/Redis (ADR-021, ADR-030).
+10. **Orquestração de LLMs e Agentes** — Agentes conversacionais e multi-agentes usam obrigatoriamente **LangChain (`langchain-core`)** e **LangGraph (`StateGraph`)** com fallbacks `with_fallbacks()` e checkpointers persistentes de estado (`AsyncPostgresSaver` em Supabase PostgreSQL; uso de `MemorySaver` in-memory é vedado em produção). Chamadas 1-shot de extração usam Instructor + Pydantic v2 (ADR-023, ADR-027, ADR-028, ADR-036, ADR-037).
+11. **SLAs de Performance (P95)** — Supabase PostgreSQL local/pooled < 15ms via Supavisor, Core API < 50ms, SSE < 100ms, Webhook < 50ms, Whisper < 1.5s, SDR Agent < 1.2s. Roteador LLM configurado com timeout primário estrito de 900ms e limite acumulado de fallback de 1.8s (ADR-019, ADR-023, ADR-037).
+12. **Observabilidade Total via LangSmith & Structlog** — 100% dos runs do LangGraph devem reportar traces estruturados com `organization_id`, `lead_id` e metadados de tokens/custo. Logs da aplicação usam Structlog em formato JSON Lines (ADR-014, ADR-029).
+13. **Propagação de ContextVar Tenant em Workers Taskiq** — Qualquer task enviada ao Taskiq DEVE utilizar `TenantTaskiqMiddleware`. O middleware serializa o `organization_id` no envio (`pre_send`) e o reidrata no worker (`pre_execute`). O broker Taskiq utiliza PostgreSQL/Redis para evitar travamentos (ADR-030).
+14. **Arquitetura PostgreSQL Unificada no Supabase** — Banco de dados Supabase Managed PostgreSQL 16+ com `pgvector` unificado para transações operacionais, histórico de conversas, memórias e busca vetorial RAG. O antigo protocolo de reidratação (ADR-031) está depreciado (ADR-036, ADR-037).
+15. **Resiliência no WhatsApp & Compliance Meta** — Bloqueio estrito de envio de mensagens em texto livre após a janela de 24h da Meta (forçando mensagens de template HSM aprovadas). Rate limiter Token Bucket (max 1 msg/3-5s) com jitter humano (2.0s-6.0s), status `composing` e download imediato de áudios no Taskiq armazenando no Supabase Storage (ADR-032, ADR-037).
+16. **Execução Autônoma em Micro-Sprints Horárias (1h-4h)** — Agentes devem executar tarefas descompostas em escopos atômicos de 1h a 4h, com contratos estritos Pydantic v2 e verificação sub-minuto no CI/CD em $< 60\text{s}$ (ADR-033, ADR-034).
+17. **Respeito à Topologia em 5 Streams Paralelas** — Desenvolver conforme contratos OpenAPI 3.1 sem bloquear outros fluxos (ADR-035).
 
 ---
 

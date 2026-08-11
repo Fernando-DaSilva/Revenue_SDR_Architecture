@@ -57,21 +57,24 @@ Todas as tarefas do backlog e códigos produzidos pela equipe de desenvolvimento
 3. **Propagação de Contexto em Workers Assíncronos (ADR-030)**:
    - Todo job do Taskiq deve obrigatoriamente utilizar o `TenantTaskiqMiddleware` (`app/tasks/middleware.py`).
    - O `pre_send` serializa o `organization_id` nos metadados da mensagem e o `pre_execute` hidrata a `ContextVar` `current_organization` no processo worker antes de executar a tarefa. Trabalhos executados sem tenant context lançam `RuntimeError` imediato.
-4. **Protocolo de Re-hidratação de Contexto de Cold Storage (ADR-031)**:
-   - Se um lead inativo (> 30 dias) enviar uma mensagem inbound, o `LeadService` aciona o hook de re-hidratação assíncrona para buscar o histórico relevante no Postgres Cold DW e recarregar as últimas 10 mensagens e memórias chave na réplica local Turso hot storage.
-   - O modelo de embeddings em `sqlite-vec` (Turso local) e `pgvector` (Postgres DW) deve ser estritamente mantido idêntico (`text-embedding-3-small` 1536d) para prevenir incompatibilidade de busca vetorial.
-5. **Enforcement da Janela Meta 24h & Anti-Ban no WhatsApp (ADR-032)**:
-   - Toda mensagem outbound gerada por cadências automáticas deve validar o timestamp da última mensagem inbound do lead (`last_inbound_timestamp`). Se $> 24\text{ horas}$, a mensagem DEVE utilizar obrigatoriamente um modelo aprovado (HSM Template) ou sinalizar o operador no Zap Copilot.
-   - Disparos no WhatsApp via Z-API/Evolution API devem aplicar limitadores por token-bucket com intervalos humanizados aleatórios (3–5s de pause, máximo de 200 disparos/dia em contas novas) para mitigar banimentos.
-6. **SLA de Latência & Timeout Estrito de LLM (ADR-019, ADR-023)**:
+4. **Continuidade de Dados no PostgreSQL Unificado (ADR-036)**:
+   - Todo o histórico conversacional, atração de leads, memórias e vetores RAG residem nativamente na mesma instância PostgreSQL 16+. O antigo protocolo de reidratação (ADR-031) foi depreciado.
+   - O modelo de embeddings em `pgvector` é padronizado em 1536d (`text-embedding-3-small`) com índice HNSW para buscas semânticas ultrarrápidas.
+5. **Invariantes do Taskiq Worker com Tenant (ADR-030)**:
+   - Toda task enviada para o Taskiq deve registrar o middleware `TenantTaskiqMiddleware`.
+   - O middleware serializa o `organization_id` no payload da tarefa (`pre_send`) e o reidrata na `ContextVar` do worker (`pre_execute`). O broker Taskiq utiliza PostgreSQL ou Redis.
+6. **Janela de 24 Horas do WhatsApp & Rate Limiting (ADR-032)**:
+   - Respostas de IA para contatos cuja última mensagem inbound foi há mais de 24 horas são **estritamente bloqueadas** de enviar texto livre (*freeform text*), forçando mensagem de template HSM aprovada.
+   - Envios de mensagens usam Token Bucket rate limiter (3–5s de intervalo com jitter humano de 500–1500ms).
+7. **Persistência de Grafos no LangGraph & Escalonamento (ADR-028, ADR-036, ADR-037)**:
+   - Substituição obrigatória de checkpointers efêmeros (`MemorySaver`) por checkpointer persistente baseado em banco PostgreSQL no Supabase (`AsyncPostgresSaver`).
+   - Estados de pausa em `interrupt()` (Human-in-the-Loop) sem interação humana por $> 15\text{ minutos}$ disparam automaticamente um job assíncrono Taskiq de escalonamento para o gestor comercial.
+8. **Migrações de Banco com Alembic PostgreSQL (ADR-010, ADR-037)**: Nenhuma alteração de schema ocorre via `create_all()`. Migrações usam versionamento relacional estrito ACID do PostgreSQL compatível com a Supabase CLI (`supabase migration` / `supabase db push`).
+9. **SLA de Latência & Timeout Estrito de LLM (ADR-019, ADR-023)**:
    - O timeout da chamada LLM primária (`gemini-2.5-flash` / `claude-3.5-sonnet`) é limitado a no máximo **900 ms**.
    - Caso a primária falhe ou exceda 900ms, o router dispara o modelo secundário (`gpt-4o-mini`) com orçamento adicional de 900ms, garantindo teto acumulado de **1.8s**, de forma a preservar o SLA P95 do SDR Agent em **$< 1.2\text{ s}$**.
-7. **Checkpointer Persistente & Escalonamento no LangGraph (ADR-028)**:
-   - Substituição obrigatória de checkpointers efêmeros (`MemorySaver`) por checkpointer persistente baseado em banco local Turso/libSQL (`AsyncSqliteSaver`).
-   - Estados de pausa em `interrupt()` (Human-in-the-Loop) sem interação humana por $> 15\text{ minutos}$ disparam automaticamente um job assíncrono Taskiq de escalonamento para o gestor comercial.
-8. **Migrações de Banco com Alembic Batch Mode**: Nenhuma alteração de schema ocorre via `create_all()`. Migrações usam obrigatoriamente `render_as_batch=True` para compatibilidade total com Turso/libSQL (ADR-024).
-9. **Sincronização Baseline do Repositório**: O diretório `revenue_sdr_os` deve ter seu mock legada `server.ts` (Node.js) completamente substituído pela aplicação oficial Python 3.12+ FastAPI (`app/main.py`), modelos SQLModel e estrutura modular alinhada à especificação da arquitetura.
-10. **Harness de Qualidade Obrigatório (ADR-026)**: Nenhum PR ou commit é aceito sem aprovação no pipeline de verificação: `pytest` (100% de isolamento tenant, $> 85\%$ de cobertura em services) + `ruff check` + `alembic` round-trip.
+10. **Sincronização Baseline do Repositório**: O diretório `revenue_sdr_os` deve ter seu mock legada `server.ts` (Node.js) completamente substituído pela aplicação oficial Python 3.12+ FastAPI (`app/main.py`), modelos SQLModel e estrutura modular alinhada à especificação da arquitetura.
+11. **Harness de Qualidade Obrigatório (ADR-026)**: Nenhum PR ou commit é aceito sem aprovação no pipeline de verificação: `pytest` (100% de isolamento tenant, $> 85\%$ de cobertura em services) + `ruff check` + `alembic` round-trip.
 
 ---
 

@@ -10,7 +10,7 @@ license: Proprietary
 platforms: [claude-code, codex, opencode, hermes-agent, github-copilot]
 metadata:
   hermes:
-    tags: [taskiq, saq, arq, background-jobs, idempotency, dlq, redis, sqlite]
+    tags: [taskiq, saq, arq, background-jobs, idempotency, dlq, redis, postgres]
 ---
 
 # Skill: Processamento de Jobs Assíncronos e Filas de Tarefas (Taskiq)

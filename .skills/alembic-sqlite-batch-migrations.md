@@ -1,101 +1,99 @@
 ---
-name: alembic-sqlite-batch-migrations
+name: alembic-postgresql-migrations
 description: |
   Carregue esta skill sempre que for criar ou modificar migrações de banco de dados
-  no Alembic para garantir compatibilidade com SQLite/libSQL usando o modo batch (render_as_batch=True).
-version: 1.0.0
-author: Hermes (arquiteto)
+  no Alembic no Revenue SDR OS para garantir compatibilidade total com o Supabase Managed PostgreSQL.
+version: 2.0.0
+author: Antigravity (arquiteto)
 license: Proprietary
 platforms: [claude-code, codex, opencode, hermes-agent, github-copilot]
 metadata:
   hermes:
-    tags: [alembic, sqlite, libsql, batch-mode, migrations, schema-evolution]
+    tags: [alembic, postgresql, supabase, migrations, schema-evolution, DDL]
 ---
 
-# Skill: Migrações de Banco de Dados via Alembic em Modo Batch (SQLite/libSQL)
+# Skill: Migrações de Banco de Dados via Alembic em PostgreSQL (Supabase Platform)
 
 ## 1. Princípio Fundamental
 
-O SQLite/libSQL possui limitações de DDL (`ALTER TABLE`) para alterar colunas, remover Foreign Keys ou modificar constraints em tabelas existentes.
-Para evitar que migrações falhem em produção, **TODA** alteração de tabela no Alembic DEVE utilizar o modo batch (`op.batch_alter_table`).
+O Revenue SDR OS utiliza **Supabase Managed PostgreSQL 16+** como banco de dados unificado (ADR-036, ADR-037). O antigo modo batch do SQLite (`render_as_batch=True` / ADR-024) foi **SUPERSEDIDO**. 
+
+Todas as migrações usam DDL transacional ACID nativo do PostgreSQL, executadas via Alembic e compatíveis com a Supabase CLI (`supabase migration` / `supabase db push`).
 
 ---
 
-## 2. Configuração de Batch no `alembic/env.py`
+## 2. Configuração do Dialeto no `alembic/env.py`
 
-Garantir que `render_as_batch=True` esteja ativado no contexto do Alembic:
+O `env.py` configura o dialeto relacional PostgreSQL (`postgresql+asyncpg://` ou `psycopg3`):
 
 ```python
 context.configure(
     connection=connection,
     target_metadata=target_metadata,
-    render_as_batch=True,  # OBRIGATÓRIO PARA SQLITE / LIBSQL
-    configure_constraints=True,
+    compare_type=True,  # Detecta alteração de tipos de coluna
+    compare_server_default=True,
 )
 ```
 
 ---
 
-## 3. Padrão de Script de Migração Reversível (`alembic/versions/`)
+## 3. Conexão com Supabase (Pooler Supavisor vs Direct)
+
+- **Modo Sessão / Conexão Direta (Porta 5432)**: As migrações DDL do Alembic (`alembic upgrade head`) DEVEM ser executadas usando a conexão direta ou modo sessão (porta 5432) do Supabase Postgres, evitando limitações de DDL no modo transação do Supavisor.
+- **SSL**: Exige `sslmode=require` na URL de conexão.
+
+---
+
+## 4. Padrão de Script de Migração PostgreSQL (`alembic/versions/`)
 
 ```python
-"""add_fields_to_leads
+"""add_pgvector_and_fields_to_leads
 
 Revision ID: 3b9a8c7d6e5f
 Revises: 1a2b3c4d5e6f
-Create Date: 2026-08-10
+Create Date: 2026-08-11
 """
 from alembic import op
 import sqlalchemy as sa
 import sqlmodel
+from pgvector.sqlalchemy import Vector
+
+# revision identifiers, used by Alembic.
+revision = '3b9a8c7d6e5f'
+down_revision = '1a2b3c4d5e6f'
+branch_labels = None
+depends_on = None
 
 def upgrade() -> None:
-    # USAR SEMPRE batch_alter_table
-    with op.batch_alter_table('leads', schema=None) as batch_op:
-        batch_op.add_column(sa.Column('company_name', sa.String(), nullable=True))
-        batch_op.add_column(sa.Column('score_dhs', sa.Integer(), nullable=False, server_default='0'))
-        batch_op.create_index(batch_op.f('ix_leads_company_name'), ['company_name'], unique=False)
+    # 1. Garante extensão pgvector no Supabase
+    op.execute("CREATE EXTENSION IF NOT EXISTS vector;")
+    
+    # 2. Adiciona colunas nativas no PostgreSQL
+    op.add_column('leads', sa.Column('organization_id', sa.Uuid(), nullable=False))
+    op.add_column('leads', sa.Column('embedding', Vector(1536), nullable=True))
+    
+    # 3. Adiciona FK e Índices HNSW
+    op.create_foreign_key('fk_leads_org', 'leads', 'organizations', ['organization_id'], ['id'])
+    op.create_index('idx_leads_embedding_hnsw', 'leads', ['embedding'], postgresql_using='hnsw', postgresql_ops={'embedding': 'vector_cosine_ops'})
 
 def downgrade() -> None:
-    with op.batch_alter_table('leads', schema=None) as batch_op:
-        batch_op.drop_index(batch_op.f('ix_leads_company_name'))
-        batch_op.drop_column('score_dhs')
-        batch_op.drop_column('company_name')
+    op.drop_index('idx_leads_embedding_hnsw', table_name='leads')
+    op.drop_constraint('fk_leads_org', 'leads', type_='foreignkey')
+    op.drop_column('leads', 'embedding')
+    op.drop_column('leads', 'organization_id')
 ```
 
 ---
 
-## 4. Teste Round-Trip Obrigatório Antes do Commit
-
-Todo script de migração novo deve passar no ciclo completo de upgrade e downgrade localmente:
+## 5. Harness de Verificação Pré-Commit
 
 ```bash
-# 1. Aplicar a nova migração
+# 1. Aplicar migração
 alembic upgrade head
 
-# 2. Testar o downgrade (reverter)
+# 2. Testar reversão (downgrade)
 alembic downgrade -1
 
-# 3. Re-aplicar a migração
+# 3. Re-aplicar (upgrade)
 alembic upgrade head
 ```
-
----
-
-## 5. Anti-Patterns (NUNCA faça)
-
-```
-[X] op.add_column('leads', ...) fora de batch_alter_table -> Falhará em SQLite se alterar constraints
-[X] Criar nova coluna NOT NULL sem server_default          -> Quebrará bancos com dados existentes
-[X] Deletar ou modificar manualmente migrações antigas     -> Crie uma nova revisão com alembic revision
-[X] Esquecer a função downgrade()                         -> Toda migração DEVE ser reversível
-```
-
----
-
-## 6. Checklist de Validação
-
-- [ ] O script em `alembic/versions/` usa `with op.batch_alter_table(...)`
-- [ ] Colunas `NOT NULL` novas possuem um `server_default` apropriado
-- [ ] A função `downgrade()` reverte exatamente o que `upgrade()` faz
-- [ ] O teste round-trip (`upgrade head -> downgrade -1 -> upgrade head`) passou 100%

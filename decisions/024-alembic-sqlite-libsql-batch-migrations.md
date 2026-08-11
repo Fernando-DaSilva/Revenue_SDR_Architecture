@@ -1,8 +1,8 @@
 # ADR-024: Migrações de Banco de Dados via Alembic em SQLite/libSQL (Batch Mode)
 
-* **Status**: Aprovado
-* **Data**: Agosto 2026
-* **Autores**: Equipe de Banco de Dados e Engenharia Backend (Revenue SDR OS)
+* **Status**: Substituído (Superseded por ADR-036 e ADR-037)
+* **Data**: Agosto 2026 (Atualizado em 2026-08-11)
+* **Nota de Depreciação**: Esta decisão aplicava-se exclusivamente às limitações do SQLite/libSQL. Com a migração para PostgreSQL Unificado no Supabase (ADR-036 e ADR-037), as migrações usam DDL transacional nativo do PostgreSQL.
 
 ---
 

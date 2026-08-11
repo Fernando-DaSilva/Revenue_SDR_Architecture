@@ -8,8 +8,8 @@
 ## Decisão
 
 1. **5 Streams Paralelas Desacopladas por Contratos**:
-   - **Stream 1: Core Engine & Data Persistence**: Modelos SQLModel, Turso/libSQL local DB, migrations Alembic batch, Taskiq background queue com `TenantTaskiqMiddleware`.
-   - **Stream 2: AI Multi-Agent Systems & LangGraph**: Grafos de estado (`StateGraph`), checkpointers `AsyncSqliteSaver`, Instructor Pydantic schemas, RAG híbrido (`sqlite-vec` + `pgvector`), roteador multi-tier de LLMs com teto de 900ms.
+   - **Stream 1: Core Engine & Data Persistence**: Modelos SQLModel, Supabase Managed PostgreSQL database, migrations Alembic PostgreSQL, Taskiq background queue com `TenantTaskiqMiddleware`.
+   - **Stream 2: AI Multi-Agent Systems & LangGraph**: Grafos de estado (`StateGraph`), checkpointers `AsyncPostgresSaver`, Instructor Pydantic schemas, Supabase `pgvector` RAG, roteador multi-tier de LLMs com teto de 900ms.
    - **Stream 3: Messaging Engine & Omnichannel Integration**: Abstração `ZapProvider` (Z-API WhatsApp), Meta 24h Window HSM Template validator, SSE broker real-time, transcrição Whisper.
    - **Stream 4: Frontend & UX Deconstruction**: Desconstrução do HTML monolítico de 1.1MB em Jinja2 templates, HTMX requisições parciais, Alpine.js micro-interações, Tailwind CSS + DaisyUI, ZAP Copilot micro-app.
    - **Stream 5: DevSecOps, SRE & Platform Automation**: Single-tenant VPS orchestrator (systemd), MyraOS Console, pipeline CI/CD sub-minuto, monitoramento LangSmith e audit LGPD.
