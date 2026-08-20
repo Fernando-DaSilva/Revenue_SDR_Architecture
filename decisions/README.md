@@ -42,6 +42,9 @@ Este diretório contém os registros de decisões arquiteturais importantes do p
 * **ADR-036** — [Adoção do PostgreSQL Unificado como Banco de Dados Único (Option A)](036-unified-postgresql-architecture.md)
 * **ADR-037** — [Integração com a Plataforma Supabase PostgreSQL Gerenciado](037-supabase-managed-database-platform-integration.md)
 * **ADR-038** — [Arquitetura Híbrida de Autenticação e Autorização Multi-Tenant (Supabase Auth + Zero-Trust RBAC no FastAPI)](038-hybrid-multi-tenant-auth-and-authorization-architecture.md)
+* **ADR-039** — [Motor de Follow-up Multi-Cenário Automatizado e Recuperação de Objeções](039-multi-scenario-automated-followup-engine.md)
+* **ADR-040** — [Sistema Interno Integrado de Calendário, Gestão de Agendamentos e Sincronização Multi-Provedor](040-native-integrated-calendar-and-scheduling-engine.md)
+
 
 
 

@@ -77,13 +77,47 @@ CREATE TABLE cadence_steps (
 );
 ```
 
+### Tabelas: follow_up_rules & follow_up_schedules (ADR-039)
+```sql
+CREATE TABLE follow_up_rules (
+    id VARCHAR PRIMARY KEY,
+    organization_id VARCHAR NOT NULL,
+    scenario_type VARCHAR(50) NOT NULL, -- objection_recovery, winback, agenda_reminder, custom
+    objection_tag VARCHAR(50),          -- price, timing, competitor, silent
+    delay_hours INTEGER NOT NULL DEFAULT 24,
+    target_channel VARCHAR(50) NOT NULL DEFAULT 'zap',
+    template_id VARCHAR,
+    is_active BOOLEAN NOT NULL DEFAULT TRUE,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    FOREIGN KEY (organization_id) REFERENCES organizations(id)
+);
+
+CREATE TABLE follow_up_schedules (
+    id VARCHAR PRIMARY KEY,
+    organization_id VARCHAR NOT NULL,
+    lead_id VARCHAR NOT NULL,
+    rule_id VARCHAR NOT NULL,
+    scheduled_for DATETIME NOT NULL,
+    status VARCHAR(20) NOT NULL DEFAULT 'pending', -- pending, executed, canceled, skipped
+    attempts INTEGER NOT NULL DEFAULT 0,
+    last_error TEXT,
+    created_at DATETIME NOT NULL,
+    updated_at DATETIME NOT NULL,
+    FOREIGN KEY (organization_id) REFERENCES organizations(id),
+    FOREIGN KEY (lead_id) REFERENCES leads(id),
+    FOREIGN KEY (rule_id) REFERENCES follow_up_rules(id)
+);
+```
+
 ---
 
 ## Endpoints e Serviços
 
 - **Conversations API**: `GET /api/v1/conversations`, `POST /api/v1/conversations/{id}/messages`
-- **Cadence Service**: Lógica de enfileiramento de `jobs` assíncronos. Verificação periódica de `next_execution_at` para avançar `cadence_steps` e disparar eventos.
+- **Cadence & Follow-up Service**: Lógica de enfileiramento de `jobs` assíncronos no Taskiq (ADR-030). Processamento dinâmico de recuperação de objeções, cadências por temperatura e disparo de templates HSM respeitando a Janela Meta 24h (ADR-032, ADR-039).
 - **Scoring Engine**: Função que avalia `lead_timeline_events` e atualiza o campo `score` (e possivelmente a fase do funil) do lead na tabela `leads`.
+
 
 ---
 

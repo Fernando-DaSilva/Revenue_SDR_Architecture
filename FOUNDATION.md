@@ -39,10 +39,11 @@ O cliente nao compra Zap, Instagram ou IA. **Ele compra agenda cheia.**
 | **Memory Brain** | Extrai e lembra atributos de longo prazo (objecoes, datas, contexto financeiro) | S2 |
 | **Opportunity Brain** | Scoring baseado em eventos (respondeu rapido +5, perguntou preco +25...) | S3 |
 | **Omnichannel Engine** | Continuidade entre canais: IG -> Zap -> email -> ligacao | S3/S8 |
-| **Cadence Engine** | Maquina de estados da regua de relacionamento por temperatura do lead | S3 |
+| **Cadence & Multi-Scenario Follow-up Engine** | Maquina de estados de regua dinamica e follow-up multi-cenario (recuperacao de objecoes, re-venda e lembretes) (ADR-039) | S3/S4 |
 | **AI Sales Brain** | Abstracao de LLMs com Instructor/Pydantic, RAG e Tool Calling; age como vendedor senior | S4 |
-| **Manager Brain** | Numeros do dono: funil, CAC, ROI, canal vencedor, melhor vendedor | S5-S7 |
+| **Manager & Native Calendar Operations** | Gestao de relatorios e ferramenta interna integrada de calendario/agendamentos (Google Cal/Cal.com/ics) (ADR-040) | S5-S7 |
 | **Revenue Brain** | Pensa dinheiro: por que perdemos leads, onde esta o gargalo, o que sugerir | S7 |
+
 
 Conceitos derivados (pos-MVP): Playbooks verticais por nicho, Modo Closer,
 Coach de vendedores pos-conversa, Radar de abandono, Emotional Timeline,

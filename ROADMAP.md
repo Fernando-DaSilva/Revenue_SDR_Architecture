@@ -16,9 +16,10 @@
 ```
 MÊS 1 (SEMANAS 1-4 / DIAS 1-28): CORE ENGINE, IA MULTI-AGENTE & MESSAGING
 Semana 1 [MICRO-SPRINTS 02.1-02.8] Lead Brain + Memory Brain + Taskiq Tenant Propagation (ADR-030)
-Semana 2 [MICRO-SPRINTS 03.1-03.8] Conversations + Opportunity Brain + Cadence Engine + Meta 24h HSM (ADR-032)
+Semana 2 [MICRO-SPRINTS 03.1-03.8] Conversations + Opportunity Brain + Multi-Scenario Follow-up Engine (ADR-039) + Meta 24h HSM (ADR-032)
 Semana 3 [MICRO-SPRINTS 04.1-04.8] AI Sales Brain + AsyncPostgresSaver + Z-API WhatsApp Anti-Ban (ADR-036, ADR-037)
-Semana 4 [MICRO-SPRINTS 05.1-05.8] Human-AI Handoff + Desconstrução HTML Monólito + Google Calendar Sync
+Semana 4 [MICRO-SPRINTS 05.1-05.8] Human-AI Handoff + Desconstrução HTML Monólito + Native Integrated Calendar Operations & Sync (ADR-040)
+
 
 MÊS 2 (SEMANAS 5-8 / DIAS 29-60): REALTIME, OMNICHANNEL & SCALE
 Semana 5 [MICRO-SPRINTS 06.1-06.8] Transcrição Whisper + Fix Memory Leak Chart.js + Stream SSE Real-Time
@@ -59,12 +60,12 @@ Docs: [spec](Sprints/02_Sprint_02_Lead_Brain_Memory_Brain/README.md) |
 
 Decisoes em aberto: ver secao "Decisoes pendentes" no spec da sprint.
 
-## Sprint 03 — Conversations + Opportunity + Cadence
+## Sprint 03 — Conversations + Opportunity + Cadence & Multi-Scenario Follow-up Engine
 
 - `conversations` como agregado raiz (lead vira participante)
 - `messages` + tabela central `events` (generaliza a timeline)
 - Opportunity Brain: scoring por eventos
-- Cadence Engine: maquina de estados + jobs agendados (fila leve)
+- Motor de Follow-up Multi-Cenário Automatizado: recuperação de objeções, cadências dinâmicas por temperatura e reagendamento de contatos (ADR-039)
 
 ## Sprint 04 — AI Sales Brain + Z-API Zap (LangChain & LangGraph Multi-Agent Engine)
 
@@ -73,11 +74,12 @@ Decisoes em aberto: ver secao "Decisoes pendentes" no spec da sprint.
 - AI Sales Brain: Grafo **LangGraph (`StateGraph`)** com checkpointer de memória, `@tool` calling, fallbacks `with_fallbacks()` (Gemini 2.5 Flash / Sonnet 3.5 -> GPT-4o-mini), e tracing no **LangSmith** (ADR-027, ADR-028, ADR-029)
 - Modo `ai` vs `human` por conversa via interrupção `interrupt()` (Human-in-the-Loop no `02_ZAP_Prototype`)
 
-## Sprint 05 — Monitoramento + handoff + Calendar
+## Sprint 05 — Monitoramento + Handoff + Ferramenta Interna Integrada de Calendário (ADR-040)
 
 - Handoff IA<->Humano com contexto preservado
-- Google Calendar sync (agendar reuniao via tool da IA)
-- Observabilidade: Prometheus + logs JSON (skill pronta)
+- Sistema Interno Integrado de Calendário & Agendamentos: Dashboard de Eventos, disponibilidade de vendedores, ciclo de vida de reuniões e sincronização bidirecional/exportação com Google Calendar, Cal.com e `.ics` (ADR-040)
+- Observabilidade: Prometheus + logs JSON (skill pronta; ADR-014)
+
 
 ## Sprint 06 — Real-time (SSE)
 
